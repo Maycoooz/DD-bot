@@ -72,7 +72,13 @@ class KidAccountDetails(SQLModel):
     first_name: str
     last_name: str
     user_id: int
+    
 
+ # -----ADMIN-----
+class ViewReviews(SQLModel):
+    username: str
+    review: str
+    stars: Optional[int] = None
 
 
 
@@ -96,7 +102,9 @@ class Users(SQLModel, table=True):
         default=None, 
         sa_column=Column(ForeignKey("roles.role_id", ondelete="CASCADE", onupdate="CASCADE"))
     )
+
     role: Optional["Roles"] = Relationship(back_populates="users")
+    reviews: List["ParentReviews"] = Relationship(back_populates="user")
 
 class LibrarianProfiles(SQLModel, table=True):
 
@@ -135,6 +143,8 @@ class ParentReviews(SQLModel, table=True):
     )
 
     review: str = Field(sa_column=Column(TEXT, nullable=False), default="No comment")
+
+    user: Optional["Users"] = Relationship(back_populates="reviews")
 
 
 
