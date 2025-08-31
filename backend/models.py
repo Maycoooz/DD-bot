@@ -2,7 +2,7 @@
 import enum
 from typing import Optional, List
 
-from sqlalchemy import Column, Enum, ForeignKey, TEXT
+from sqlalchemy import Column, Enum, ForeignKey, TEXT, INTEGER, CheckConstraint
 from sqlmodel import Field, SQLModel, Relationship, Session 
 
 # The Enum for all possible user types in the database
@@ -52,6 +52,7 @@ class KidDelete(SQLModel):
 class AddReview(SQLModel):
     parent_id: int
     message: str
+    stars: Optional[int] = None
 
 
 # ---------------------- SCHEMAS FOR ROUTES (OUTPUT) ---------------------------------
@@ -140,6 +141,12 @@ class ParentReviews(SQLModel, table=True):
     user_id: int | None = Field(
         default=None,
         sa_column=Column(ForeignKey("users.user_id", ondelete="CASCADE", onupdate="CASCADE"))
+    )
+
+    # 1 - 5 stars for reviews
+    stars: int | None = Field(
+        default=None,
+        sa_column=Column(INTEGER, CheckConstraint('stars >= 1 AND stars <= 5'))
     )
 
     review: str = Field(sa_column=Column(TEXT, nullable=False), default="No comment")

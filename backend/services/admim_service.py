@@ -23,7 +23,8 @@ class AdminService():
         for review in all_reviews:
             review_detail = models.ViewReviews(
                 username = review.user.username,
-                review = review.review
+                review = review.review,
+                stars = review.stars
             )
             reviews_list.append(review_detail)
 

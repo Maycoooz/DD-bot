@@ -115,9 +115,13 @@ class ParentService():
             # Sanitize the input to remove any HTML tags
             clean_review = bleach.clean(review_data.message, tags=[], strip=True)
 
+            # set star rating to 1 as default if no rating is provided (failsafe)
+            star_rating = review_data.stars if review_data.stars is not None else 1
+
             new_review = models.ParentReviews(
                 user_id = review_data.parent_id,
-                review = clean_review
+                review = clean_review,
+                stars = star_rating
             )
 
             self.session.add(new_review) # will fail if parent id is incorect
