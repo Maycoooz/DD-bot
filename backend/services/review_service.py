@@ -109,6 +109,7 @@ class ReviewService():
         list_of_reviews = []
         for review in all_showcased_reviews:
             showcased_review = models.ShowcasedReviewDetails(
+                review_id = review.review_id,
                 username = review.user.username,
                 review = review.review,
                 stars = review.stars
@@ -117,6 +118,28 @@ class ReviewService():
             list_of_reviews.append(showcased_review)
 
         return list_of_reviews
+    
+
+    def remove_showcased_review(self, review_id: int) -> models.SuccessMessage:
+
+        statement = select(models.ChosenReviews).where(models.ChosenReviews.review_id == review_id)
+
+        review_to_delete = self.session.exec(statement).first()
+
+        if not review_to_delete:
+            return models.SuccessMessage(
+                success=False,
+                message="Review does not exist or is not showcased"
+            )
+    
+        self.session.delete(review_to_delete)
+        self.session.commit()
+
+        return models.SuccessMessage(
+            success=True,
+            message="Review no longer showcased"
+        )
+
 
 
 

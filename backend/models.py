@@ -85,6 +85,7 @@ class ViewReviews(SQLModel):
     stars: Optional[int] = None
 
 class ShowcasedReviewDetails(SQLModel):
+    review_id: int
     username: str
     review: str
     stars: int
