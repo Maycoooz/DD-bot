@@ -5,6 +5,7 @@ from typing import List
 from .. import models
 from .. import database
 from ..services.admim_service import AdminService
+from ..services.review_service import ReviewService
 
 router = APIRouter(
     prefix = "/admin",
@@ -15,6 +16,6 @@ router = APIRouter(
 @router.get("/view-all-reviews/")
 def view_all_reviews(session: Session = Depends(database.get_session)) -> List[models.ViewReviews]:
 
-    admin_service = AdminService(session)
-    reviews_list = admin_service.view_reviews()
+    review_service = ReviewService(session)
+    reviews_list = review_service.view_reviews()
     return reviews_list

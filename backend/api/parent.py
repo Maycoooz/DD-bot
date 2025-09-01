@@ -5,6 +5,7 @@ from typing import List
 from .. import models
 from .. import database
 from ..services.parent_service import ParentService 
+from ..services.review_service import ReviewService
 
 router = APIRouter(
     prefix="/parent",
@@ -38,6 +39,6 @@ def delete_kid_account(delete_data: models.KidDelete, session: Session = Depends
 @router.post("/add-review/")
 def add_review(review_data: models.AddReview, session: Session = Depends(database.get_session)) -> bool:
 
-    parent_service = ParentService(session)
-    success = parent_service.create_review(review_data)
+    review_service = ReviewService(session)
+    success = review_service.create_review(review_data)
     return success
