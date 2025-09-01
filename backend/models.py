@@ -24,6 +24,10 @@ class StatusType(str, enum.Enum):
     APPROVED = "approved"
     REJECTED = "rejected"
 
+class SuccessMessage(SQLModel):
+    success: bool
+    message: str
+
 # ---------------------- SCHEMAS FOR ROUTES (INTAKE) ---------------------------------
 class UserRegister(SQLModel):
     username: str
@@ -74,12 +78,16 @@ class KidAccountDetails(SQLModel):
     last_name: str
     user_id: int
     
-
- # -----ADMIN-----
 class ViewReviews(SQLModel):
+    review_id: int
     username: str
     review: str
     stars: Optional[int] = None
+
+class ShowcasedReviewDetails(SQLModel):
+    username: str
+    review: str
+    stars: int
 
 
 
@@ -152,6 +160,21 @@ class ParentReviews(SQLModel, table=True):
     review: str = Field(sa_column=Column(TEXT, nullable=False), default="No comment")
 
     user: Optional["Users"] = Relationship(back_populates="reviews")
+
+    chosen_review: Optional["ChosenReviews"] = Relationship(back_populates="original_review")
+
+class ChosenReviews(SQLModel, table=True):
+    # the chosen review's ID (review_id), which is both the primary key
+    # and a foreign key to the original review.
+    review_id: int | None = Field(
+        default=None,
+        sa_column=Column(
+            ForeignKey("parentreviews.review_id", ondelete="CASCADE", onupdate="CASCADE"),
+            primary_key=True
+        )
+    )
+
+    original_review: "ParentReviews" = Relationship(back_populates="chosen_review")
 
 
 

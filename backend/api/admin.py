@@ -19,3 +19,11 @@ def view_all_reviews(session: Session = Depends(database.get_session)) -> List[m
     review_service = ReviewService(session)
     reviews_list = review_service.view_reviews()
     return reviews_list
+
+@router.post("/showcase-review/")
+def showcase_review(review_id: int, session: Session = Depends(database.get_session)) -> models.SuccessMessage:
+
+    review_service = ReviewService(session)
+    success_message = review_service.showcase_review(review_id)
+    return success_message
+
