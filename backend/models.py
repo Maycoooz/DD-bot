@@ -90,6 +90,14 @@ class ShowcasedReviewDetails(SQLModel):
     review: str
     stars: int
 
+class LibrarianDetails(SQLModel):
+    user_id: int
+    username: str
+    first_name: str
+    last_name: str
+    email: str
+    status: StatusType
+
 
 
 

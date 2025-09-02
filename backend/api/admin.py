@@ -34,9 +34,16 @@ def view_all_showcased_reviews(session: Session = Depends(database.get_session))
     showcased_reviews_list = review_service.get_showcased_reviews()
     return showcased_reviews_list
 
-@ router.delete("/remove-showcased-review/")
+@router.delete("/remove-showcased-review/")
 def remove_showcased_review(review_id: int, session: Session = Depends(database.get_session)) -> models.SuccessMessage:
 
     review_service = ReviewService(session)
     success_message = review_service.remove_showcased_review(review_id)
     return success_message
+
+@router.get("/view-all-librarians/")
+def view_all_librarians(session: Session = Depends(database.get_session)) -> List[models.LibrarianDetails]:
+
+    admin_service = AdminService(session)
+    list_of_librarians = admin_service.get_all_librarians()
+    return list_of_librarians

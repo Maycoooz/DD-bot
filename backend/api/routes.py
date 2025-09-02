@@ -9,7 +9,7 @@ from ..services.review_service import ReviewService
 
 # comment
 router = APIRouter(
-    tags=["Signup & Login"]
+    tags=["Landing Page"]
 )
 
 # Parent & librarian signup
