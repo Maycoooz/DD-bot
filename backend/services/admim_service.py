@@ -37,6 +37,32 @@ class AdminService():
             list_of_librarians.append(librarian_data)
 
         return list_of_librarians
+    
+    def approve_reject_librarian(self, update_data: models.UpdateLibrarianStatus) -> models.SuccessMessage:
+
+        # find the librarian
+        profile_to_update = self.session.get(models.LibrarianProfiles, update_data.librarian_id)
+
+        # if no profile found
+        if not profile_to_update:
+            return models.SuccessMessage(
+                success=False,
+                message="Librarian does not exist"
+            )
+        
+        # update status column
+        profile_to_update.status = update_data.new_status
+
+        # commit changes
+        self.session.add(profile_to_update)
+        self.session.commit()
+        self.session.refresh(profile_to_update)
+
+        return models.SuccessMessage(
+            success=True,
+            message="Librarian status updated"
+        )
+
 
 
 

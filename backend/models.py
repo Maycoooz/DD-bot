@@ -58,6 +58,10 @@ class AddReview(SQLModel):
     message: str
     stars: Optional[int] = None
 
+class UpdateLibrarianStatus(SQLModel):
+    librarian_id: int
+    new_status: StatusType
+
 
 # ---------------------- SCHEMAS FOR ROUTES (OUTPUT) ---------------------------------
 class LoginMessage(SQLModel):

@@ -47,3 +47,10 @@ def view_all_librarians(session: Session = Depends(database.get_session)) -> Lis
     admin_service = AdminService(session)
     list_of_librarians = admin_service.get_all_librarians()
     return list_of_librarians
+
+@router.patch("/update-librarian-status/")
+def approve_reject_librarian(update_data: models.UpdateLibrarianStatus, session: Session = Depends(database.get_session)) -> models.SuccessMessage:
+    
+    admin_service = AdminService(session)
+    success_message = admin_service.approve_reject_librarian(update_data)
+    return success_message
