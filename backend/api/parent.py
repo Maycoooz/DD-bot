@@ -21,7 +21,6 @@ def create_kid_account(kid_data: models.KidCreate, session: Session = Depends(da
     creation_data = parent_service.create_kid_account(kid_data)
     return creation_data
 
-# This route now requires a valid token
 @router.get("/view-kid-accounts/")
 def view_kids_accounts(parent_id: int, session: Session = Depends(database.get_session)):
     
@@ -42,3 +41,10 @@ def add_review(review_data: models.AddReview, session: Session = Depends(databas
     review_service = ReviewService(session)
     success = review_service.create_review(review_data)
     return success
+
+@router.delete("/delete-my-account/")
+def delete_my_account(account_data: models.DeleteParentAccount, session: Session = Depends(database.get_session)) -> models.SuccessMessage:
+
+    parent_service = ParentService(session)
+    success_message = parent_service.delete_my_account(account_data)
+    return success_message

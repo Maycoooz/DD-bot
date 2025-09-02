@@ -53,6 +53,11 @@ class KidDelete(SQLModel):
     parent_id: int
     kid_id: int
 
+class DeleteParentAccount(SQLModel):
+    user_id: int
+    username: str
+    password: str
+
 class AddReview(SQLModel):
     parent_id: int
     message: str
@@ -107,12 +112,12 @@ class LibrarianDetails(SQLModel):
 
 # ------------------------ SQL TABLES ----------------------------------------
 class Roles (SQLModel, table=True):
-    role_id: Optional[int] = Field(default=None, primary_key=True)
+    role_id: int = Field(default=None, primary_key=True)
     name: UserType = Field(sa_column=Column(Enum(UserType), unique=True))
     users: List["Users"] = Relationship(back_populates="role")
 
 class Users(SQLModel, table=True):
-    user_id: Optional[int] = Field(default=None, primary_key=True)
+    user_id: int = Field(default=None, primary_key=True)
     username: str = Field(index=True, unique=True, nullable=False)
     first_name: str = Field(nullable=False)
     last_name: str = Field(nullable=False)
@@ -120,18 +125,21 @@ class Users(SQLModel, table=True):
     password_hash: str = Field(nullable=False)
 
     # Foreign Key
-    role_id: Optional[int] = Field(
+    role_id: int = Field(
         default=None, 
         sa_column=Column(ForeignKey("roles.role_id", ondelete="CASCADE", onupdate="CASCADE"))
     )
 
     role: Optional["Roles"] = Relationship(back_populates="users")
-    reviews: List["ParentReviews"] = Relationship(back_populates="user")
+    reviews: List["ParentReviews"] = Relationship(
+        back_populates="user",
+        sa_relationship_kwargs={"passive_deletes": True} 
+        )
 
 class LibrarianProfiles(SQLModel, table=True):
 
     # Foreign Key and Primary Key
-    user_id: Optional[int] = Field(
+    user_id: int = Field(
         default=None,
         sa_column=Column(
             ForeignKey("users.user_id", ondelete="CASCADE", onupdate="CASCADE"),
@@ -143,7 +151,7 @@ class LibrarianProfiles(SQLModel, table=True):
 class KidProfiles(SQLModel, table=True):
 
     # Foreign Key and Primary Key
-    user_id: Optional[int] = Field(
+    user_id: int = Field(
         default=None,
         sa_column=Column(
             ForeignKey("users.user_id", ondelete="CASCADE", onupdate="CASCADE"),
@@ -172,7 +180,11 @@ class ParentReviews(SQLModel, table=True):
 
     review: str = Field(sa_column=Column(TEXT, nullable=False), default="No comment")
 
-    user: Optional["Users"] = Relationship(back_populates="reviews")
+    user: Optional["Users"] = Relationship(
+        back_populates="reviews",
+        sa_relationship_kwargs={"passive_deletes": True} # when parent delete their account their review is deleted too
+        
+        )
 
     chosen_review: Optional["ChosenReviews"] = Relationship(back_populates="original_review")
 

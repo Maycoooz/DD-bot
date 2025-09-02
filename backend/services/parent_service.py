@@ -107,4 +107,45 @@ class ParentService():
         self.session.commit()
         
         return True
+    
+    def delete_my_account(self, account_data: models.DeleteParentAccount) -> models.SuccessMessage:
+
+        # check if used_id, username & password match parent account first
+        user_to_delete = self.session.get(models.Users, account_data.user_id)
+
+        # check if account exists and username matches
+        if not user_to_delete or user_to_delete.username != account_data.username:
+            return models.SuccessMessage(
+                success=False,
+                message="Invalid account details provided."
+            )
         
+        # verify password matches
+        password_bytes = account_data.password.encode('utf-8')
+        stored_hash_bytes = user_to_delete.password_hash.encode('utf-8')
+        is_password_correct = bcrypt.checkpw(password_bytes, stored_hash_bytes)
+
+        if not is_password_correct:
+            return models.SuccessMessage(
+                success=False,
+                message="Invalid account details provided."
+            )
+        
+        # Before deleting parent user delete all the kids account too
+        kids = self.session.exec(
+            select(models.Users)
+            .join(models.KidProfiles, models.Users.user_id == models.KidProfiles.user_id)
+            .where(models.KidProfiles.parent_id == user_to_delete.user_id)
+        ).all()
+
+        for kid in kids:
+            self.session.delete(kid)
+
+        self.session.delete(user_to_delete)
+        self.session.commit()
+
+
+        return models.SuccessMessage(
+            success=True,
+            message="Your account has been successfully deleted."
+        )
