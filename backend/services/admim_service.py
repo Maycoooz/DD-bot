@@ -62,6 +62,37 @@ class AdminService():
             success=True,
             message="Librarian status updated"
         )
+    
+    def delete_librarian_account(self, librarian_id: int) -> models.SuccessMessage:
+
+        statement = select(models.Users).where(
+            models.Users.user_id == librarian_id
+        ).options(selectinload(models.Users.role))
+
+        user_to_delete = self.session.exec(statement).first()
+
+        # check if user exists
+        if not user_to_delete:
+            return models.SuccessMessage(
+                success=False,
+                message="User does not exist"
+            )
+        
+        # check if user is a librarian
+        if user_to_delete.role.name != models.UserType.LIBRARIAN:
+            return models.SuccessMessage(
+                success=False,
+                message="This user is not a librarian"
+            )
+        
+        # all checks pass, then delete account
+        self.session.delete(user_to_delete)
+        self.session.commit()
+
+        return models.SuccessMessage(
+            success=True,
+            message="Librarian account successfully deleted"
+        )
 
 
 

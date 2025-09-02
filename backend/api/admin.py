@@ -54,3 +54,10 @@ def approve_reject_librarian(update_data: models.UpdateLibrarianStatus, session:
     admin_service = AdminService(session)
     success_message = admin_service.approve_reject_librarian(update_data)
     return success_message
+
+@router.delete("/delete-librarian-account/")
+def delete_librarian_account(librarian_id: int, session: Session = Depends(database.get_session)) -> models.SuccessMessage:
+
+    admin_service = AdminService(session)
+    success_message = admin_service.delete_librarian_account(librarian_id)
+    return success_message
