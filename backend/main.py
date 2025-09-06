@@ -8,10 +8,8 @@ from .api import routes, parent, admin
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("App is starting up...")
     create_db_and_tables()
     yield
-    print("App is shutting down...")
 
 app = FastAPI(lifespan=lifespan)
 
