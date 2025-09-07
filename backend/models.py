@@ -28,6 +28,10 @@ class SuccessMessage(SQLModel):
     success: bool
     message: str
 
+class BookVideoStatus(str, enum.Enum):
+    AVAILABLE = "available"
+    SUSPENDED = "suspended"
+
 # ---------------------- SCHEMAS FOR ROUTES (INTAKE) ---------------------------------
 class UserRegister(SQLModel):
     username: str
@@ -118,10 +122,10 @@ class Roles (SQLModel, table=True):
 
 class Users(SQLModel, table=True):
     user_id: int = Field(default=None, primary_key=True)
-    username: str = Field(index=True, unique=True, nullable=False)
-    first_name: str = Field(nullable=False)
-    last_name: str = Field(nullable=False)
-    email: str = Field(unique=True, nullable=True)
+    username: str = Field(index=True, unique=True, nullable=False, max_length=30)
+    first_name: str = Field(nullable=False, max_length=50)
+    last_name: str = Field(nullable=False, max_length=50)
+    email: str = Field(unique=True, nullable=True, max_length=50)
     password_hash: str = Field(nullable=False)
 
     # Foreign Key
@@ -164,16 +168,16 @@ class KidProfiles(SQLModel, table=True):
 
 class ParentReviews(SQLModel, table=True):
     # Auto-incrementing primary key for the review itself
-    review_id: int | None = Field(default=None, primary_key=True)
+    review_id: int = Field(default=None, primary_key=True)
 
     # user_id foreign key
-    user_id: int | None = Field(
+    user_id: int = Field(
         default=None,
         sa_column=Column(ForeignKey("users.user_id", ondelete="CASCADE", onupdate="CASCADE"))
     )
 
     # 1 - 5 stars for reviews
-    stars: int | None = Field(
+    stars: int = Field(
         default=None,
         sa_column=Column(INTEGER, CheckConstraint('stars >= 1 AND stars <= 5'))
     )
@@ -200,6 +204,41 @@ class ChosenReviews(SQLModel, table=True):
     )
 
     original_review: "ParentReviews" = Relationship(back_populates="chosen_review")
+
+
+class Books(SQLModel, table=True):
+
+    book_id: int = Field(default=None, primary_key=True)
+    title: str = Field(nullable=False, max_length=255)
+    author: str = Field(nullable=False, max_length=255)
+    age_group: str = Field(nullable=False, max_length=50, default="5-12")
+    category: str = Field(nullable=False, max_length=100)
+    description: str = Field(
+        sa_column=Column(TEXT, nullable=False, default="No description found")
+    )
+    link: str = Field(nullable=False, max_length=500, unique=True)
+    rating: float = Field(default=0.0)
+    status: BookVideoStatus = Field(
+        sa_column=Column(Enum(BookVideoStatus), nullable=False, default=BookVideoStatus.AVAILABLE)
+    )
+
+class Videos(SQLModel, table=True):
+
+    video_id: int = Field(default=None, primary_key=True)
+    title: str = Field(nullable=False, max_length=255)
+    creator: str = Field(nullable=False, max_length=255)
+    age_group: str = Field(nullable=False, max_length=50, default="5-12")
+    category: str = Field(nullable=False, max_length=100)
+    description: str = Field(
+        sa_column=Column(TEXT, nullable=False, default="No description found")
+    )
+    link: str = Field(nullable=False, max_length=500, unique=True)
+    rating: float = Field(default=0.0)
+    status: BookVideoStatus = Field(
+        sa_column=Column(Enum(BookVideoStatus), nullable=False, default=BookVideoStatus.AVAILABLE)
+    )
+
+
 
 
 
