@@ -3,8 +3,6 @@ import mysql.connector
 import os 
 from dotenv import load_dotenv
 
-
-
 def fetch_books_to_db():
     load_dotenv()
     # Connect DB 
