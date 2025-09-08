@@ -4,7 +4,7 @@ from sqlmodel import Session, select
 from typing import List
 from .. import models
 from .. import database
-from ..services.admim_service import AdminService
+from ..services.admin_service import AdminService
 from ..services.review_service import ReviewService
 
 router = APIRouter(

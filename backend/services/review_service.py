@@ -39,7 +39,7 @@ class ReviewService():
             return False
         
 
-    # admin view all reviews
+    # view all reviews
     def view_reviews(self) -> List[models.ViewReviews]:
         # Select the full ParentReviews object
         statement = select(models.ParentReviews).options(selectinload(models.ParentReviews.user))

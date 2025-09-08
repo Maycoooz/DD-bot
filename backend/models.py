@@ -28,7 +28,7 @@ class SuccessMessage(SQLModel):
     success: bool
     message: str
 
-class BookVideoStatus(str, enum.Enum):
+class MaterialStatus(str, enum.Enum):
     AVAILABLE = "available"
     SUSPENDED = "suspended"
 
@@ -70,6 +70,19 @@ class AddReview(SQLModel):
 class UpdateLibrarianStatus(SQLModel):
     librarian_id: int
     new_status: StatusType
+
+class AddBook(SQLModel):
+    title: str
+    author: str
+    age_group: Optional[str] = "5-12"
+    category: str
+    description: str
+    link: str
+    rating: Optional[int] = 0
+    status: Optional[MaterialStatus] = MaterialStatus.AVAILABLE
+
+
+
 
 
 # ---------------------- SCHEMAS FOR ROUTES (OUTPUT) ---------------------------------
@@ -218,8 +231,8 @@ class Books(SQLModel, table=True):
     )
     link: str = Field(nullable=False, max_length=500, unique=True)
     rating: float = Field(default=0.0)
-    status: BookVideoStatus = Field(
-        sa_column=Column(Enum(BookVideoStatus), nullable=False, default=BookVideoStatus.AVAILABLE)
+    status: MaterialStatus = Field(
+        sa_column=Column(Enum(MaterialStatus), nullable=False, default=MaterialStatus.AVAILABLE)
     )
 
 class Videos(SQLModel, table=True):
@@ -234,8 +247,8 @@ class Videos(SQLModel, table=True):
     )
     link: str = Field(nullable=False, max_length=500, unique=True)
     rating: float = Field(default=0.0)
-    status: BookVideoStatus = Field(
-        sa_column=Column(Enum(BookVideoStatus), nullable=False, default=BookVideoStatus.AVAILABLE)
+    status: MaterialStatus = Field(
+        sa_column=Column(Enum(MaterialStatus), nullable=False, default=MaterialStatus.AVAILABLE)
     )
 
 

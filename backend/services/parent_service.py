@@ -4,7 +4,6 @@ from .. import models
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 from typing import List
-import bleach
 
 class ParentService():
 
@@ -59,9 +58,10 @@ class ParentService():
         self.session.commit()
         self.session.refresh(kid_profile)
 
-        creation_data = models.CreateKidAccountMessage
-        creation_data.success = True
-        creation_data.message = "Kid Account successfully created"
+        creation_data = models.CreateKidAccountMessage(
+            success=True,
+            message="Kid account successfully created"
+        )
         return creation_data
 
     def view_kids_accounts(self, parent_id: int) -> List[models.KidAccountDetails]:

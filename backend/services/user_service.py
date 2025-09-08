@@ -56,9 +56,6 @@ class UserService():
         return True
     
     # login check order
-    # 1. username exists
-    # 2. password is correct
-    # 3. if its librarian, check account status
     def login(self, user_data: models.UserLogin) -> models.LoginMessage:
         
         # check if user exists
