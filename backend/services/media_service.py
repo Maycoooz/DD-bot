@@ -1,8 +1,8 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, select, or_
 from .. import models
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
-from typing import List
+from typing import List, Optional
 
 class MediaService():
 
@@ -39,13 +39,6 @@ class MediaService():
             success=True,
             message="Book added successfully"
         )
-    
-    def view_books(self, limit: int, offset: int) -> List[models.Books]:
-
-        statement = select(models.Books).offset(offset).limit(limit)
-        books = self.session.exec(statement).all()
-        return books
-
 
     def update_book(self, book_data: models.UpdateBook) -> models.SuccessMessage:
 
@@ -76,11 +69,25 @@ class MediaService():
             message="Book successfully updated"
         )
     
-    def search_book(self, filter_title: str) -> List[models.Books]:
+    def search_books(self, search_term: Optional[str], limit: int, offset: int) -> List[models.Books]:
+        statement = select(models.Books)
         
-
-
-        return
+        # If a search term is provided, add a where clause
+        if search_term:
+            # The '%' are wildcards, so it finds partial matches
+            search_pattern = f"%{search_term}%"
+            statement = statement.where(
+                or_(
+                    models.Books.title.ilike(search_pattern),
+                    models.Books.author.ilike(search_pattern)
+                )
+            )
+            
+        # Apply pagination
+        final_statement = statement.offset(offset).limit(limit)
+        books = self.session.exec(final_statement).all()
+        
+        return books
     
     def delete_book(self):
         return
