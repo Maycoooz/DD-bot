@@ -14,7 +14,7 @@ class ReviewService():
 
 
     # for now only parents can create reviews (kids can make reviews in the future maybe)
-    def create_review(self, review_data: models.AddReview) -> bool:
+    def create_review(self, review_data: models.AddReview) -> models.SuccessMessage:
         try:
             # Sanitize the input to remove any HTML tags
             clean_review = bleach.clean(review_data.message, tags=[], strip=True)
@@ -32,11 +32,17 @@ class ReviewService():
             self.session.commit()
             self.session.refresh(new_review)
 
-            return True
+            return models.SuccessMessage(
+                success=True,
+                message="Review submitted"
+            )
         # if parent id is incorrect
         except IntegrityError: 
             self.session.rollback()
-            return False
+            return models.SuccessMessage(
+                success=False,
+                message="Parent ID incorrect"
+            )
         
 
     # view all reviews
@@ -60,7 +66,7 @@ class ReviewService():
     
     # admin selects review for landing page
     # review chosen from view-all-reviews endpoint
-    # saved into another table in db ChosenReviews
+    # saved into another table in db, ChosenReviews table
     def showcase_review(self, review_id: int) -> models.SuccessMessage:
 
         # check if review is already showcased
