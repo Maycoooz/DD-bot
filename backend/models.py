@@ -78,7 +78,7 @@ class AddBook(SQLModel):
     category: str
     description: str
     link: str
-    rating: Optional[int] = 0
+    rating: Optional[float] = 0
     status: Optional[MaterialStatus] = MaterialStatus.AVAILABLE
 
 

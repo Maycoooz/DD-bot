@@ -24,8 +24,10 @@ class MediaService():
         new_book_entry = models.Books(
             title=book.title,
             author=book.author,
+            age_group=book.age_group,
             category=book.category,
             description=book.description,
+            rating=book.rating,
             link=book.link
         )
 
@@ -38,10 +40,14 @@ class MediaService():
             message="Book added successfully"
         )
     
-    def update_book(self) -> models.SuccessMessage:
-        return
-    
-    def view_all_books(self):
+    def view_books(self, limit: int, offset: int) -> List[models.Books]:
+
+        statement = select(models.Books).offset(offset).limit(limit)
+        books = self.session.exec(statement).all()
+        return books
+
+
+    def update_book(self, ) -> models.SuccessMessage:
         return
     
     def search_book(self):

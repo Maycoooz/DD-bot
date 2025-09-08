@@ -1,5 +1,5 @@
 # backend/api/routes.py
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session, select
 from typing import List
 from .. import models
@@ -17,4 +17,14 @@ def add_book(book: models.AddBook, session: Session = Depends(database.get_sessi
     media_service = MediaService(session)
     success = media_service.add_book(book)
     return success
+
+@router.get("/view-books/")
+def view_books(limit: int = Query(default=20, le=20), 
+               offset: int = Query(default=0, ge=0),
+               session: Session = Depends(database.get_session)
+               ) -> List[models.Books]:
+    
+    media_service = MediaService(session)
+    list_of_books = media_service.view_books(limit, offset)
+    return list_of_books
 
