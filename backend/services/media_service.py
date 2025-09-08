@@ -111,20 +111,105 @@ class MediaService():
     def suspend_book(self):
         return
     
-    def add_video(self) -> models.SuccessMessage:
-        return
+
+
+
     
-    def update_video(self) -> models.SuccessMessage:
-        return
+    def add_video(self, video: models.AddVideo) -> models.SuccessMessage:
+        statement = select(models.Videos).where(video.link == models.Videos.link)
+
+        video_exists = self.session.exec(statement).first()
+
+        if video_exists:
+            return models.SuccessMessage(
+                success=False,
+                message="Video already exists in database"
+            )
+        
+        new_video_entry = models.Videos(
+            title=video.title,
+            creator=video.creator,
+            age_group=video.age_group,
+            category=video.category,
+            description=video.description,
+            rating=video.rating,
+            link=video.link
+        )
+
+        self.session.add(new_video_entry)
+        self.session.commit()
+        self.session.refresh(new_video_entry)
+
+        return models.SuccessMessage(
+            success=True,
+            message="Video added successfully"
+        )
     
-    def view_all_videos(self):
-        return
+    def search_videos(self, search_term: Optional[str], limit: int, offset: int) -> List[models.Videos]:
+        statement = select(models.Videos)
+        
+        # If a search term is provided, add a where clause
+        if search_term:
+            # The '%' are wildcards, so it finds partial matches
+            search_pattern = f"%{search_term}%"
+            statement = statement.where(
+                or_(
+                    models.Videos.title.ilike(search_pattern),
+                    models.Videos.creator.ilike(search_pattern)
+                )
+            )
+            
+        # Apply pagination
+        final_statement = statement.offset(offset).limit(limit)
+        videos = self.session.exec(final_statement).all()
+        
+        return videos
     
-    def search_video(self):
-        return
+    def update_video(self, video_data: models.UpdateVideo) -> models.SuccessMessage:
+        
+        # find the video
+        video_to_update = self.session.get(models.Videos, video_data.video_id)
+
+        # if video does not exist
+        if not video_to_update:
+            return models.SuccessMessage(
+                success=False,
+                message="Video does not exist"
+            )
+        
+        # update the video with the new video_data
+        video_to_update.title = video_data.new_title
+        video_to_update.creator = video_data.new_creator
+        video_to_update.age_group = video_data.new_age_group
+        video_to_update.category = video_data.new_category
+        video_to_update.description = video_data.new_description
+        video_to_update.link = video_data.new_link
+
+        self.session.add(video_to_update)
+        self.session.commit()
+        self.session.refresh(video_to_update)
+
+        return models.SuccessMessage(
+            success=True,
+            message="Video successfully updated"
+        )
     
-    def delete_video(self):
-        return
+    def delete_video(self, video_id: int) -> models.SuccessMessage:
+        video_to_delete = self.session.get(models.Videos, video_id)
+
+        if not video_to_delete:
+            return models.SuccessMessage(
+                success=False,
+                message="Video does not exist"
+            )
+        
+        self.session.delete(video_to_delete)
+        self.session.commit()
+
+        return models.SuccessMessage(
+            success=True,
+            message="Video successfully removed from database"
+        )
     
     # KIV
     def suspend_video(self):

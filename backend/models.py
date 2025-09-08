@@ -90,6 +90,25 @@ class UpdateBook(SQLModel):
     new_description: str
     new_link: str
 
+class AddVideo(SQLModel):
+    title: str
+    creator: str
+    age_group: Optional[str] = "5-12"
+    category: str
+    description: str
+    link: str
+    rating: Optional[float] = 0
+    status: Optional[MaterialStatus] = MaterialStatus.AVAILABLE
+
+class UpdateVideo(SQLModel):
+    video_id: int # find the video to update based on id (frontend sends to backend)
+    new_title: str
+    new_creator: str
+    new_age_group: str
+    new_category: str
+    new_description: str
+    new_link: str
+
 
 
 
