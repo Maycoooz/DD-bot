@@ -40,5 +40,12 @@ def update_book(book_data: models.UpdateBook, session: Session = Depends(databas
     success_message = media_service.update_book(book_data)
     return success_message
 
+@router.delete("/delete-book/", response_model=models.SuccessMessage)
+def delete_book(book_id: int, session: Session = Depends(database.get_session)):
+
+    media_service = MediaService(session)
+    success_message = media_service.delete_book(book_id)
+    return success_message
+
 
 

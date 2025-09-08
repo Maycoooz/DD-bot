@@ -89,8 +89,23 @@ class MediaService():
         
         return books
     
-    def delete_book(self):
-        return
+    def delete_book(self, book_id: int) -> models.SuccessMessage:
+        
+        book_to_delete = self.session.get(models.Books, book_id)
+
+        if not book_to_delete:
+            return models.SuccessMessage(
+                success=False,
+                message="Book does not exist"
+            )
+        
+        self.session.delete(book_to_delete)
+        self.session.commit()
+
+        return models.SuccessMessage(
+            success=True,
+            message="Book successfully removed from database"
+        )
     
     # KIV
     def suspend_book(self):
