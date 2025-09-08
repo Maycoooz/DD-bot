@@ -47,15 +47,45 @@ class MediaService():
         return books
 
 
-    def update_book(self, ) -> models.SuccessMessage:
-        return
+    def update_book(self, book_data: models.UpdateBook) -> models.SuccessMessage:
+
+        # find the book
+        book_to_update = self.session.get(models.Books, book_data.book_id)
+
+        # if book does not exist
+        if not book_to_update:
+            return models.SuccessMessage(
+                success=False,
+                message="Book does not exist"
+            )
+        
+        # update the book with the new book_data
+        book_to_update.title = book_data.new_title
+        book_to_update.author = book_data.new_author
+        book_to_update.age_group = book_data.new_age_group
+        book_to_update.category = book_data.new_category
+        book_to_update.description = book_data.new_description
+        book_to_update.link = book_data.new_link
+
+        self.session.add(book_to_update)
+        self.session.commit()
+        self.session.refresh(book_to_update)
+
+        return models.SuccessMessage(
+            success=True,
+            message="Book successfully updated"
+        )
     
-    def search_book(self):
+    def search_book(self, filter_title: str) -> List[models.Books]:
+        
+
+
         return
     
     def delete_book(self):
         return
     
+    # KIV
     def suspend_book(self):
         return
     
@@ -74,5 +104,6 @@ class MediaService():
     def delete_video(self):
         return
     
+    # KIV
     def suspend_video(self):
         return

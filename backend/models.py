@@ -81,6 +81,16 @@ class AddBook(SQLModel):
     rating: Optional[float] = 0
     status: Optional[MaterialStatus] = MaterialStatus.AVAILABLE
 
+class UpdateBook(SQLModel):
+    book_id: int # find the book to update based on id (frontend sends to backend)
+    new_title: str
+    new_author: str
+    new_age_group: str
+    new_category: str
+    new_description: str
+    new_link: str
+
+
 
 
 
