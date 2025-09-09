@@ -4,13 +4,13 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "./AuthContext"
 import logoImg from "./assets/logo.png"
-import showImg from "./assets/visibility_on.png"
-import hideImg from "./assets/visibility_off.png"
+import showImg from "./assets/visibility_off.png"
+import hideImg from "./assets/visibility_on.png"
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
-    role: "",
-    userId: "",
+    role: "parent", // Default to parent role
+    username: "",
     password: "",
   })
   const [showPassword, setShowPassword] = useState(false)
@@ -33,7 +33,7 @@ export default function LoginPage() {
     setError("")
 
     // Basic validation
-    if (!formData.role || !formData.userId || !formData.password) {
+    if (!formData.role || !formData.username || !formData.password) {
       setError("Please fill in all fields")
       return
     }
@@ -88,14 +88,14 @@ export default function LoginPage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="userId" className="form-label">
+              <label htmlFor="username" className="form-label">
                 User ID
               </label>
               <input
                 type="text"
-                id="userId"
-                name="userId"
-                value={formData.userId}
+                id="username"
+                name="username"
+                value={formData.username}
                 onChange={handleInputChange}
                 className="form-input"
                 placeholder="Enter your user ID"

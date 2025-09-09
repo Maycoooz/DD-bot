@@ -16,55 +16,85 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Load user from localStorage on app start
+  // Check authentication status on app start using a secure approach
   useEffect(() => {
-    try {
-      const savedUser = localStorage.getItem("user")
-      if (savedUser) {
-        setUser(JSON.parse(savedUser))
-      }
-    } catch (error) {
-      console.error("Error loading user from localStorage:", error)
-      localStorage.removeItem("user")
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
+    const checkAuthStatus = async () => {
+      try {
+        // Instead of localStorage, check session validity with the backend
+        const response = await fetch('/api/auth/verify/', {
+          method: 'GET',
+          credentials: 'include', // This includes cookies in the request
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
 
-  // Save user to localStorage whenever user state changes
-  useEffect(() => {
-    if (user) {
-      localStorage.setItem("user", JSON.stringify(user))
-    } else {
-      localStorage.removeItem("user")
+        if (response.ok) {
+          const userData = await response.json()
+          setUser(userData)
+        }
+      } catch (error) {
+        console.error("Error verifying authentication:", error)
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [user])
+
+    checkAuthStatus()
+  }, [])
 
   const login = async (credentials) => {
     setIsLoading(true)
     try {
-      // Mock authentication - replace with real API call
-      const mockUsers = {
-        admin: { id: "admin001", password: "admin123", redirect: "/admin" },
-        parent: { id: "parent001", password: "parent123", redirect: "/parent-dashboard" },
-        kid: { id: "kid001", password: "kid123", redirect: "/chat" },
-        librarian: { id: "lib001", password: "lib123", redirect: "/librarian-dashboard" },
+      // Real API call to backend
+      const response = await fetch('/api/login/', {
+        method: 'POST',
+        credentials: 'include', // This includes cookies in the request
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: credentials.username,
+          password: credentials.password
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Login failed')
       }
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      const mockUser = mockUsers[credentials.role]
-      if (mockUser && mockUser.id === credentials.userId && mockUser.password === credentials.password) {
+      const data = await response.json()
+      
+      if (data.success) {
+        // The backend should set HTTP-only cookies for authentication
+        // We only store non-sensitive user data in the state
         const userData = {
-          role: credentials.role,
-          userId: credentials.userId,
-          loginTime: new Date().toISOString(),
+          role: data.usertype,
+          username: credentials.username,
+          id: data.username,
         }
         setUser(userData)
-        return { success: true, redirect: mockUser.redirect }
+        
+        // Determine redirect path based on user role
+        let redirectPath = '/login'
+        switch (data.usertype) {
+          case "admin":
+            redirectPath = "/admin"
+            break
+          case "parent":
+            redirectPath = "/parent-dashboard"
+            break
+          case "kid":
+            redirectPath = "/chat"
+            break
+          case "librarian":
+            redirectPath = "/librarian-dashboard"
+            break
+        }
+        
+        return { success: true, redirect: redirectPath }
       } else {
-        throw new Error("Invalid credentials")
+        throw new Error(data.message || "Invalid credentials")
       }
     } catch (error) {
       throw new Error("Login failed. Please check your credentials.")
@@ -73,8 +103,22 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const logout = () => {
-    setUser(null)
+  const logout = async () => {
+    try {
+      // Call backend to invalidate the session and clear HTTP-only cookies
+      await fetch('/api/logout/', {
+        method: 'POST',
+        credentials: 'include', // Include cookies in the request
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+    } catch (error) {
+      console.error("Error during logout:", error)
+    } finally {
+      // Clear user state
+      setUser(null)
+    }
   }
 
   const isAuthenticated = () => {
@@ -102,11 +146,57 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  const signup = async (userData) => {
+    setIsLoading(true)
+    try {
+      // Real API call to backend
+      const response = await fetch('/api/signup/', {
+        method: 'POST',
+        credentials: 'include', // Include cookies in the request
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: userData.username,
+          password: userData.password,
+          first_name: userData.first_name || 'User',
+          last_name: userData.last_name || 'Name',
+          email: userData.email || 'user@example.com',
+          usertype: userData.usertype
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.message || 'Signup failed')
+      }
+
+      const data = await response.json()
+      
+      // If the backend automatically logs in the user after signup
+      // and sets the authentication cookies
+      if (data.success && data.user) {
+        setUser({
+          role: data.user.usertype,
+          username: data.user.username,
+          id: data.user.user_id,
+        })
+      }
+
+      return { success: data.success }
+    } catch (error) {
+      throw new Error(error.message || "Signup failed. Please try again.")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const value = {
     user,
     isLoading,
     login,
     logout,
+    signup,
     isAuthenticated,
     hasRole,
     getRedirectPath,

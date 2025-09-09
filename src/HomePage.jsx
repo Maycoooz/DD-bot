@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import logoImg from "./assets/logo.png"
 
@@ -123,10 +124,76 @@ const Footer = () => (
   </footer>
 )
 
+const TestimonialsSection = () => {
+  const [testimonials, setTestimonials] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const response = await fetch('/api/')
+        if (!response.ok) {
+          throw new Error('Failed to fetch testimonials')
+        }
+        const data = await response.json()
+        setTestimonials(data)
+      } catch (err) {
+        console.error('Error fetching testimonials:', err)
+        setError('Failed to load testimonials. Please try again later.')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchTestimonials()
+  }, [])
+
+  if (loading) {
+    return (
+      <section className="testimonials">
+        <h2 className="section-title">What Parents Say</h2>
+        <div className="loading">Loading testimonials...</div>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className="testimonials">
+        <h2 className="section-title">What Parents Say</h2>
+        <div className="error">{error}</div>
+      </section>
+    )
+  }
+
+  return (
+    <section className="testimonials">
+      <h2 className="section-title">What Parents Say</h2>
+      <div className="testimonial-cards">
+        {testimonials.length > 0 ? (
+          testimonials.map((testimonial) => (
+            <div key={testimonial.id} className="testimonial-card">
+              <p className="testimonial-text">"{testimonial.review_text}"</p>
+              <div className="testimonial-author">
+                <span className="author-name">{testimonial.parent_name}</span>
+                <span className="author-title">Parent</span>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p>No testimonials available at the moment.</p>
+        )}
+      </div>
+    </section>
+  )
+}
+
 const HomePage = () => (
   <div className="app">
     <Header />
     <HeroSection />
+    <TestimonialsSection />
     <Footer />
   </div>
 )
