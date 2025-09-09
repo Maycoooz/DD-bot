@@ -33,16 +33,17 @@ export default function SignupPage() {
       return
     }
 
-    const result = await signup(formData)
 
-if (result.success) {
-  alert("🎉 Congrats! You have successfully created an account.")
-  setTimeout(() => {
-    navigate("/login")
-  }, 1500)
-} else {
+      const result = await signup(formData)
+      if (result.success) {
+        alert("🎉 Congrats! You have successfully created an account.")
+        setTimeout(() => {
+          navigate("/login")
+        }, 1500)
+      }else {
   setError(result.message)
-}}
+}
+  }
 
   return (
     <div className="app">

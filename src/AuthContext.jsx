@@ -176,18 +176,17 @@ const signup = async (userData) => {
     if (data.success && data.user) {
       setUser({
         role: data.user.usertype,
-        username: data.user.username,
-        id: data.user.user_id,
+        username: data.user.username
       })
     }
 
-    return { success: data.success, message: data.message || "Account existed please try another username!" }
-  } catch (error) {
-    return { success: false, message: error.message || "Signup failed" }
-  } finally {
-    setIsLoading(false)
+    return { success: true }
+    } catch (error) {
+      return { success: false, message: error.message || "Signup failed" }
+    } finally {
+      setIsLoading(false)
+    }
   }
-}
 
 
   const value = {
