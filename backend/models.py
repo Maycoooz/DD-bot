@@ -28,7 +28,7 @@ class SuccessMessage(SQLModel):
     success: bool
     message: str
 
-class BookVideoStatus(str, enum.Enum):
+class MaterialStatus(str, enum.Enum):
     AVAILABLE = "available"
     SUSPENDED = "suspended"
 
@@ -70,6 +70,48 @@ class AddReview(SQLModel):
 class UpdateLibrarianStatus(SQLModel):
     librarian_id: int
     new_status: StatusType
+
+class AddBook(SQLModel):
+    title: str
+    author: str
+    age_group: Optional[str] = "5-12"
+    category: str
+    description: str
+    link: str
+    rating: Optional[float] = 0
+    status: Optional[MaterialStatus] = MaterialStatus.AVAILABLE
+
+class UpdateBook(SQLModel):
+    book_id: int # find the book to update based on id (frontend sends to backend)
+    new_title: str
+    new_author: str
+    new_age_group: str
+    new_category: str
+    new_description: str
+    new_link: str
+
+class AddVideo(SQLModel):
+    title: str
+    creator: str
+    age_group: Optional[str] = "5-12"
+    category: str
+    description: str
+    link: str
+    rating: Optional[float] = 0
+    status: Optional[MaterialStatus] = MaterialStatus.AVAILABLE
+
+class UpdateVideo(SQLModel):
+    video_id: int # find the video to update based on id (frontend sends to backend)
+    new_title: str
+    new_creator: str
+    new_age_group: str
+    new_category: str
+    new_description: str
+    new_link: str
+
+
+
+
 
 
 # ---------------------- SCHEMAS FOR ROUTES (OUTPUT) ---------------------------------
@@ -218,8 +260,8 @@ class Books(SQLModel, table=True):
     )
     link: str = Field(nullable=False, max_length=500, unique=True)
     rating: float = Field(default=0.0)
-    status: BookVideoStatus = Field(
-        sa_column=Column(Enum(BookVideoStatus), nullable=False, default=BookVideoStatus.AVAILABLE)
+    status: MaterialStatus = Field(
+        sa_column=Column(Enum(MaterialStatus), nullable=False, default=MaterialStatus.AVAILABLE)
     )
 
 class Videos(SQLModel, table=True):
@@ -234,8 +276,8 @@ class Videos(SQLModel, table=True):
     )
     link: str = Field(nullable=False, max_length=500, unique=True)
     rating: float = Field(default=0.0)
-    status: BookVideoStatus = Field(
-        sa_column=Column(Enum(BookVideoStatus), nullable=False, default=BookVideoStatus.AVAILABLE)
+    status: MaterialStatus = Field(
+        sa_column=Column(Enum(MaterialStatus), nullable=False, default=MaterialStatus.AVAILABLE)
     )
 
 

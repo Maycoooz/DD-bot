@@ -15,7 +15,7 @@ def fetch_books_to_db():
     cursor = conn.cursor()
 
     # Request Google Books API 
-    url = os.getenv("url")
+    url = os.getenv("BOOKS_URL")
     params = {
         "q": "subject:juvenile",
         "maxResults": 40,

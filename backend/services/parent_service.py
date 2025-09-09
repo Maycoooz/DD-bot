@@ -4,7 +4,6 @@ from .. import models
 from sqlalchemy.orm import selectinload
 from sqlalchemy.exc import IntegrityError
 from typing import List
-import bleach
 
 class ParentService():
 
@@ -59,9 +58,10 @@ class ParentService():
         self.session.commit()
         self.session.refresh(kid_profile)
 
-        creation_data = models.CreateKidAccountMessage
-        creation_data.success = True
-        creation_data.message = "Kid Account successfully created"
+        creation_data = models.CreateKidAccountMessage(
+            success=True,
+            message="Kid account successfully created"
+        )
         return creation_data
 
     def view_kids_accounts(self, parent_id: int) -> List[models.KidAccountDetails]:
@@ -88,7 +88,7 @@ class ParentService():
 
         return kids_details_list
     
-    def delete_kids_account(self, delete_data: models.KidDelete) -> bool:
+    def delete_kids_account(self, delete_data: models.KidDelete) -> models.SuccessMessage:
         
         statement = select(models.Users).join(
             models.KidProfiles,
@@ -101,12 +101,18 @@ class ParentService():
         user_to_delete = self.session.exec(statement).first()
 
         if not user_to_delete:
-            return False
+            return models.SuccessMessage(
+                success=False,
+                message="Kid account does not exist"
+            )
         
         self.session.delete(user_to_delete)
         self.session.commit()
         
-        return True
+        return models.SuccessMessage(
+            success=True,
+            message="Kid account successfully deleted"
+        )
     
     def delete_my_account(self, account_data: models.DeleteParentAccount) -> models.SuccessMessage:
 

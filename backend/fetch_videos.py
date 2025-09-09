@@ -17,7 +17,7 @@ cursor = conn.cursor()
 # YouTube API details
 API_KEY = os.getenv("API_KEY")
 SEARCH_QUERY = os.getenv("SEARCH_QUERY")
-URL = os.getenv("URL")
+URL = os.getenv("YOUTUBE_URL")
 
 videos_added = 0
 next_page_token = None
