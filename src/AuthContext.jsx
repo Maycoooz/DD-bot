@@ -146,50 +146,49 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const signup = async (userData) => {
-    setIsLoading(true)
-    try {
-      // Real API call to backend
-      const response = await fetch('/api/signup/', {
-        method: 'POST',
-        credentials: 'include', // Include cookies in the request
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: userData.username,
-          password: userData.password,
-          first_name: userData.first_name || 'User',
-          last_name: userData.last_name || 'Name',
-          email: userData.email || 'user@example.com',
-          usertype: userData.usertype
-        }),
-      })
+const signup = async (userData) => {
+  setIsLoading(true)
+  try {
+    const response = await fetch('/api/signup/', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: userData.username,
+        password: userData.password,
+        first_name: userData.first_name || 'User',
+        last_name: userData.last_name || 'Name',
+        email: userData.email || 'user@example.com',
+        usertype: userData.usertype
+      }),
+    })
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}))
-        throw new Error(errorData.message || 'Signup failed')
+    const data = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: data.detail || data.message || 'Signup failed',
       }
-
-      const data = await response.json()
-      
-      // If the backend automatically logs in the user after signup
-      // and sets the authentication cookies
-      if (data.success && data.user) {
-        setUser({
-          role: data.user.usertype,
-          username: data.user.username,
-          id: data.user.user_id,
-        })
-      }
-
-      return { success: data.success }
-    } catch (error) {
-      throw new Error(error.message || "Signup failed. Please try again.")
-    } finally {
-      setIsLoading(false)
     }
+
+    // If backend sends back the user data after signup
+    if (data.success && data.user) {
+      setUser({
+        role: data.user.usertype,
+        username: data.user.username,
+        id: data.user.user_id,
+      })
+    }
+
+    return { success: data.success, message: data.message || "Account existed please try another username!" }
+  } catch (error) {
+    return { success: false, message: error.message || "Signup failed" }
+  } finally {
+    setIsLoading(false)
   }
+}
+
 
   const value = {
     user,
