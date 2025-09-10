@@ -15,7 +15,11 @@ router = APIRouter(
 # Parent & librarian signup
 @router.post("/signup/", response_model=bool)
 def signup(user_data: models.UserRegister, session: Session = Depends(database.get_session)):
-
+    
+    statement = select(models.Users).where(models.Users.username == user_data.username)
+    existing_user = session.exec(statement).first()
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Username already exists")
     user_service = UserService(session)
     success = user_service.registerAccount(user_data)
     return success
@@ -34,3 +38,4 @@ def display_showcased_reviews(session: Session = Depends(database.get_session)):
     review_service = ReviewService(session)
     list_of_showcased_reviews = review_service.get_showcased_reviews()
     return list_of_showcased_reviews
+
