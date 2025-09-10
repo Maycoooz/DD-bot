@@ -36,7 +36,6 @@ export default function SignupPage() {
 
       const result = await signup(formData)
       if (result.success) {
-        alert("🎉 Congrats! You have successfully created an account.")
         setTimeout(() => {
           navigate("/login")
         }, 1500)
