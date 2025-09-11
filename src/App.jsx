@@ -4,7 +4,7 @@ import LoginPage from "./Login"
 import ChatbotPage from "./ChatbotPage"
 import SignupPage from "./Signup"
 import ParentDashboard from "./ParentDashboard"
-
+import ProtectedRoute from "./ProtectedRoute"
 
 export default function App() {
   return (
@@ -13,7 +13,14 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/chat" element={<ChatbotPage />} />
-      <Route path="/parent-dashboard" element={<ParentDashboard />} />
+      <Route
+        path="/parent-dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["parent"]}>
+            <ParentDashboard />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   )
 }
