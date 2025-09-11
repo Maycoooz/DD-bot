@@ -108,8 +108,13 @@ const ParentDashboard = () => {
     setError(null)
     setSuccessMessage("")
 
+    if (!user?.user_id) {
+    setError("Parent ID is missing. Please log in again.")
+    setIsLoading(false)
+    return
+  }
     try {
-      const response = await fetch(`api/parent/create-kid-account/`, {
+      const response = await fetch(`${API_BASE}/parent/create-kid-account/`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -118,7 +123,7 @@ const ParentDashboard = () => {
           first_name: newKidData.first_name,
           last_name: newKidData.last_name,
           password: newKidData.password,
-          parent_id: user?.user_id,
+          parent_id: user.user_id,
 
         }),
       })
@@ -133,7 +138,7 @@ const ParentDashboard = () => {
       }
 
       setSuccessMessage(result.message)
-      setNewKidData({ username: "", first_name: "", last_name: "", password: "",email: null,usertype: "kid" })
+      setNewKidData({ username: "", first_name: "", last_name: "", password: "" })
       fetchKidAccounts()
     } catch (err) {
       console.error("Error creating kid account:", err)

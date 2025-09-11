@@ -16,7 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Check authentication status on app start
+  // ------------------ Check authentication status on app start ------------------
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
@@ -28,7 +28,12 @@ export const AuthProvider = ({ children }) => {
 
         if (response.ok) {
           const userData = await response.json()
-          setUser(userData) // should return { id, username, role }
+          // normalize to always have user_id
+          setUser({
+            user_id: userData.id, // backend gives "id"
+            username: userData.username,
+            role: userData.role,
+          })
         }
       } catch (error) {
         console.error("Error verifying authentication:", error)
@@ -40,6 +45,7 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus()
   }, [])
 
+  // ------------------ Login ------------------
   const login = async (credentials) => {
     setIsLoading(true)
     try {
@@ -60,13 +66,11 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json()
 
       if (data.success) {
-        
-        const userData = {
-          id: data.user_id || data.username,
+        setUser({
+          user_id: data.user_id, // always store as user_id
           username: data.username,
           role: data.usertype,
-        }
-        setUser(userData)
+        })
 
         // Decide redirect path
         let redirectPath = "/login"
@@ -96,6 +100,7 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
+  // ------------------ Logout ------------------
   const logout = async () => {
     try {
       await fetch("/api/logout/", {
@@ -110,26 +115,7 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  const isAuthenticated = () => !!user
-  const hasRole = (role) => user?.role === role
-
-  const getRedirectPath = () => {
-    if (!user) return "/login"
-
-    switch (user.role) {
-      case "admin":
-        return "/admin"
-      case "parent":
-        return "/parent-dashboard"
-      case "kid":
-        return "/chat"
-      case "librarian":
-        return "/librarian-dashboard"
-      default:
-        return "/login"
-    }
-  }
-
+  // ------------------ Signup ------------------
   const signup = async (userData) => {
     setIsLoading(true)
     try {
@@ -158,10 +144,9 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success && data.user) {
         setUser({
-          
-          role: data.user.usertype,
+          user_id: data.user.id,
           username: data.user.username,
-          
+          role: data.user.usertype,
         })
       }
 
@@ -170,6 +155,27 @@ export const AuthProvider = ({ children }) => {
       return { success: false, message: error.message || "Signup failed" }
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // ------------------ Helpers ------------------
+  const isAuthenticated = () => !!user
+  const hasRole = (role) => user?.role === role
+
+  const getRedirectPath = () => {
+    if (!user) return "/login"
+
+    switch (user.role) {
+      case "admin":
+        return "/admin"
+      case "parent":
+        return "/parent-dashboard"
+      case "kid":
+        return "/chat"
+      case "librarian":
+        return "/librarian-dashboard"
+      default:
+        return "/login"
     }
   }
 
