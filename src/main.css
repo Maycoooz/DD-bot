@@ -1168,3 +1168,160 @@ body {
 .admin-card-btn:hover {
   opacity: 0.85;
 }
+
+/* ----- General Layout ----- */
+.librarian-dashboard {
+  min-height: 100vh;
+  background-color: #f9fafb;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.librarian-header {
+  background-color: #16a34a;
+  color: white;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.librarian-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.librarian-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.librarian-logo img {
+  height: 40px;
+  width: 40px;
+}
+
+.librarian-header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logout-btn {
+  background-color: #ef4444;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #dc2626;
+}
+
+/* ----- Navigation ----- */
+.librarian-nav {
+  background: #f3f4f6;
+  border-bottom: 1px solid #d1d5db;
+}
+
+.librarian-nav-tabs {
+  display: flex;
+  overflow-x: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.librarian-tab {
+  flex-shrink: 0;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border: none;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.librarian-tab:hover {
+  background-color: #e5e7eb;
+  color: #16a34a;
+}
+
+.librarian-tab.active {
+  background-color: #16a34a;
+  color: white;
+  border-bottom: 2px solid #16a34a;
+}
+
+/* ----- Sections ----- */
+.librarian-section {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.librarian-section h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+/* ----- Cards ----- */
+.librarian-section-content {
+  display: grid;
+  gap: 1rem;
+}
+
+.librarian-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.librarian-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+}
+
+.librarian-card-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  color: white;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.librarian-card-btn.blue {
+  background-color: #3b82f6;
+}
+
+.librarian-card-btn.orange {
+  background-color: #f97316;
+}
+
+.librarian-card-btn.green {
+  background-color: #10b981;
+}
+
+.librarian-card-btn.red {
+  background-color: #ef4444;
+}
+
+.librarian-card-btn.purple {
+  background-color: #8b5cf6;
+}
+
+.librarian-card-btn:hover {
+  opacity: 0.9;
+}
