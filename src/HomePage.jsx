@@ -132,7 +132,7 @@ const TestimonialsSection = () => {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const response = await fetch('/api/')
+        const response = await fetch('/api/get-reviews/')
         if (!response.ok) {
           throw new Error('Failed to fetch testimonials')
         }

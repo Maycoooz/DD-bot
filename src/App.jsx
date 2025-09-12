@@ -4,6 +4,8 @@ import LoginPage from "./Login"
 import ChatbotPage from "./ChatbotPage"
 import SignupPage from "./Signup"
 import ParentDashboard from "./ParentDashboard"
+import AdminDashboard from "./AdminDashboard"
+import LibrarianDashboard from "./LibrarianDashboard"
 import ProtectedRoute from "./ProtectedRoute"
 
 export default function App() {
@@ -18,6 +20,22 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={["parent"]}>
             <ParentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin-dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["admin"]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/librarian-dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["librarian"]}>
+            <LibrarianDashboard />
           </ProtectedRoute>
         }
       />
