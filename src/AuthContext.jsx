@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }) => {
         let redirectPath = "/login"
         switch (data.usertype) {
           case "admin":
-            redirectPath = "/admin"
+            redirectPath = "/admin-dashboard"
             break
           case "parent":
             redirectPath = "/parent-dashboard"
