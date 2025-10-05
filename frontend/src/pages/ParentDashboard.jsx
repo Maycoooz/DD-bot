@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
-import '../styles/ParentDashboard.css'; // Updated CSS import
+import '../styles/ParentDashboard.css';
 
 // Import Placeholder Components
-import HomeDashboard from './ParentHome.jsx'; // New import
-import MyProfile from './ParentProfile.jsx'; // Updated import path
-import CreateChild from './CreateChild.jsx'; // Updated import path
+import ParentHome from './ParentHome.jsx'; 
+import ParentProfile from './ParentProfile.jsx'; 
+import CreateChild from './CreateChild.jsx'; 
 
 // --- Dashboard Menu Definition ---
 const menuItems = {
@@ -71,13 +71,13 @@ function ParentDashboard() {
 
     // ----------------------------------------------------------------------
     // 3. RENDERING LOGIC
-    // ------------------------------------------------------
+    // ----------------------------------------------------------------------
     const renderComponent = () => {
         switch (activeComponent) {
-            case 'home': // <-- NEW CASE
-                return <HomeDashboard />;
+            case 'home': 
+                return <ParentHome />;
             case 'profile':
-                return <MyProfile profile={userProfile} />;
+                return <ParentProfile onProfileUpdate={setUserProfile} />;
             case 'createChild':
                 return <CreateChild parentProfile={userProfile} />;
             // Add cases for other menu items as you build them

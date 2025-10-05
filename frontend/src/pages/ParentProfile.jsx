@@ -3,7 +3,7 @@ import api from '../api/axiosConfig';
 import '../styles/ParentProfile.css'; // Corrected CSS import
 
 // Renamed component from MyProfile to ParentProfile
-function ParentProfile() {
+function ParentProfile({ onProfileUpdate }) {
     // 1. Load initial data from localStorage (set during login)
     const initialProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
 
@@ -91,6 +91,10 @@ function ParentProfile() {
             
             setIsEditing(false);
             setMessage('Profile successfully updated!');
+
+            if (onProfileUpdate) {
+                onProfileUpdate(updatedProfile);
+            }
 
         } catch (err) {
             // Check for 422 errors and attempt to display server validation details
