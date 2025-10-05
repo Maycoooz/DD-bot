@@ -8,7 +8,7 @@ from auth.auth_handler import authenticate_user, ACCESS_TOKEN_EXPIRE_MINUTES, cr
 from db.database import get_db
 from schemas.auth import Token
 from schemas.users import ParentRegistrationRequest, ParentRegistrationResponse
-from models.users import User
+from models.users import User, SubscriptionTier
 
 router = APIRouter()
 
@@ -28,6 +28,7 @@ def register_user(user: ParentRegistrationRequest, db: Session = Depends(get_db)
         gender=user.gender,
         birthday=user.birthday,
         race=user.race,
+        tier=SubscriptionTier.FREE,
         role_id=2  
     )
     db.add(db_user)

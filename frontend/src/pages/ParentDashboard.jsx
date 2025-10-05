@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
-import '../styles/ParentDashboard.css';
+import '../styles/ParentDashboard.css'; // Updated CSS import
 
 // Import Placeholder Components
-import MyProfile from './MyProfile';
-import CreateChild from './CreateChild';
+import HomeDashboard from './ParentHome.jsx'; // New import
+import MyProfile from './ParentProfile.jsx'; // Updated import path
+import CreateChild from './CreateChild.jsx'; // Updated import path
 
 // --- Dashboard Menu Definition ---
 const menuItems = {
     General: [
+        { label: 'Home', component: 'home', key: 'home' }, 
         { label: 'My Profile', component: 'profile', key: 'profile' }
     ],
     'Child Overview': [
@@ -27,7 +29,7 @@ function ParentDashboard() {
     const navigate = useNavigate();
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [activeComponent, setActiveComponent] = useState('profile'); // Default view
+    const [activeComponent, setActiveComponent] = useState('home'); // Default is home
     
     // ----------------------------------------------------------------------
     // 1. DATA FETCHING (GET /users/me/)
@@ -72,6 +74,8 @@ function ParentDashboard() {
     // ------------------------------------------------------
     const renderComponent = () => {
         switch (activeComponent) {
+            case 'home': // <-- NEW CASE
+                return <HomeDashboard />;
             case 'profile':
                 return <MyProfile profile={userProfile} />;
             case 'createChild':
@@ -83,6 +87,8 @@ function ParentDashboard() {
                 return <div><h2>Child Chat History</h2><p>Chat logs coming soon...</p></div>;
             case 'addReview':
                 return <div><h2>Add Review</h2><p>Review form coming soon...</p></div>;
+            case 'deleteReview':
+                return <div><h2>Delete Review</h2><p>Delete review interface coming soon...</p></div>;
             default:
                 return <div><h2>Welcome</h2><p>Select an option from the sidebar to begin.</p></div>;
         }

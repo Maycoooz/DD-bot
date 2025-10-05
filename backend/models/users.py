@@ -10,6 +10,10 @@ class UserRole(enum.Enum):
     CHILD = "CHILD"
     LIBRARIAN = "LIBRARIAN"
     
+class SubscriptionTier(enum.Enum):
+    PRO = "PRO"
+    FREE = "FREE"
+    
 class Role(Base):
     __tablename__ = "role"
     
@@ -37,6 +41,12 @@ class User(Base):
     gender = Column(String(length=20), nullable=True)
     birthday = Column(DATE, nullable=True)
     race = Column(String(length=50), nullable=True)
+    
+    # Only parents and children can have tiers
+    tier = Column(
+        Enum(SubscriptionTier, native_enum=False, length=30),
+        nullable=True
+    ) 
     
     role_id = Column(Integer, ForeignKey("role.id"), nullable=False)
     role = relationship("Role", back_populates="users")

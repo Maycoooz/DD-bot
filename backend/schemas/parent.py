@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from datetime import date
+from typing import Optional
 
 class ChildRegistrationRequest(BaseModel):
     username: str
@@ -20,3 +21,11 @@ class ChildRegistrationResponse(BaseModel):
     gender: str
     birthday: date
     race: str
+
+class ParentProfileUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    country: Optional[str] = None
+    gender: Optional[str] = None
+    birthday: Optional[date] = None 
+    race: Optional[str] = None
