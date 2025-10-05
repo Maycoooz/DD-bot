@@ -6,7 +6,7 @@ const API_BASE_URL = 'http://127.0.0.1:8000';
 const api = axios.create({
     baseURL: API_BASE_URL,
     // Timeout for requests (optional maybe remove in future)
-    timeout: 5000.
+    timeout: 5000
 });
 
 // Request interceptor to attach the JWT Token

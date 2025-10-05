@@ -1,21 +1,19 @@
 import React, { useState } from 'react';
-import api from '../api/axiosConfig'; // Use the custom API instance
-import { useNavigate, Link } from 'react-router-dom'; // CORRECTED: Removed 'data'
-import '../styles/AuthForm.css';
+import api from '../api/axiosConfig';
+import { useNavigate } from 'react-router-dom';
+import '../styles/AuthForm.css'; // Use the same form styles
 
-function Register() {
+function CreateChild() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         username: '',
-        email: '',
         password: '',
-        confirm_password: '',
+        confirm_password: '', // Required by the backend schema for validation
         first_name: '',
         last_name: '',
         country: '',
         gender: '',
-        // Note: For birthday, you'll typically use a string 'YYYY-MM-DD'
-        birthday: '', 
+        birthday: '', // YYYY-MM-DD
         race: '',
     });
     const [error, setError] = useState('');
@@ -27,7 +25,7 @@ function Register() {
             ...formData,
             [name]: value,
         });
-        setError(''); // Clear error on input change
+        setError('');
     };
 
     const handleSubmit = async (e) => {
@@ -40,63 +38,64 @@ function Register() {
             return setError("Passwords do not match.");
         }
         
-        // 2. Prepare Data
-        // Clone formData and remove confirm_password before sending
+        // 2. Prepare Data and handle optional fields
         const dataToSend = { ...formData };
-        delete dataToSend.confirm_password; 
-
+        
+        // Convert empty strings to null for optional fields (Country, Gender, Birthday, Race)
+        // NOTE: We MUST send 'confirm_password' because your backend requires it.
         const optionalFields = ['country', 'gender', 'race', 'birthday'];
         for (const key of optionalFields) {
-            // Check for the optional fields and ensure the value is not an empty string
             if (dataToSend[key] === "") {
                 dataToSend[key] = null;
             }
         }
 
         try {
-            // 3. POST request to the registration endpoint
-            const response = await api.post('/auth/register', dataToSend);
+            // 3. POST request to the protected endpoint
+            // The API instance automatically adds the parent's JWT token.
+            const response = await api.post('/parent/create-child', dataToSend);
 
-            setSuccess('Registration successful! Redirecting to login...');
+            setSuccess(`Child account '${dataToSend.username}' created successfully!`);
             
-            // 4. Redirect to login after a short delay
-            setTimeout(() => {
-                navigate('/login');
-            }, 2000);
+            // Clear form after success
+            setFormData({
+                username: '', email: '', password: '', confirm_password: '',
+                first_name: '', last_name: '', country: '', gender: '',
+                birthday: '', race: '',
+            });
 
         } catch (err) {
-             console.error("Registration Error Response:", err.response); 
+            console.error("Child Creation Error Response:", err.response); 
             
-            const defaultDetail = 'Registration failed. Check your input values.';
+            const defaultDetail = 'Account creation failed. Check input values.';
             let detail = defaultDetail;
 
             if (err.response && err.response.data && err.response.data.detail) {
                 const errorDetails = err.response.data.detail;
                 if (Array.isArray(errorDetails)) {
-                    // Safely map Pydantic errors to a single string
+                    // Display specific Pydantic validation errors
                     detail = "Validation Failed: " + errorDetails.map(e => {
-                        // Display the failing field and the message
                         const field = e.loc[e.loc.length - 1]; 
                         return `${field} (${e.msg})`;
                     }).join('; ');
                 } else {
-                    // Catch cases where 'detail' is a simple string error
-                    detail = errorDetails;
+                    detail = errorDetails; // General FastAPI error message
                 }
             } else if (err.message) {
-                // Catch network errors
                 detail = `Network Error: ${err.message}`;
             }
 
-            setError(detail); // Ensure error state is set to a string
+            setError(detail);
         }
     };
     
     return (
-        <div className="auth-container">
-            {/* Added 'register' class for two-column grid layout */}
+        <div className="main-content-card">
+            <h2>Create Child Account</h2>
+            <p>Use this form to register a new user account and link them to your parent profile.</p>
+
+            {/* Added 'register' class for the two-column grid layout */}
             <form onSubmit={handleSubmit} className="auth-form register">
-                <h2>Register New Parent Account</h2>
                 
                 {/* Error/Success Messages spanning full width */}
                 {error && <p className="form-message error">{error}</p>}
@@ -104,15 +103,11 @@ function Register() {
 
                 {/* --- Credentials (Column 1) --- */}
                 <div className="form-group">
-                    <label htmlFor="username">Username</label>
+                    <label htmlFor="username">Username (Child)</label>
                     <input type="text" id="username" name="username" value={formData.username} onChange={handleChange} required />
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="email">Email</label>
-                    <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} required />
-                </div>
-
+                {/* Email is typically NOT required for child accounts, so it's omitted here */}
                 <div className="form-group">
                     <label htmlFor="password">Password</label>
                     <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required />
@@ -146,7 +141,6 @@ function Register() {
 
                 <div className="form-group">
                     <label htmlFor="birthday">Birthday (YYYY-MM-DD)</label>
-                    {/* Using type="date" ensures YYYY-MM-DD format */}
                     <input type="date" id="birthday" name="birthday" value={formData.birthday} onChange={handleChange} />
                 </div>
 
@@ -155,15 +149,11 @@ function Register() {
                     <input type="text" id="race" name="race" value={formData.race} onChange={handleChange} />
                 </div>
 
-                {/* Button and Link span full width */}
-                <button type="submit">Register</button>
-                
-                <p className="link-text">
-                    Already have an account? <Link to="/login">Log in here</Link>
-                </p>
+                {/* Button spans full width */}
+                <button type="submit">Create Account</button>
             </form>
         </div>
     );
 }
 
-export default Register;
+export default CreateChild;

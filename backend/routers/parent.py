@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 
-@router.post("/create_child", status_code=status.HTTP_201_CREATED, response_model=ChildRegistrationResponse)
+@router.post("/create-child", status_code=status.HTTP_201_CREATED, response_model=ChildRegistrationResponse)
 async def create_child_account(
     child_data: ChildRegistrationRequest, 
     db: Session = Depends(get_db),

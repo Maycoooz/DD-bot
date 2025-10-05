@@ -11,8 +11,13 @@ from db.database import get_db
 from schemas.auth import TokenData
 from models.users import User
 
-SECRET_KEY = ""
-ALGORITHM = "HS256"
+from dotenv import load_dotenv
+import os
+load_dotenv()
+
+
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
