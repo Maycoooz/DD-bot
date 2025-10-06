@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from auth.auth_handler import get_current_active_user, get_password_hash, get_user
 from db.database import get_db
-from schemas.parent import ChildRegistrationRequest, ChildRegistrationResponse, ParentViewChildAccountsResponse
+from schemas.parent import ChildRegistrationRequest, ChildRegistrationResponse, ParentViewChildAccountsResponse, ChildProfileUpdate
 from schemas.interest import InterestResponse
 from models import tables
 from typing import List
@@ -14,12 +14,13 @@ router = APIRouter(
     tags=["Parent Actions"]
 )
 
+# Get all interests in database for dropdown list
 @router.get("/interests", response_model=List[InterestResponse])
 def get_all_interests(db: Session = Depends(get_db)):
     interests = db.query(tables.Interest).all()
     return interests
 
-
+# Create child account
 @router.post("/create-child", status_code=status.HTTP_201_CREATED, response_model=ChildRegistrationResponse)
 async def create_child_account(
     child_data: ChildRegistrationRequest, 
@@ -54,6 +55,7 @@ async def create_child_account(
     db.refresh(new_child)
     return new_child
 
+# View all children accounts
 @router.get("/my-children", response_model=List[ParentViewChildAccountsResponse])
 def get_children_for_current_parent(
     db: Session = Depends(get_db),
@@ -64,3 +66,53 @@ def get_children_for_current_parent(
     
     return children_list
     
+@router.put("/update-child/{child_id}", response_model=ParentViewChildAccountsResponse)
+def update_child_profile(
+    child_id: int,
+    update_data: ChildProfileUpdate,
+    db: Session = Depends(get_db),
+    current_parent: tables.User = Depends(get_current_active_user)
+):
+    # Perform initial checks
+    child_to_update = db.query(tables.User).filter(tables.User.id == child_id).first()
+    
+    if not child_to_update:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Child not found")
+    
+    if child_to_update.primary_parent_id != current_parent.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to modify this childs profile."
+        )
+        
+    # Create the dictionary of updates from the request data
+    update_dict = update_data.model_dump(exclude_unset=True)
+
+    # Handle the 'interests' relationship as a special case
+    if "interests" in update_dict:
+        # Get the list of names and REMOVE it from the dictionary
+        interest_names = update_dict.pop("interests")
+        
+        # Query the database to get the actual Interest objects
+        interests_from_db = db.query(tables.Interest).filter(
+            tables.Interest.name.in_(interest_names)
+        ).all()
+        
+        # Validate that all interests were found
+        if len(interests_from_db) != len(set(interest_names)):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="One or more selected interests are invalid."
+            )
+        
+        # Assign the list of interests to the relationship
+        child_to_update.interests = interests_from_db
+
+    # Loop through the rest off the fields and update them
+    for key, value in update_dict.items():
+        setattr(child_to_update, key, value)
+        
+    # Commit all changes to the database
+    db.commit()
+    db.refresh(child_to_update)
+    return child_to_update

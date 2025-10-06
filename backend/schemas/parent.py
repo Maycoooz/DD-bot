@@ -34,6 +34,27 @@ class ChildRegistrationResponse(BaseModel):
     gender: str
     birthday: date
     race: str
+    
+class ChildProfileUpdate(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    country: Optional[str] = None
+    gender: Optional[str] = None
+    
+    birthday: Optional[date] = None
+    race: Optional[str] = None
+    
+    interests: Optional[List[str]] = None
+    @field_validator('interests')
+    @classmethod
+    def validate_interests_count(cls, value: List[str]) -> List[str]:
+        if len(value) < 3:
+            raise ValueError('At least 3 interests must be selected.')
+        
+        if len(set(value)) != len(value):
+            raise ValueError('Interests must be unique.')
+
+        return value
 
 class ParentProfileUpdate(BaseModel):
     first_name: Optional[str] = None
@@ -46,6 +67,7 @@ class ParentProfileUpdate(BaseModel):
 class ParentViewChildAccountsResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     
+    id: int
     username: str
     first_name: str
     last_name: str
