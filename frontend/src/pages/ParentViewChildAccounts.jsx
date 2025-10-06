@@ -12,6 +12,9 @@ function ViewChildAccounts() {
     // State for the in-line editing feature
     const [editingChildId, setEditingChildId] = useState(null);
     const [editFormData, setEditFormData] = useState({});
+
+    // State for deleting child account
+    const [childToDelete, setChildToDelete] = useState(null);
     
     // State to hold all possible interests for the dropdown
     const [availableInterests, setAvailableInterests] = useState([]);
@@ -84,6 +87,34 @@ function ViewChildAccounts() {
             setError("Failed to save changes. Please try again.");
         }
     };
+
+    const handleDeleteClick = (child) => {
+        setChildToDelete(child);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!childToDelete)
+            return;
+
+        try {
+            await api.delete(`/parent/delete-child/${childToDelete.id}`);
+
+            // Upadte UI by removing the deleted child from the state
+            setChildren(children.filter(child => child.id !== childToDelete.id));
+
+            // close modal
+            setChildToDelete(null)
+        } catch (err) {
+            console.error("Failed to delete child account: ", err);
+            setError("Failed to delete account. Please try again.");
+            setChildToDelete(null); // close modal on error
+        }
+    };
+
+    // handles closing the modal
+    const handleCancelDelete = () => {
+        setChildToDelete(null)
+    }
 
     // --- JSX RENDERING ---
     if (loading) return <div className="loading-state">Loading child accounts...</div>;
@@ -159,7 +190,7 @@ function ViewChildAccounts() {
                                     <td>{child.interests.map(i => i.name).join(', ')}</td>
                                     <td>
                                         <button className="action-button edit" onClick={() => handleEditClick(child)}>Edit</button>
-                                        <button className="action-button delete">Delete</button>
+                                        <button className="action-button delete" onClick={() => handleDeleteClick(child)}>Delete</button>
                                     </td>
                                 </tr>
                             )
@@ -167,6 +198,26 @@ function ViewChildAccounts() {
                     </tbody>
                 </table>
             </form>
+
+            {childToDelete && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>Confirm Deletion</h3>
+                        <p>
+                            Are you sure you want to delete the account for <strong>{childToDelete.username}</strong>?
+                            This action is permanent.
+                        </p>
+                        <div className="modal-actions">
+                            <button className="action-button cancel" onClick={handleCancelDelete}>
+                                Cancel
+                            </button>
+                            <button className="action-button delete" onClick={handleConfirmDelete}>
+                                Delete Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

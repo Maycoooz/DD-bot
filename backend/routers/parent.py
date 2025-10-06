@@ -6,6 +6,7 @@ from auth.auth_handler import get_current_active_user, get_password_hash, get_us
 from db.database import get_db
 from schemas.parent import ChildRegistrationRequest, ChildRegistrationResponse, ParentViewChildAccountsResponse, ChildProfileUpdate
 from schemas.interest import InterestResponse
+from schemas.auth import StatusMessage
 from models import tables
 from typing import List
 
@@ -65,7 +66,8 @@ def get_children_for_current_parent(
     children_list = db.query(tables.User).filter(managed_parent.id == tables.User.primary_parent_id).all()
     
     return children_list
-    
+
+# Update child account  
 @router.put("/update-child/{child_id}", response_model=ParentViewChildAccountsResponse)
 def update_child_profile(
     child_id: int,
@@ -116,3 +118,30 @@ def update_child_profile(
     db.commit()
     db.refresh(child_to_update)
     return child_to_update
+
+
+@router.delete("/delete-child/{child_id}", response_model=StatusMessage)
+def delete_child_account(child_id: int, db: Session = Depends(get_db), current_parent: tables.User = Depends(get_current_active_user)):
+    child_to_delete = db.query(tables.User).filter(tables.User.id == child_id).first()
+        
+    if not child_to_delete:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Child not found"
+        )
+        
+    if child_to_delete.primary_parent_id != current_parent.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to delete this child account."
+    )
+        
+    db.delete(child_to_delete)
+    db.commit()
+    
+    status_message = StatusMessage(
+        status="success",
+        message="Child account deleted successfully."
+    )
+    
+    return status_message
