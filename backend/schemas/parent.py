@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator, ConfigDict
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
 class ChildRegistrationRequest(BaseModel):
     username: str
@@ -12,6 +12,22 @@ class ChildRegistrationRequest(BaseModel):
     gender: str
     birthday: date
     race: str
+    interests: List[str]
+    
+    @field_validator('interests')
+    @classmethod
+    def validate_interests_count(cls, value: List[str]) -> List[str]:
+        if len(value) < 3:
+            raise ValueError('At least 3 interests must be selected.')
+        
+        if len(set(value)) != len(value):
+            raise ValueError('Interests must be unique.')
+
+        return value
+    
+class InterestResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    name: str
     
 class ChildRegistrationResponse(BaseModel):
     username: str

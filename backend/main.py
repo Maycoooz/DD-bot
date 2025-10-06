@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from db.database import create_tables_and_insert_default_roles
+from db.database import create_tables_and_seed_it
 from contextlib import asynccontextmanager
 
 from routers import auth, users, parent
@@ -9,7 +9,7 @@ from routers import auth, users, parent
 @asynccontextmanager
 async def lifespan_context(app: FastAPI):
 
-    create_tables_and_insert_default_roles()
+    create_tables_and_seed_it()
     yield
     
 

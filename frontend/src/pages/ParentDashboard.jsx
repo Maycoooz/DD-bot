@@ -6,7 +6,7 @@ import '../styles/ParentDashboard.css';
 // Import Placeholder Components
 import ParentHome from './ParentHome.jsx'; 
 import ParentProfile from './ParentProfile.jsx'; 
-import CreateChild from './CreateChild.jsx'; 
+import CreateChild from './ParentCreateChild.jsx'; 
 
 // --- Dashboard Menu Definition ---
 const menuItems = {

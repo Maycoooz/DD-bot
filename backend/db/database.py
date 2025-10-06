@@ -26,7 +26,7 @@ def get_db():
 
 def insert_default_roles():
     print("Inserting Default Roles...")
-    from models.users import Role
+    from models.tables import Role
     default_roles = [
         {"name": "ADMIN"},
         {"name": "PARENT"},
@@ -55,18 +55,60 @@ def insert_default_roles():
         
     finally:
         db.close()
+        
+
+def insert_default_interests():
+    print("Inserting Default Interests...")
+    from models.tables import Interest
+    default_interests = [
+        {"name": "FICTION"},
+        {"name": "NONFICTION"},
+        {"name": "COMIC"},
+        {"name": "ART"},
+        {"name": "GEOGRAPHY"},
+        {"name": "SCIENCE"},
+        {"name": "ANIMALS"},
+        {"name": "HISTORY"},
+        {"name": "FANTASY"},
+        {"name": "TECHNOLOGY"},
+        {"name": "SPORTS"},
+        {"name": "COOKING"}
+    ]
+    
+    db: Session = SessionLocal()
+    
+    try:
+        for interest_data in default_interests:
+            exists = db.query(Interest).filter(Interest.name == interest_data['name']).first()
+            
+            if not exists:
+                new_interest = Interest(name=interest_data['name'])
+                db.add(new_interest)
+                print(f"New Interest added: {interest_data['name']}")
+            else:
+                print(f"Default Interest already added in database: {interest_data['name']}")
+                
+            db.commit()
+            
+    except Exception as e:
+        db.rollback()
+        print(f"An error has occurred during defaut interest insertion: {e}")
+        
+    finally:
+        db.close()
     
               
 def create_tables():
     
-    from models import users
+    from models import tables
     
     print("Creating/Checkings tables")
     Base.metadata.create_all(bind=engine)
     print("Tables created/checked successfully")
     
     
-def create_tables_and_insert_default_roles():
+def create_tables_and_seed_it():
     create_tables()
     insert_default_roles()
+    insert_default_interests()
     

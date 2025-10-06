@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AuthForm.css'; // Use the same form styles
@@ -15,9 +15,27 @@ function CreateChild() {
         gender: '',
         birthday: '', // YYYY-MM-DD
         race: '',
+        interests: [],
     });
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [availableInterests, setAvailableInterests] = useState([]);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+
+    useEffect(() =>{
+        // fetch the interests from backend
+        const fetchInterests = async () => {
+            try {
+                const response = await api.get('/parent/interests');
+                setAvailableInterests(response.data)
+            } catch (err) {
+                console.error("Failed to fetch interests: ", err);
+                setError("Could not load the list of interests.");
+            }
+        };
+
+        fetchInterests();
+    }, [])
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -28,17 +46,41 @@ function CreateChild() {
         setError('');
     };
 
+    const handleCheckboxChange = (interestName) => {
+        setFormData((prevFormData) => {
+            const currentInterests = prevFormData.interests;
+            // Check if the interest is already selected
+            if (currentInterests.includes(interestName)) {
+                // If yes remove it
+                return {
+                    ...prevFormData,
+                    interests: currentInterests.filter((item) => item !== interestName),
+                };
+            } else {
+                // If no add it
+                return {
+                    ...prevFormData,
+                    interests: [...currentInterests, interestName],
+                };
+            }
+        });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         setSuccess('');
 
-        // 1. Frontend Password Validation
+        // Frontend Password Validation
         if (formData.password !== formData.confirm_password) {
             return setError("Passwords do not match.");
         }
+
+        if (formData.interests.length < 3) {
+            return setError("Please select at least 3 interests.");
+        }
         
-        // 2. Prepare Data and handle optional fields
+        // Prepare Data and handle optional fields
         const dataToSend = { ...formData };
         
         // Convert empty strings to null for optional fields (Country, Gender, Birthday, Race)
@@ -51,7 +93,7 @@ function CreateChild() {
         }
 
         try {
-            // 3. POST request to the protected endpoint
+            // POST request to the protected endpoint
             // The API instance automatically adds the parent's JWT token.
             const response = await api.post('/parent/create-child', dataToSend);
 
@@ -59,9 +101,17 @@ function CreateChild() {
             
             // Clear form after success
             setFormData({
-                username: '', email: '', password: '', confirm_password: '',
-                first_name: '', last_name: '', country: '', gender: '',
-                birthday: '', race: '',
+                username: '', 
+                email: '', 
+                password: '', 
+                confirm_password: '',
+                first_name: '', 
+                last_name: '', 
+                country: '', 
+                gender: '',
+                birthday: '', 
+                race: '', 
+                interests: [],
             });
 
         } catch (err) {
@@ -92,7 +142,7 @@ function CreateChild() {
     return (
         <div className="main-content-card">
             <h2>Create Child Account</h2>
-            <p>Use this form to register a new user account and link them to your parent profile.</p>
+            <p>Create your childs account here! Please choose at least 3 interests!</p>
 
             {/* Added 'register' class for the two-column grid layout */}
             <form onSubmit={handleSubmit} className="auth-form register">
@@ -135,8 +185,29 @@ function CreateChild() {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="gender">Gender</label>
-                    <input type="text" id="gender" name="gender" value={formData.gender} onChange={handleChange} />
+                    <label>Gender</label>
+                    <div className="radio-button-group">
+                        <label>
+                            <input 
+                                type="radio" 
+                                name="gender" 
+                                value="Male" 
+                                checked={formData.gender === 'Male'} 
+                                onChange={handleChange} 
+                            />
+                            <span>Male</span>
+                        </label>
+                        <label>
+                            <input 
+                                type="radio" 
+                                name="gender" 
+                                value="Female" 
+                                checked={formData.gender === 'Female'} 
+                                onChange={handleChange} 
+                            />
+                            <span>Female</span>
+                        </label>
+                    </div>
                 </div>
 
                 <div className="form-group">
@@ -147,6 +218,40 @@ function CreateChild() {
                 <div className="form-group">
                     <label htmlFor="race">Race</label>
                     <input type="text" id="race" name="race" value={formData.race} onChange={handleChange} />
+                </div>
+
+                <div className="form-group full-width">
+                    <label>Child's Interests (select at least 3)</label>
+                    <div className="custom-dropdown">
+                        {/* This button shows the selected items and toggles the dropdown */}
+                        <button 
+                            type="button" 
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)} 
+                            className="dropdown-button"
+                        >
+                            {formData.interests.length > 0 
+                                ? `${formData.interests.length} selected` 
+                                : "Select interests..."}
+                            <span className="dropdown-arrow">{isDropdownOpen ? '▲' : '▼'}</span>
+                        </button>
+
+                        {/* This is the dropdown panel that shows/hides */}
+                        {isDropdownOpen && (
+                            <div className="dropdown-panel">
+                                {availableInterests.map((interest) => (
+                                    <label key={interest.name} className="dropdown-item">
+                                        <input
+                                            type="checkbox"
+                                            value={interest.name}
+                                            checked={formData.interests.includes(interest.name)}
+                                            onChange={() => handleCheckboxChange(interest.name)}
+                                        />
+                                        {interest.name}
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Button spans full width */}

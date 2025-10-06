@@ -8,7 +8,7 @@ from auth.auth_handler import authenticate_user, ACCESS_TOKEN_EXPIRE_MINUTES, cr
 from db.database import get_db
 from schemas.auth import Token
 from schemas.users import ParentRegistrationRequest, ParentRegistrationResponse
-from models.users import User, SubscriptionTier
+from models.tables import User, SubscriptionTier
 
 router = APIRouter()
 
@@ -36,7 +36,7 @@ def register_user(user: ParentRegistrationRequest, db: Session = Depends(get_db)
     db.refresh(db_user)
     return db_user
 
-# login with authentication
+# login with authentication & receive access token
 @router.post("/token")
 async def login_for_access_token( form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> Token:
     user = authenticate_user(db, form_data.username, form_data.password)

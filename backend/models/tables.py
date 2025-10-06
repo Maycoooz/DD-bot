@@ -14,6 +14,47 @@ class SubscriptionTier(enum.Enum):
     PRO = "PRO"
     FREE = "FREE"
     
+class InterestsList(enum.Enum):
+    FICTION = "FICTION"
+    NONFICTION = "NONFICTION"
+    COMIC = "COMIC"
+    ART = "ART"
+    GEOGRAPHY = "GEOGRAPHY"
+    SCIENCE = "SCIENCE"
+    ANIMALS = "ANIMALS"
+    HISTORY = "HISTORY"
+    FANTASY = "FANTASY"
+    TECHNOLOGY = "TECHNOLOGY"
+    SPORTS = "SPORTS"
+    COOKING = "COOKING"
+    
+class Interest(Base):
+    __tablename__ = "interest"
+    
+    id = Column(Integer, primary_key=True, autoincrement="auto")
+    name = Column(
+        Enum(InterestsList, native_enum=False, length=50),
+        unique=True,
+        nullable=False,
+        index=True
+    )
+    
+    # Relationship to get all children with this interest
+    children = relationship(
+        "User",
+        secondary="childinterest",
+        back_populates="interests"
+    )
+
+class ChildInterest(Base):
+    __tablename__ = "childinterest"
+    
+    # Foreign key to the User table (specifically, the child)
+    child_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), primary_key=True)
+    
+    # Foreign key to the Interest table
+    interest_id = Column(Integer, ForeignKey("interest.id", ondelete="CASCADE"), primary_key=True)
+
 class Role(Base):
     __tablename__ = "role"
     
@@ -60,8 +101,7 @@ class User(Base):
     children_list = relationship(
         "User", 
         back_populates="parent_user", 
-        # This tells SQLAlchemy that the 'id' on the remote side is the one being matched.
-        remote_side=[id]  
+        remote_side=[id]
     )
     
     # 2. Relationship for getting a user's parent:
@@ -70,6 +110,13 @@ class User(Base):
         "User", 
         back_populates="children_list", 
         foreign_keys=[primary_parent_id]
+    )
+    
+    # 3. Relationship for getting a child's interests
+    interests = relationship(
+        "Interest",
+        secondary="childinterest",
+        back_populates="children"
     )
 
     

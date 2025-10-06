@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from auth.auth_handler import get_current_active_user, get_db
 from schemas.users import ParentRegistrationResponse
 from schemas.parent import ParentProfileUpdate
-from models.users import User
+from models.tables import User
 
 router = APIRouter()
 
