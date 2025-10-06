@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from auth.auth_handler import get_current_active_user, get_password_hash, get_user
 from db.database import get_db
-from schemas.parent import ChildRegistrationRequest, ChildRegistrationResponse
+from schemas.parent import ChildRegistrationRequest, ChildRegistrationResponse, ParentViewChildAccountsResponse
 from schemas.interest import InterestResponse
 from models import tables
 from typing import List
@@ -53,4 +53,14 @@ async def create_child_account(
     db.commit()
     db.refresh(new_child)
     return new_child
+
+@router.get("/my-children", response_model=List[ParentViewChildAccountsResponse])
+def get_children_for_current_parent(
+    db: Session = Depends(get_db),
+    current_parent: tables.User = Depends(get_current_active_user)
+):
+    managed_parent = db.merge(current_parent)
+    children_list = db.query(tables.User).filter(managed_parent.id == tables.User.primary_parent_id).all()
+    
+    return children_list
     

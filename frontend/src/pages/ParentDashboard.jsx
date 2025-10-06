@@ -6,7 +6,8 @@ import '../styles/ParentDashboard.css';
 // Import Placeholder Components
 import ParentHome from './ParentHome.jsx'; 
 import ParentProfile from './ParentProfile.jsx'; 
-import CreateChild from './ParentCreateChild.jsx'; 
+import CreateChild from './ParentCreateChild.jsx';
+import ViewChildAccounts from './ParentViewChildAccounts.jsx'
 
 // --- Dashboard Menu Definition ---
 const menuItems = {
@@ -80,9 +81,8 @@ function ParentDashboard() {
                 return <ParentProfile onProfileUpdate={setUserProfile} />;
             case 'createChild':
                 return <CreateChild parentProfile={userProfile} />;
-            // Add cases for other menu items as you build them
             case 'viewChildren':
-                return <div><h2>View Child Accounts</h2><p>List of children coming soon...</p></div>;
+                return <ViewChildAccounts></ViewChildAccounts>;
             case 'childChatHistory':
                 return <div><h2>Child Chat History</h2><p>Chat logs coming soon...</p></div>;
             case 'addReview':

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, field_validator, ConfigDict
 from datetime import date
 from typing import Optional, List
+from schemas.interest import InterestResponse
 
 class ChildRegistrationRequest(BaseModel):
     username: str
@@ -25,10 +26,6 @@ class ChildRegistrationRequest(BaseModel):
 
         return value
     
-class InterestResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-    name: str
-    
 class ChildRegistrationResponse(BaseModel):
     username: str
     first_name: str
@@ -45,3 +42,17 @@ class ParentProfileUpdate(BaseModel):
     gender: Optional[str] = None
     birthday: Optional[date] = None 
     race: Optional[str] = None
+    
+class ParentViewChildAccountsResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    username: str
+    first_name: str
+    last_name: str
+    
+    country: Optional[str] = None
+    gender: Optional[str] = None
+    birthday: Optional[date] = None
+    race: Optional[str] = None
+    interests: List[InterestResponse] = []
+    
