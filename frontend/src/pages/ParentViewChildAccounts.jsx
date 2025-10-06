@@ -48,6 +48,9 @@ function ViewChildAccounts() {
                             <th>Username</th>
                             <th>Name</th>
                             <th>Birthday</th>
+                            <th>Country</th>
+                            <th>Gender</th>
+                            <th>Race</th>
                             <th>Interests</th>
                             <th>Actions</th>
                         </tr>
@@ -58,6 +61,9 @@ function ViewChildAccounts() {
                                 <td>{child.username}</td>
                                 <td>{`${child.first_name} ${child.last_name}`}</td>
                                 <td>{child.birthday}</td>
+                                <td>{child.country || 'N/A'}</td>
+                                <td>{child.gender || 'N/A'}</td>
+                                <td>{child.race || 'N/A'}</td>
                                 <td>
                                     {/* This correctly maps over the interests array */}
                                     {child.interests.map(interest => interest.name).join(', ')}
