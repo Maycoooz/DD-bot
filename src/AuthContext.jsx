@@ -3,7 +3,7 @@
 import { createContext, useContext, useState, useEffect } from "react"
 
 const AuthContext = createContext()
-const API_BASE = import.meta.env.VITE_API_URL;
+const API_BASE = import.meta.env.VITE_API_URL
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch("${API_BASE}/auth/verify/", {
+        const response = await fetch(`${API_BASE}/auth/verify/`, {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -29,9 +29,8 @@ export const AuthProvider = ({ children }) => {
 
         if (response.ok) {
           const userData = await response.json()
-          // normalize to always have user_id
           setUser({
-            user_id: userData.id, // backend gives "id"
+            user_id: userData.id,
             username: userData.username,
             role: userData.role,
           })
@@ -50,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     setIsLoading(true)
     try {
-      const response = await fetch("${API_BASE}/login/", {
+      const response = await fetch(`${API_BASE}/login/`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -68,12 +67,11 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         setUser({
-          user_id: data.user_id, // always store as user_id
+          user_id: data.user_id,
           username: data.username,
           role: data.usertype,
         })
 
-        // Decide redirect path
         let redirectPath = "/login"
         switch (data.usertype) {
           case "admin":
@@ -104,7 +102,7 @@ export const AuthProvider = ({ children }) => {
   // ------------------ Logout ------------------
   const logout = async () => {
     try {
-      await fetch("${API_BASE}/logout/", {
+      await fetch(`${API_BASE}/logout/`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -120,7 +118,7 @@ export const AuthProvider = ({ children }) => {
   const signup = async (userData) => {
     setIsLoading(true)
     try {
-      const response = await fetch("${API_BASE}/signup/", {
+      const response = await fetch(`${API_BASE}/signup/`, {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
