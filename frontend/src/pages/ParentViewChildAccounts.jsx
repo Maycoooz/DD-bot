@@ -86,7 +86,7 @@ function ViewChildAccounts() {
         clearMessages();
         try {
             const childId = editFormData.id;
-            const response = await api.put(`/parent/update-child/${childId}`, editFormData);
+            const response = await api.patch(`/parent/update-child/${childId}`, editFormData);
             const updatedChildren = children.map((child) =>
                 child.id === childId ? response.data : child
             );
@@ -153,7 +153,7 @@ function ViewChildAccounts() {
                 new_password: passwordData.new_password
             };
             
-            await api.put(`/parent/change-kid-password/${childId}`, dataToSend);
+            await api.patch(`/parent/change-kid-password/${childId}`, dataToSend);
             
             setSuccess(`Password for ${childForPasswordChange.first_name} ${childForPasswordChange.last_name} has been changed successfully!`);
             handleCancelChangePassword();

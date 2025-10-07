@@ -69,7 +69,7 @@ def get_children_for_current_parent(
     return children_list
 
 # Update child account  
-@router.put("/update-child/{child_id}", response_model=ParentViewChildAccountsResponse)
+@router.patch("/update-child/{child_id}", response_model=ParentViewChildAccountsResponse)
 def update_child_profile(
     child_id: int,
     update_data: ChildProfileUpdate,
@@ -147,7 +147,7 @@ def delete_child_account(child_id: int, db: Session = Depends(get_db), current_p
     
     return status_message
 
-@router.put("/change-kid-password/{child_id}", response_model=ParentViewChildAccountsResponse)
+@router.patch("/change-kid-password/{child_id}", response_model=ParentViewChildAccountsResponse)
 def edit_child_password(child_id: int, child_data: ChangePassword, db: Session = Depends(get_db), current_parent: tables.User = Depends(get_current_active_user)):
     child_to_edit = db.query(tables.User).filter(tables.User.id == child_id).first()
     

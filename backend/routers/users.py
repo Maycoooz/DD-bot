@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from sqlalchemy.orm import Session
 
-from auth.auth_handler import get_current_active_user, get_db
-from schemas.users import ParentRegistrationResponse
+from auth.auth_handler import get_current_active_user, get_db, verify_password, get_password_hash
+from schemas.auth import StatusMessage
+from schemas.users import ParentRegistrationResponse, ChangePassword
 from schemas.parent import ParentProfileUpdate
 from models.tables import User
 
@@ -44,3 +45,46 @@ async def update_users_me(
     db.refresh(current_user)
     
     return current_user
+
+@router.patch("/users/change-password/{user_id}", response_model=StatusMessage)
+def change_password(
+    user_id: int, 
+    password_data: ChangePassword, 
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db)
+):
+    user_change_pw = db.query(User).filter(User.id == user_id).first()
+    
+    if not user_change_pw:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    if user_change_pw.id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to change this accounts password."
+        )
+    
+    if not verify_password(password_data.current_password, user_change_pw.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password provided is incorrect. Please try again."
+        )
+        
+    new_hashed_password = get_password_hash(password_data.new_password)
+    
+    user_change_pw.hashed_password = new_hashed_password
+    
+    db.add(user_change_pw)
+    db.commit()
+    db.refresh(user_change_pw)
+    
+    status_message = StatusMessage(
+        status="success",
+        message="Password updated successfully"
+    )
+    return status_message
+        
+    

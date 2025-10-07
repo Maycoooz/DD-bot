@@ -6,7 +6,7 @@ function ChildDashboard() {
 
     return (
         <div>
-            <h1>Welcome, Child {profile.first_name}!</h1>
+            <h1>Welcome {profile.first_name}!</h1>
             <p>Role: {localStorage.getItem('userRole')}</p>
             {/* Logic for the child's interface goes here */}
         </div>
