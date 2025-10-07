@@ -14,6 +14,7 @@ class ParentRegistrationRequest(BaseModel):
     race: str
     
 class ParentRegistrationResponse(BaseModel):
+    id: int
     username: str
     first_name: str
     last_name: str

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { data, useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import '../styles/ParentDashboard.css';
 
@@ -13,7 +13,7 @@ import ViewChildAccounts from './ParentViewChildAccounts.jsx'
 const menuItems = {
     General: [
         { label: 'Home', component: 'home', key: 'home' }, 
-        { label: 'My Profile', component: 'profile', key: 'profile' }
+        { label: 'My Profile', component: 'profile', key: 'profile' },
     ],
     'Child Overview': [
         { label: 'Create Child Account', component: 'createChild', key: 'createChild' },
@@ -31,9 +31,9 @@ function ParentDashboard() {
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeComponent, setActiveComponent] = useState('home'); // Default is home
-    
+     
     // ----------------------------------------------------------------------
-    // 1. DATA FETCHING (GET /users/me/)
+    // DATA FETCHING (GET /users/me/)
     // ----------------------------------------------------------------------
     useEffect(() => {
         const fetchProfile = async () => {
@@ -62,8 +62,15 @@ function ParentDashboard() {
         }
     }, []);
 
+    // --- Handler for clearing messages ---
+    const clearMessages = () => {
+        setError('');
+        setSuccess('');
+        setPasswordError('');
+    };
+
     // ----------------------------------------------------------------------
-    // 2. LOGOUT HANDLER
+    // LOGOUT HANDLER
     // ----------------------------------------------------------------------
     const handleLogout = () => {
         localStorage.clear(); // Clear all stored user data and tokens
@@ -71,7 +78,7 @@ function ParentDashboard() {
     };
 
     // ----------------------------------------------------------------------
-    // 3. RENDERING LOGIC
+    // RENDERING LOGIC
     // ----------------------------------------------------------------------
     const renderComponent = () => {
         switch (activeComponent) {

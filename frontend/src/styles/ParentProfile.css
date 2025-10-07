@@ -89,9 +89,13 @@
 }
 
 .btn-secondary {
-    background-color: #f0f0f0;
-    color: #333;
-    border: 1px solid #ccc;
+    background-color: #6c757d; /* Darker grey background */
+    color: white; /* White text */
+    border: none; /* Removed border for a flatter look */
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268; /* Slightly darker grey on hover */
 }
 
 /* --- MESSAGING --- */
@@ -112,4 +116,29 @@
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
+}
+
+/* --- Tier Status Section --- */
+.tier-status {
+    display: flex;
+    flex-direction: row; 
+    align-items: center; 
+    justify-content: flex-start; 
+    gap: 20px; 
+}
+
+.btn-upgrade {
+    background-color: #28a745; 
+    color: white;
+    border: none;
+    padding: 8px 18px; 
+    font-size: 0.9em; 
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-upgrade:hover {
+    background-color: #218838; 
 }
