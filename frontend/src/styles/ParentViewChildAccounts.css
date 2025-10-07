@@ -1,166 +1,129 @@
-/* ViewChildAccounts.css */
-
-/* --- General Table Styles (assuming you have these) --- */
-.child-accounts-table {
+/* --- Core Layout & Page Container --- */
+.page-container {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+    max-width: 900px;
+    margin: 2rem auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-.child-accounts-table th,
-.child-accounts-table td {
-    border: 1px solid #ddd;
-    padding: 8px 12px;
-    text-align: left;
-    vertical-align: middle;
+.page-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
 }
 
-.child-accounts-table th {
-    background-color: #f2f2f2;
-    font-weight: bold;
+.page-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
     color: #333;
 }
 
-/* --- Base Input Styling (apply to both display and edit inputs) --- */
-.child-accounts-table input[type="text"],
-.child-accounts-table input[type="date"] {
-    width: 100%;
-    padding: 6px 8px;
+/* --- Child Account Card --- */
+.child-account-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden; /* Ensures child elements respect the border radius */
+}
+
+.child-account-card h3 {
+    margin: 0;
+    padding: 16px 20px;
+    font-size: 1.25rem;
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* --- Profile Details Grid --- */
+.profile-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-size: 0.875rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"] {
+    padding: 10px;
     border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Include padding and border in the element's total width and height */
-    font-size: 0.9em;
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: #f8f9fa; /* Read-only background */
 }
 
-.child-accounts-table input[type="text"]:focus,
-.child-accounts-table input[type="date"]:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 0 0.1rem rgba(0, 123, 255, 0.25);
+/* Specific style for inputs in edit mode */
+.profile-details.editing .form-group input {
+    background-color: #ffffff;
 }
 
-/* --- Edit Mode Specific Styling --- */
-
-/* Highlight the row in edit mode */
-.child-accounts-table tr.editing-row {
-    background-color: #e8f5e9; /* Light green background */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow for depth */
-}
-
-/* Style for inputs specifically in edit mode (override if needed) */
-.child-accounts-table tr.editing-row input {
-    background-color: #ffffff; /* Ensure white background for inputs */
-}
-
-/* --- Action Buttons (Edit, Delete, Save, Cancel) --- */
-.action-button {
-    padding: 6px 12px;
-    margin-right: 5px; /* Space between buttons */
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85em;
-    transition: background-color 0.2s ease;
-}
-
-.action-button:hover {
-    opacity: 0.9;
-}
-
-/* Specific button styles */
-.action-button.edit {
-    background-color: #007bff; /* Blue */
-    color: white;
-}
-
-.action-button.edit:hover {
-    background-color: #0056b3;
-}
-
-.action-button.delete {
-    background-color: #dc3545; /* Red */
-    color: white;
-}
-
-.action-button.delete:hover {
-    background-color: #c82333;
-}
-
-.action-button.save {
-    background-color: #28a745; /* Green */
-    color: white;
-    font-weight: bold;
-}
-
-.action-button.save:hover {
-    background-color: #218838;
-}
-
-.action-button.cancel {
-    background-color: #6c757d; /* Gray */
-    color: white;
-}
-
-.action-button.cancel:hover {
-    background-color: #5a6268;
-}
-
-/* --- Interests Dropdown (reusing AuthForm.css classes for consistency, but if you want specific table styles, define them here) --- */
-/* (Assuming you already have styles for .custom-dropdown, .dropdown-button, .dropdown-panel, .dropdown-item from AuthForm.css) */
-/* Example for AuthForm.css styles (if not already there, please add): */
-
-.custom-dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.dropdown-button {
-    background-color: #f0f0f0;
+.interests-display {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    min-height: 40px; /* Match input height */
+    font-size: 0.95rem;
     color: #333;
-    padding: 6px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.85em;
-    min-width: 100px;
+}
+
+/* --- Action Buttons --- */
+.action-buttons {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    background-color: #f9fafb;
+    border-top: 1px solid #e0e0e0;
 }
 
-.dropdown-button:hover {
-    background-color: #e9e9e9;
-}
-
-.dropdown-panel {
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    border-radius: 4px;
-    padding: 8px 0;
-    max-height: 200px; /* Limit height */
-    overflow-y: auto;  /* Enable scrolling */
-}
-
-.dropdown-item {
-    display: flex;
-    align-items: center;
-    padding: 4px 12px;
+.btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid transparent;
     cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
-.dropdown-item:hover {
-    background-color: #f1f1f1;
-}
+.edit-btn { background-color: #3b82f6; color: white; }
+.edit-btn:hover { background-color: #2563eb; }
 
-.dropdown-item input[type="checkbox"] {
-    margin-right: 8px;
-    cursor: pointer;
-}
+.password-btn { background-color: #6b7280; color: white; }
+.password-btn:hover { background-color: #4b5563; }
 
-/* For Confirm delete child accounts */
+.delete-btn { background-color: #ef4444; color: white; }
+.delete-btn:hover { background-color: #dc2626; }
+
+.save-btn { background-color: #22c55e; color: white; }
+.save-btn:hover { background-color: #16a34a; }
+
+.cancel-btn { background-color: #a1a1aa; color: white; }
+.cancel-btn:hover { background-color: #71717a; }
+
+.delete-btn-confirm { background-color: #dc2626; color: white; }
+.delete-btn-confirm:hover { background-color: #b91c1c; }
+
+
+/* --- MODAL STYLES --- */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -176,27 +139,74 @@
 
 .modal-content {
     background-color: white;
-    padding: 25px 30px;
-    border-radius: 8px;
+    padding: 30px 40px;
+    border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     width: 90%;
-    max-width: 400px;
+    max-width: 450px;
     text-align: center;
 }
 
 .modal-content h3 {
     margin-top: 0;
+    margin-bottom: 8px;
     color: #333;
+    font-size: 1.5rem;
 }
 
 .modal-content p {
     margin-bottom: 25px;
-    color: #555;
+    color: #666;
     line-height: 1.5;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-form .form-group {
+    text-align: left;
+}
+
+.modal-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
 }
 
 .modal-actions {
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 15px;
+    margin-top: 30px;
+}
+
+/* --- MESSAGES (Error/Success) --- */
+.form-message {
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 0 0 20px 0;
+}
+.form-message.error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+.form-message.success {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+/* Simple Dropdown Styles */
+.custom-dropdown .dropdown-button {
+    text-align: left;
+    background-color: white;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
 }

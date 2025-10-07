@@ -2,9 +2,10 @@ from datetime import date
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from auth.auth_handler import get_current_active_user, get_password_hash, get_user
+from auth.auth_handler import get_current_active_user, get_password_hash, get_user, verify_password
 from db.database import get_db
 from schemas.parent import ChildRegistrationRequest, ChildRegistrationResponse, ParentViewChildAccountsResponse, ChildProfileUpdate
+from schemas.users import ChangePassword
 from schemas.interest import InterestResponse
 from schemas.auth import StatusMessage
 from models import tables
@@ -145,3 +146,33 @@ def delete_child_account(child_id: int, db: Session = Depends(get_db), current_p
     )
     
     return status_message
+
+@router.put("/change-kid-password/{child_id}", response_model=ParentViewChildAccountsResponse)
+def edit_child_password(child_id: int, child_data: ChangePassword, db: Session = Depends(get_db), current_parent: tables.User = Depends(get_current_active_user)):
+    child_to_edit = db.query(tables.User).filter(tables.User.id == child_id).first()
+    
+    if not child_to_edit:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Child not found"
+        )
+        
+    if child_to_edit.primary_parent_id != current_parent.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to edit this childs password."
+        )
+        
+    if not verify_password(child_data.current_password, child_to_edit.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The current password provided is incorrect."
+        )
+        
+    child_to_edit.hashed_password = get_password_hash(child_data.new_password)
+    db.add(child_to_edit)
+    db.commit()
+    db.refresh(child_to_edit)
+    return child_to_edit
+    
+    
