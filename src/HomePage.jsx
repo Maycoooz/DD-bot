@@ -34,7 +34,7 @@ const HeroSection = () => (
       <div className="announcement">
         🎉 DD Bot-AI chatbot for personalized book and video recommendations for children
       </div>
-      <h1 className="hero-title">DD Botts</h1>
+      <h1 className="hero-title">DD Bot</h1>
       <p className="hero-subtitle">Discover Amazing Stories & Videos</p>
 
       <div className="feature-cards">
