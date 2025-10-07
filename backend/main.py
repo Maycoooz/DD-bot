@@ -29,8 +29,8 @@ def seed_roles():
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    seed_roles()
     create_db_and_tables()
+    seed_roles()
     yield
 
 app = FastAPI(lifespan=lifespan)
