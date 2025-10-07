@@ -29,7 +29,7 @@ mdurl==0.1.2
 mysql-connector-python==9.4.0
 orjson==3.11.2
 passlib==1.7.4
-psycopg2-binary==2.9.9
+psycopg[binary,pool]==3.2.1
 pyasn1==0.6.1
 pycparser==2.22
 pydantic==2.11.7
@@ -63,4 +63,5 @@ uvicorn==0.35.0
 watchfiles==1.1.0
 webencodings==0.5.1
 websockets==15.0.1
+
 
