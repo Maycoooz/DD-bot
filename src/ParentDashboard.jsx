@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import logoImg from "./assets/logo.png";
 
-const API_BASE = "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 // ------------------ Popup Component ------------------
 const DeletePopup = ({ isOpen, message, onClose, onConfirm, isSuccess }) => {
