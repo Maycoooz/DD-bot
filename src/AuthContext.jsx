@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useEffect } from "react"
 
 const AuthContext = createContext()
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export const useAuth = () => {
   const context = useContext(AuthContext)
@@ -20,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuthStatus = async () => {
       try {
-        const response = await fetch("/api/auth/verify/", {
+        const response = await fetch("${API_BASE}/auth/verify/", {
           method: "GET",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
@@ -49,7 +50,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     setIsLoading(true)
     try {
-      const response = await fetch("/api/login/", {
+      const response = await fetch("${API_BASE}/login/", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -103,7 +104,7 @@ export const AuthProvider = ({ children }) => {
   // ------------------ Logout ------------------
   const logout = async () => {
     try {
-      await fetch("/api/logout/", {
+      await fetch("${API_BASE}/logout/", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -119,7 +120,7 @@ export const AuthProvider = ({ children }) => {
   const signup = async (userData) => {
     setIsLoading(true)
     try {
-      const response = await fetch("/api/signup/", {
+      const response = await fetch("${API_BASE}/signup/", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
