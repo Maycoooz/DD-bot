@@ -21,6 +21,7 @@ app.include_router(librarian.router)
 origins = [
     "http://localhost:5173",
     "http://localhost:8000"
+    "https://ddbot-ochre.vercel.app/"
 ]
 
 app.add_middleware(
