@@ -2,6 +2,8 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import logoImg from "./assets/logo.png"
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
 const Header = () => (
   <header className="header">
     <div className="header-content">
@@ -132,7 +134,7 @@ const TestimonialsSection = () => {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const response = await fetch('/api/get-reviews/')
+        const response = await fetch('${API_BASE}/get-reviews/')
         if (!response.ok) {
           throw new Error('Failed to fetch testimonials')
         }
