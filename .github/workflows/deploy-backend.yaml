@@ -1,0 +1,40 @@
+name: Deploy Backend to Elastic Beanstalk
+
+on:
+  push:
+    branches:
+      - main           # change to your branch if needed
+    paths:
+      - 'backend/**'
+      - 'requirements.txt'
+      - 'Procfile'
+      - '.ebextensions/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Elastic Beanstalk CLI
+        run: pip install awsebcli
+
+      - name: Initialize EB
+        run: |
+          eb init ddbot-api --platform "Python 3.11" --region ap-southeast-1
+          eb use ddbot-api
+
+      - name: Deploy to Elastic Beanstalk
+        run: eb deploy ddbot-api
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
