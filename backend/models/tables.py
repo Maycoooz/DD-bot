@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, JSON, DATE, Enum, TEXT, CheckConstraint
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship, C
+from sqlalchemy.orm import relationship
 from db.database import Base
 import enum
 
@@ -121,6 +121,9 @@ class User(Base):
     ) 
     
     role_id = Column(Integer, ForeignKey("role.id"), nullable=False)
+    
+    is_verified = Column(Boolean, default=False, nullable=False, index=True)
+    
     role = relationship("Role", back_populates="users")
     
     # Foreign Key that points to the User's own table to identify their parent
@@ -150,12 +153,14 @@ class User(Base):
         back_populates="children"
     )
     
+    '''
     # 4. Relationship for getting user's reviews
     reviews = relationship(
         "Review",
         back_populates="user",
         cascade="all, delete-orphan"
     )
+    '''
 
     
     

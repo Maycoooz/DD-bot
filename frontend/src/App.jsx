@@ -1,10 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
-// Create these files next:
+
 import ParentDashboard from './pages/ParentDashboard'; 
 import ChildDashboard from './pages/ChildDashboard';
 import NotFound from './pages/NotFound'; // Placeholder for 404
+import VerifyEmailPage from './pages/VerifyEmail';
 
 // Utility function to check if the user is logged in
 const isAuthenticated = () => {
@@ -24,6 +25,7 @@ function App() {
                 {/* Public Route */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/verify-email" element={<VerifyEmailPage />} />
                 
                 {/* Protected Routes */}
                 <Route path="/parent-dashboard" element={<PrivateRoute element={<ParentDashboard />} />} />

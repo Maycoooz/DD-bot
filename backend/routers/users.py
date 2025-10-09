@@ -4,12 +4,12 @@ from sqlalchemy.orm import Session
 
 from auth.auth_handler import get_current_active_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
-from schemas.users import ParentRegistrationResponse, ChangePassword, MakeReview
+from schemas.users import ParentRegistrationResponse, ChangePassword
 from schemas.parent import ParentProfileUpdate
 from models.tables import User
 
 router = APIRouter(
-    tags="Users"
+    tags=["Users"]
 )
 
 @router.get("/users/me/", response_model=ParentRegistrationResponse)

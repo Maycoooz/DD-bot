@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../api/axiosConfig'; // Use the custom API instance
-import { useNavigate, Link } from 'react-router-dom'; // CORRECTED: Removed 'data'
+import { useNavigate, Link } from 'react-router-dom'; 
 import '../styles/AuthForm.css';
 
 function Register() {
@@ -57,12 +57,7 @@ function Register() {
             // 3. POST request to the registration endpoint
             const response = await api.post('/auth/register', dataToSend);
 
-            setSuccess('Registration successful! Redirecting to login...');
-            
-            // 4. Redirect to login after a short delay
-            setTimeout(() => {
-                navigate('/login');
-            }, 2000);
+            setSuccess(response.data.message);
 
         } catch (err) {
              console.error("Registration Error Response:", err.response); 
