@@ -23,6 +23,8 @@ function Login() {
                 navigate('/parent-dashboard');
             } else if (role === 'CHILD') {
                 navigate('/child-dashboard');
+            } else if (role === 'ADMIN') {
+                navigate('/admin-dashboard');
             } else {
                 navigate('/');
             }

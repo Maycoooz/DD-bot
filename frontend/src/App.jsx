@@ -4,6 +4,7 @@ import Register from './pages/Register';
 
 import ParentDashboard from './pages/ParentDashboard'; 
 import ChildDashboard from './pages/ChildDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import NotFound from './pages/NotFound'; // Placeholder for 404
 import VerifyEmailPage from './pages/VerifyEmail';
 
@@ -30,6 +31,7 @@ function App() {
                 {/* Protected Routes */}
                 <Route path="/parent-dashboard" element={<PrivateRoute element={<ParentDashboard />} />} />
                 <Route path="/child-dashboard" element={<PrivateRoute element={<ChildDashboard />} />} />
+                <Route path="/admin-dashboard" element={<PrivateRoute element={<AdminDashboard />} />} />
                 
                 {/* Default Routes */}
                 <Route path="/" element={<Navigate to="/login" />} />
