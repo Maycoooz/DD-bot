@@ -1,20 +1,17 @@
 version: 0.2
-
 phases:
   install:
     runtime-versions:
       nodejs: 18
     commands:
-      - npm ci
+      - npm install
   build:
     commands:
       - npm run build
-
 artifacts:
-  base-directory: dist   # if you use Create React App, change to 'build'
+  base-directory: dist  # use 'build' if you're using Create React App
   files:
     - '**/*'
-
 cache:
   paths:
     - node_modules/**/*
