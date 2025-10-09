@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 
 from auth.auth_handler import authenticate_user, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, get_user, get_password_hash, create_verification_token, send_verification_email
 from db.database import get_db
-from schemas.auth import Token
-from schemas.users import ParentRegistrationRequest, ParentRegistrationResponse
+from schemas.auth import TokenWithProfile
+from schemas.users import ParentRegistrationRequest
 from models.tables import User, SubscriptionTier
 
 load_dotenv()
@@ -75,20 +75,24 @@ def verify_email(token: str, db: Session = Depends(get_db)):
     return {"message": "Email verified successfully. You can now log in."}
 
 # login with authentication & receive access token
-@router.post("/token")
-async def login_for_access_token( form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)) -> Token:
+@router.post("/token", response_model=TokenWithProfile) # 1. Use the new response model
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), 
+    db: Session = Depends(get_db)
+):
     user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
         )
         
     if not user.is_verified:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please verify your email before logging in.")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="Please verify your email before logging in."
+        )
         
-    # Get role information as well
     user_role_name = user.role.name.value
         
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -96,8 +100,11 @@ async def login_for_access_token( form_data: OAuth2PasswordRequestForm = Depends
         data={"sub": user.username, "role": user_role_name}, 
         expires_delta=access_token_expires
     )
-    return Token(
+    
+    # 2. Return the new object with token, role, and the full user profile
+    return TokenWithProfile(
         access_token=access_token, 
         token_type="bearer",
-        user_role=user_role_name
+        user_role=user_role_name,
+        profile=user 
     )

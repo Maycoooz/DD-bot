@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict
 from datetime import date
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class ParentRegistrationRequest(BaseModel):
     username: str
@@ -18,11 +18,13 @@ class ParentRegistrationResponse(BaseModel):
     username: str
     first_name: str
     last_name: str
-    email: str
+    email: Optional[str] = None
     country: str
     gender: str
     birthday: date
     race: str
+    
+    model_config = ConfigDict(from_attributes=True)
     
 class UserInDB(ParentRegistrationResponse):
     hashed_password: str
