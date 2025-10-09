@@ -9,10 +9,12 @@ phases:
   build:
     commands:
       - npm run build
+
 artifacts:
-  base-directory: dist    # use 'build' if you're using Create React App
+  base-directory: dist   # if you use Create React App, change to 'build'
   files:
     - '**/*'
+
 cache:
   paths:
     - node_modules/**/*
