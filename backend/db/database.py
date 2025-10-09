@@ -98,11 +98,11 @@ def insert_default_interests():
     finally:
         db.close()
         
-
+'''
 def insert_default_admin():
     print("Inserting default admin...")
-    from models.tables import User
-    admin_user = User(
+    from models import tables
+    admin_user = tables.User(
         username="admin",
         hashed_password=get_password_hash("password123"),
         first_name="Administrator",
@@ -114,7 +114,7 @@ def insert_default_admin():
     db: Session = SessionLocal()
     
     try:
-        exists = db.query(User).filter(User.username == admin_user.username).first()
+        exists = db.query(tables.User).filter(tables.User.username == admin_user.username).first()
         
         if not exists:
             db.add(admin_user)
@@ -128,8 +128,8 @@ def insert_default_admin():
         print(f"An error has occured during default admin insertion: {e}")
     finally:
         db.close()
-    
-              
+'''
+ 
 def create_tables():
     
     from models import tables
@@ -143,5 +143,5 @@ def create_tables_and_seed_it():
     create_tables()
     insert_default_roles()
     insert_default_interests()
-    insert_default_admin()
+
     
