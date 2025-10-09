@@ -4,17 +4,13 @@ from sqlalchemy.orm import Session
 
 from auth.auth_handler import get_current_active_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
-from schemas.users import ParentRegistrationResponse, ChangePassword
+from schemas.users import ParentRegistrationResponse, ChangePassword, MakeReview
 from schemas.parent import ParentProfileUpdate
 from models.tables import User
 
-router = APIRouter()
-
-# Define fields that are immutable for ALL users via this endpoint
-IMMUTABLE_FIELDS = [
-    'id', 'username', 'email', 'role_id', 'hashed_password', 
-    'tier', 'primary_parent_id', 'children_list', 'parent_user'
-]
+router = APIRouter(
+    tags="Users"
+)
 
 @router.get("/users/me/", response_model=ParentRegistrationResponse)
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
@@ -86,5 +82,13 @@ def change_password(
         message="Password updated successfully"
     )
     return status_message
+
+@router.post("/users/make-review/{user_id}", response_model=StatusMessage)
+def make_review():
+    pass
+
+@router.delete("/users/delete-review/{user_id}", response_model=StatusMessage)
+def delete_review():
+    pass
         
     

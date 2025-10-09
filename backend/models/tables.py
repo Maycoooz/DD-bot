@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, JSON, DATE, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, JSON, DATE, Enum, TEXT, CheckConstraint
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, C
 from db.database import Base
 import enum
 
@@ -28,6 +28,37 @@ class InterestsList(enum.Enum):
     SPORTS = "SPORTS"
     COOKING = "COOKING"
     
+''' 
+class ReviewType(enum.Enum):
+    BOOK = "BOOK"
+    VIDEO = "VIDEO"
+    APP = "APP"
+
+
+class Review(Base):
+    __tablename__ = "review"
+    
+    id = Column(Integer, primary_key=True, autoincrement="auto")
+    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
+    review = Column(TEXT, nullable=False)
+    stars = Column(Integer, CheckConstraint('stars >= 1 AND stars <=5'),nullable=False)
+    
+    # -------------------- TODO ------------------------
+    # book_id = Column()
+    # video_id = Column()
+    # --------------------------------------------------
+    
+    review_type = Column(
+        Enum(ReviewType, native_enum=False, length=50),
+        nullable=False,
+        index=True
+    )
+    
+    created_at = Column(DateTime, server_default=func.now())
+    
+    user = relationship("User", back_populates="reviews")
+'''
+
 class Interest(Base):
     __tablename__ = "interest"
     
@@ -50,10 +81,10 @@ class ChildInterest(Base):
     __tablename__ = "childinterest"
     
     # Foreign key to the User table (specifically, the child)
-    child_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), primary_key=True)
+    child_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True)
     
     # Foreign key to the Interest table
-    interest_id = Column(Integer, ForeignKey("interest.id", ondelete="CASCADE"), primary_key=True)
+    interest_id = Column(Integer, ForeignKey("interest.id", ondelete="CASCADE", onupdate="CASCADE"), primary_key=True)
 
 class Role(Base):
     __tablename__ = "role"
@@ -117,6 +148,13 @@ class User(Base):
         "Interest",
         secondary="childinterest",
         back_populates="children"
+    )
+    
+    # 4. Relationship for getting user's reviews
+    reviews = relationship(
+        "Review",
+        back_populates="user",
+        cascade="all, delete-orphan"
     )
 
     
