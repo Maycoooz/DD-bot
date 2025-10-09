@@ -18,7 +18,7 @@ class ParentRegistrationResponse(BaseModel):
     username: str
     first_name: str
     last_name: str
-    email: str
+    email: Optional[str] = None
     country: str
     gender: str
     birthday: date

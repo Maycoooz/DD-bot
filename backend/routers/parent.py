@@ -48,7 +48,8 @@ async def create_child_account(
         birthday=child_data.birthday,
         race=child_data.race,
         role_id=3, # Child role PK
-        primary_parent_id=current_parent_user.id # link parent to child via parents id
+        primary_parent_id=current_parent_user.id, # link parent to child via parents id
+        is_verified=1
     )
     new_child.interests = interests_from_db
     
