@@ -111,4 +111,5 @@ def create_tables_and_seed_it():
     insert_default_roles()
     insert_default_interests()
 
+
     
