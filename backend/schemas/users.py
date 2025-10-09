@@ -19,10 +19,10 @@ class ParentRegistrationResponse(BaseModel):
     first_name: str
     last_name: str
     email: Optional[str] = None
-    country: str
-    gender: str
-    birthday: date
-    race: str
+    country: Optional[str] = None
+    gender: Optional[str] = None
+    birthday: Optional[date] = None
+    race: Optional[str] = None
     
 class UserInDB(ParentRegistrationResponse):
     hashed_password: str

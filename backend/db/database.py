@@ -4,6 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from dotenv import load_dotenv
 from passlib.context import CryptContext
 
+from passlib.context import CryptContext
+
 
 import os
 load_dotenv()
@@ -100,6 +102,7 @@ def insert_default_interests():
         db.close()
         
 
+
 def insert_default_admin():
     print("Inserting default admin...")
     from models.tables import User
@@ -109,10 +112,19 @@ def insert_default_admin():
     password_hashed = pwd_context.hash(DEFAULT_ADMIN_PASSWORD)
     
     admin_user = User(
+    from models.tables import User
+    
+    DEFAULT_ADMIN_PASSWORD = os.getenv("DEFAULT_ADMIN_PASSWORD")
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    password_hashed = pwd_context.hash(DEFAULT_ADMIN_PASSWORD)
+    
+    admin_user = User(
         username="admin",
+        hashed_password=password_hashed,
         hashed_password=password_hashed,
         first_name="Administrator",
         last_name="01",
+        role_id = 1, # admin role id
         role_id = 1, # admin role id
         is_verified = True
     )
@@ -121,10 +133,12 @@ def insert_default_admin():
     
     try:
         exists = db.query(User).filter(User.username == admin_user.username).first()
+        exists = db.query(User).filter(User.username == admin_user.username).first()
         
         if not exists:
             db.add(admin_user)
         else:
+            print(f"Default admin already in database: {admin_user.username}")
             print(f"Default admin already in database: {admin_user.username}")
         
         db.commit()  
@@ -134,6 +148,7 @@ def insert_default_admin():
         print(f"An error has occured during default admin insertion: {e}")
     finally:
         db.close()
+
 
  
 def create_tables():
