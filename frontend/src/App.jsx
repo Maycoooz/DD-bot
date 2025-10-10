@@ -8,60 +8,32 @@ import AdminDashboard from './pages/AdminDashboard';
 import LibrarianDashboard from './pages/LibrarianDashboard';
 import NotFound from './pages/NotFound';
 import VerifyEmailPage from './pages/VerifyEmail';
+import LandingPage from './pages/LandingPage';
 
-// 1. Expanded utility function to get user data
+// Utility function to get user authentication status and role
 const getCurrentUser = () => {
     const token = localStorage.getItem('accessToken');
     const role = localStorage.getItem('userRole');
-    
-    if (!token || !role) {
-        return null; // Not authenticated
-    }
+    if (!token || !role) return null;
     return { token, role };
 };
 
-// 2. A more powerful ProtectedRoute component
+// Updated ProtectedRoute component
 const ProtectedRoute = ({ element, allowedRoles }) => {
     const currentUser = getCurrentUser();
 
-    // If user is not logged in, redirect to login
+    // If user is not logged in, redirect to the landing page
     if (!currentUser) {
-        return <Navigate to="/login" />;
+        return <Navigate to="/LandingPage" />;
     }
     
-    // If the route requires specific roles and the user's role is not included,
-    // redirect them to a default or unauthorized page.
+    // If user's role is not allowed, redirect to the main landing page
     if (allowedRoles && !allowedRoles.includes(currentUser.role)) {
-        // You could redirect to a dedicated 'Unauthorized' page or their own dashboard
-        return <Navigate to="/" />; 
+        return <Navigate to="/LandingPage" />; 
     }
 
     return element;
 };
-
-// 3. A component to handle the initial redirect logic
-const HomeRedirect = () => {
-    const currentUser = getCurrentUser();
-    
-    if (!currentUser) {
-        return <Navigate to="/login" />;
-    }
-
-    // Redirect logged-in users to their respective dashboards
-    switch (currentUser.role) {
-        case 'PARENT':
-            return <Navigate to="/parent-dashboard" />;
-        case 'CHILD':
-            return <Navigate to="/child-dashboard" />;
-        case 'ADMIN':
-            return <Navigate to="/admin-dashboard" />;
-        case 'LIBRARIAN':
-            return <Navigate to="/librarian-dashboard" />;
-        default:
-            return <Navigate to="/login" />;
-    }
-};
-
 
 function App() {
     return (
@@ -72,16 +44,18 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/librarianregister" element={<RegisterLibrarian />} />
                 <Route path="/verify-email" element={<VerifyEmailPage />} />
-
                 
-                {/* 4. Protected Routes with role-based access */}
+                {/* This is now the main entry point for everyone */}
+                <Route path="/LandingPage" element={<LandingPage />} />
+                
+                {/* Protected Routes */}
                 <Route path="/parent-dashboard" element={<ProtectedRoute element={<ParentDashboard />} allowedRoles={['PARENT']} />} />
                 <Route path="/child-dashboard" element={<ProtectedRoute element={<ChildDashboard />} allowedRoles={['CHILD']} />} />
                 <Route path="/admin-dashboard" element={<ProtectedRoute element={<AdminDashboard />} allowedRoles={['ADMIN']} />} />
                 <Route path="/librarian-dashboard" element={<ProtectedRoute element={<LibrarianDashboard />} allowedRoles={['LIBRARIAN']} />} />
                 
                 {/* Default Routes */}
-                <Route path="/" element={<HomeRedirect />} />
+                <Route path="/" element={<Navigate to="/LandingPage" />} />
                 <Route path="*" element={<NotFound />} />
             </Routes>
         </Router>
