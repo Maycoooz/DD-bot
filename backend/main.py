@@ -8,8 +8,10 @@ from routers import auth, users, parent, admin
 
 @asynccontextmanager
 async def lifespan_context(app: FastAPI):
-
-    create_tables_and_seed_it()
+    try:
+        create_tables_and_seed_it()
+    except Exception as e:
+        print(f"Error during startup: {e}")
     yield
     
 

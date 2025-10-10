@@ -1,9 +1,11 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import RegisterLibrarian from './pages/LibrarianRegister';
 import ParentDashboard from './pages/ParentDashboard'; 
 import ChildDashboard from './pages/ChildDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import LibrarianDashboard from './pages/LibrarianDashboard';
 import NotFound from './pages/NotFound';
 import VerifyEmailPage from './pages/VerifyEmail';
 
@@ -53,6 +55,8 @@ const HomeRedirect = () => {
             return <Navigate to="/child-dashboard" />;
         case 'ADMIN':
             return <Navigate to="/admin-dashboard" />;
+        case 'LIBRARIAN':
+            return <Navigate to="/librarian-dashboard" />;
         default:
             return <Navigate to="/login" />;
     }
@@ -66,12 +70,15 @@ function App() {
                 {/* Public Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                <Route path="/librarianregister" element={<RegisterLibrarian />} />
                 <Route path="/verify-email" element={<VerifyEmailPage />} />
+
                 
                 {/* 4. Protected Routes with role-based access */}
                 <Route path="/parent-dashboard" element={<ProtectedRoute element={<ParentDashboard />} allowedRoles={['PARENT']} />} />
                 <Route path="/child-dashboard" element={<ProtectedRoute element={<ChildDashboard />} allowedRoles={['CHILD']} />} />
                 <Route path="/admin-dashboard" element={<ProtectedRoute element={<AdminDashboard />} allowedRoles={['ADMIN']} />} />
+                <Route path="/librarian-dashboard" element={<ProtectedRoute element={<LibrarianDashboard />} allowedRoles={['LIBRARIAN']} />} />
                 
                 {/* Default Routes */}
                 <Route path="/" element={<HomeRedirect />} />

@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from auth.auth_handler import authenticate_user, ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token, get_user, get_password_hash, create_verification_token, send_verification_email
 from db.database import get_db
 from schemas.auth import Token
+from schemas.librarian import LibrarianRegistrationRequest
 from schemas.users import ParentRegistrationRequest, ParentRegistrationResponse
 from models.tables import User, SubscriptionTier
 
@@ -50,6 +51,45 @@ def register_user(user: ParentRegistrationRequest, background_tasks: BackgroundT
     background_tasks.add_task(send_verification_email, db_user.email, token)
     
     return {"message": "Registration successful. Please check your email to verify you account."}
+
+@router.post("/register-librarian")
+async def register_librarian(
+    user: LibrarianRegistrationRequest, 
+    background_tasks: BackgroundTasks, 
+    db: Session = Depends(get_db)
+):
+    # Check if username or email already exists
+    if db.query(User).filter(User.username == user.username).first():
+        raise HTTPException(status_code=400, detail="Username already registered.")
+    if db.query(User).filter(User.email == user.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered.")
+    
+    hashed_password = get_password_hash(user.password)
+    
+    db_user = User(
+        username=user.username,
+        email=user.email,
+        hashed_password=hashed_password,
+        first_name=user.first_name,
+        last_name=user.last_name,
+        country=user.country,
+        gender=user.gender,
+        birthday=user.birthday,
+        race=user.race,
+        role_id=4,  # Assuming LIBRARIAN role ID is 4
+        is_verified=False
+    )
+    
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    
+    # Send verification email in the background
+    token = create_verification_token(data={"sub": db_user.email})
+    background_tasks.add_task(send_verification_email, db_user.email, token)
+    
+    return {"message": "Librarian registration successful. Please check your email to verify your account."}
+
 
 # verify email 
 @router.get("/verify")

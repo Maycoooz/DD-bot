@@ -18,7 +18,7 @@ function AdminManageUsersView({ user, allUsers, onClose, onDeleteUser }) {
             <div className="user-detail-modal">
                 <div className="modal-header">
                     <button onClick={onClose} className="btn-back">Back</button>
-                    <h3>View User ({user.role.name})</h3>
+                    <h3>User: {user.role.name}</h3>
                     <span>Status: {user.is_verified ? 'Active' : 'Pending'}</span>
                 </div>
 

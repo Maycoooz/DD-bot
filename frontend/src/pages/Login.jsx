@@ -108,6 +108,10 @@ function Login() {
                 <p className="link-text">
                     Don't have an account? <Link to="/register">Register here</Link>
                 </p>
+
+                <p className="link-text secondary-link">
+                    Want to help us curate books and videos? <Link to="/librarianregister">Register here</Link>
+                </p>
             </form>
         </div>
     );
