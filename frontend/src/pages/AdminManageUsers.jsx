@@ -2,23 +2,23 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import '../styles/AdminManageUsers.css';
+import AdminManageUsersView from './AdminManageUsersView';
 
 function AdminManageUsers() {
     const navigate = useNavigate();
     
-    // --- STATE MANAGEMENT ---
     const [allUsers, setAllUsers] = useState([]);
     const [stats, setStats] = useState({ totalUsers: 0, totalParents: 0, totalKids: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [viewingUser, setViewingUser] = useState(null);
 
-    // --- DATA FETCHING ---
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await api.get('/admin/viewAllUsers');
-                // Corrected to match the key from your last backend example
+                const response = await api.get('/admin/view-all-users');
                 const { parent_and_kid_users, total_users, total_parents, total_kids } = response.data;
                 setAllUsers(parent_and_kid_users || []);
                 setStats({
@@ -36,7 +36,6 @@ function AdminManageUsers() {
         fetchUsers();
     }, []);
 
-    // --- USER FILTERING LOGIC ---
     const filteredUsers = useMemo(() => {
         if (!searchTerm) {
             return allUsers;
@@ -46,12 +45,36 @@ function AdminManageUsers() {
         );
     }, [allUsers, searchTerm]);
 
+    const handleDeleteUser = async (userToDelete) => {
+        try {
+            const response = await api.delete(`/admin/delete-user/${userToDelete.id}`);
+            
+            let updatedUsers = allUsers.filter(u => u.id !== userToDelete.id);
+            if (userToDelete.role.name === 'PARENT') {
+                updatedUsers = updatedUsers.filter(u => u.primary_parent_id !== userToDelete.id);
+            }
+            
+            setAllUsers(updatedUsers);
+            setSuccess(response.data.message);
+            setError('');
+            setViewingUser(null);
+
+        } catch (err) {
+            console.error("Failed to delete user:", err);
+            setError(err.response?.data?.detail || "Failed to delete the account.");
+            setSuccess('');
+            setViewingUser(null);
+        }
+    };
+
     if (loading) return <div className="loading-state">Loading user data...</div>;
-    if (error) return <div className="error-state">{error}</div>;
 
     return (
         <>
-            <h2>Manage Users</h2>
+            <h1>Manage Users</h1>
+            
+            {error && <div className="error-state">{error}</div>}
+            {success && <div className="success-state">{success}</div>}
 
             <div className="stats-and-search">
                 <div className="stats-summary">
@@ -74,7 +97,6 @@ function AdminManageUsers() {
                     <thead>
                         <tr>
                             <th>Username</th>
-                            <th>First Name</th>
                             <th>Role</th>
                             <th>Tier</th>
                             <th>Status</th>
@@ -85,19 +107,28 @@ function AdminManageUsers() {
                         {filteredUsers.map(user => (
                             <tr key={user.id}>
                                 <td>{user.username}</td>
-                                <td>{user.first_name}</td>
                                 <td className={`role-${user.role?.name.toLowerCase()}`}>{user.role?.name}</td>
                                 <td>{user.tier || 'FREE'}</td>
                                 <td>{user.is_verified ? 'Active' : 'Pending'}</td>
                                 <td>
-                                    {/* The navigate function for this button is still needed */}
-                                    <button className="btn-view" onClick={() => navigate(`/admin/view-user/${user.id}`)}>View</button>
+                                    <button className="btn-view" onClick={() => setViewingUser(user)}>
+                                        View
+                                    </button>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+
+            {viewingUser && (
+                <AdminManageUsersView 
+                    user={viewingUser} 
+                    allUsers={allUsers}
+                    onClose={() => setViewingUser(null)} 
+                    onDeleteUser={handleDeleteUser}
+                />
+            )}
         </>
     );
 }

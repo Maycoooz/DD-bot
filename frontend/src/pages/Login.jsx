@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import api from '../api/axiosConfig'; // Use the custom API instance
-import { useNavigate, Link } from 'react-router-dom'; // Import Link
-import '../styles/AuthForm.css'; // Import the CSS styles
+import { useNavigate, Link } from 'react-router-dom'; 
+import '../styles/Login.css'; 
 
 function Login() {
     const [username, setUsername] = useState('');

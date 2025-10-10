@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import api from '../api/axiosConfig'; // Use the custom API instance
 import { useNavigate, Link } from 'react-router-dom'; 
-import '../styles/AuthForm.css';
+import '../styles/Register.css';
 
 function Register() {
     const navigate = useNavigate();
@@ -135,8 +135,29 @@ function Register() {
                 </div>
 
                 <div className="form-group">
-                    <label htmlFor="gender">Gender</label>
-                    <input type="text" id="gender" name="gender" value={formData.gender} onChange={handleChange} />
+                    <label>Gender</label>
+                    <div className="gender-radio-group">
+                        <label className={`radio-button ${formData.gender === 'Male' ? 'selected' : ''}`}>
+                            <input
+                                type="radio"
+                                name="gender"
+                                value="Male"
+                                checked={formData.gender === 'Male'}
+                                onChange={handleChange}
+                            />
+                            Male
+                        </label>
+                        <label className={`radio-button ${formData.gender === 'Female' ? 'selected' : ''}`}>
+                            <input
+                                type="radio"
+                                name="gender"
+                                value="Female"
+                                checked={formData.gender === 'Female'}
+                                onChange={handleChange}
+                            />
+                            Female
+                        </label>
+                    </div>
                 </div>
 
                 <div className="form-group">

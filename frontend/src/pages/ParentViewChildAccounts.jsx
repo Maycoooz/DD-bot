@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
-import '../styles/ParentViewChildAccounts.css'; // This is the new CSS file.
+import '../styles/ParentViewChildAccounts.css';
 
 function ViewChildAccounts() {
     // --- STATE MANAGEMENT ---
     const [children, setChildren] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [success, setSuccess] = useState(''); // State for success messages
+    const [success, setSuccess] = useState('');
 
     // Editing Profile State
     const [editingChildId, setEditingChildId] = useState(null);
@@ -138,7 +138,7 @@ function ViewChildAccounts() {
     const handleConfirmChangePassword = async () => {
         if (passwordData.new_password !== passwordData.confirm_new_password) {
             setPasswordError("New passwords do not match.");
-            setPasswordData({ current_password: '', new_password: '', confirm_new_password: ''}); // clearn the form on error
+            setPasswordData({ current_password: '', new_password: '', confirm_new_password: ''});
             return;
         }
         if (!passwordData.current_password || !passwordData.new_password) {
@@ -161,7 +161,7 @@ function ViewChildAccounts() {
             console.error("Failed to change password:", err);
             const detail = err.response?.data?.detail || "An unexpected error occurred. Please try again.";
             setPasswordError(detail);
-            setPasswordData({ current_password: '', new_password: '', confirm_new_password: ''}); // clearn the form on error
+            setPasswordData({ current_password: '', new_password: '', confirm_new_password: ''});
         }
     };
 
@@ -180,80 +180,86 @@ function ViewChildAccounts() {
                 <h2>View Child Accounts</h2>
             </header>
             
-            {/* --- Global Success/Error Messages --- */}
             {error && <p className="form-message error">{error}</p>}
             {success && <p className="form-message success">{success}</p>}
 
             <main>
-                {children.map((child) => (
-                    <div key={child.id} className="child-account-card">
-                        <h3>{editingChildId === child.id ? 'Editing Profile' : `${child.first_name} ${child.last_name}`}</h3>
-                        
-                        {editingChildId === child.id ? (
-                            // --- EDITING VIEW ---
-                            <div className="profile-details editing">
-                                <div className="form-group"><label>Username</label><input type="text" name="username" value={editFormData.username} onChange={handleEditFormChange} /></div>
-                                <div className="form-group"><label>First Name</label><input type="text" name="first_name" value={editFormData.first_name} onChange={handleEditFormChange} /></div>
-                                <div className="form-group"><label>Last Name</label><input type="text" name="last_name" value={editFormData.last_name} onChange={handleEditFormChange} /></div>
-                                <div className="form-group"><label>Birthday</label><input type="date" name="birthday" value={editFormData.birthday || ''} onChange={handleEditFormChange} /></div>
-                                <div className="form-group"><label>Country</label><input type="text" name="country" value={editFormData.country || ''} onChange={handleEditFormChange} /></div>
-                                <div className="form-group"><label>Gender</label><input type="text" name="gender" value={editFormData.gender || ''} onChange={handleEditFormChange} /></div>
-                                <div className="form-group"><label>Race</label><input type="text" name="race" value={editFormData.race || ''} onChange={handleEditFormChange} /></div>
-                                <div className="form-group full-width">
-                                    <label>Interests</label>
-                                    <div className="custom-dropdown">
-                                        <button type="button" onClick={() => setIsDropdownOpen(prev => !prev)} className="dropdown-button">
-                                            {(editFormData.interests || []).length} selected
-                                            <span className="dropdown-arrow">{isDropdownOpen ? '▲' : '▼'}</span>
-                                        </button>
-                                        {isDropdownOpen && (
-                                            <div className="dropdown-panel">
-                                                {availableInterests.map((interest) => (
-                                                    <label key={interest.name} className="dropdown-item">
-                                                        <input type="checkbox" checked={(editFormData.interests || []).includes(interest.name)} onChange={() => handleEditInterestsChange(interest.name)} />
-                                                        {interest.name}
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            // --- DISPLAY VIEW ---
-                            <div className="profile-details">
-                                <div className="form-group"><label>Username</label><input type="text" value={child.username} readOnly /></div>
-                                <div className="form-group"><label>First Name</label><input type="text" value={child.first_name} readOnly /></div>
-                                <div className="form-group"><label>Last Name</label><input type="text" value={child.last_name} readOnly /></div>
-                                <div className="form-group"><label>Birthday</label><input type="text" value={child.birthday || 'N/A'} readOnly /></div>
-                                <div className="form-group"><label>Country</label><input type="text" value={child.country || 'N/A'} readOnly /></div>
-                                <div className="form-group"><label>Gender</label><input type="text" value={child.gender || 'N/A'} readOnly /></div>
-                                <div className="form-group"><label>Race</label><input type="text" value={child.race || 'N/A'} readOnly /></div>
-                                <div className="form-group full-width">
-                                    <label>Interests</label>
-                                    <div className="interests-display">
-                                        {child.interests && child.interests.length > 0 ? child.interests.map(i => i.name).join(', ') : 'No interests specified'}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="action-buttons">
-                            {editingChildId === child.id ? (
-                                <>
-                                    <button className="btn save-btn" onClick={handleSaveClick}>Save Changes</button>
-                                    <button className="btn cancel-btn" onClick={handleCancelClick}>Cancel</button>
-                                </>
-                            ) : (
-                                <>
-                                    <button className="btn edit-btn" onClick={() => handleEditClick(child)}>Edit Profile</button>
-                                    <button className="btn password-btn" onClick={() => handlePasswordModalOpen(child)}>Change Password</button>
-                                    <button className="btn delete-btn" onClick={() => handleDeleteClick(child)}>Delete Account</button>
-                                </>
-                            )}
-                        </div>
+                {/* Check if the children array is empty */}
+                {children.length === 0 ? (
+                    <div className="no-children-message">
+                        <p>You have not created any child accounts yet.</p>
                     </div>
-                ))}
+                ) : (
+                    children.map((child) => (
+                        <div key={child.id} className="child-account-card">
+                            <h3>{editingChildId === child.id ? 'Editing Profile' : `${child.first_name} ${child.last_name}`}</h3>
+                            
+                            {editingChildId === child.id ? (
+                                // --- EDITING VIEW ---
+                                <div className="profile-details editing">
+                                    <div className="form-group"><label>Username</label><input type="text" name="username" value={editFormData.username} onChange={handleEditFormChange} /></div>
+                                    <div className="form-group"><label>First Name</label><input type="text" name="first_name" value={editFormData.first_name} onChange={handleEditFormChange} /></div>
+                                    <div className="form-group"><label>Last Name</label><input type="text" name="last_name" value={editFormData.last_name} onChange={handleEditFormChange} /></div>
+                                    <div className="form-group"><label>Birthday</label><input type="date" name="birthday" value={editFormData.birthday || ''} onChange={handleEditFormChange} /></div>
+                                    <div className="form-group"><label>Country</label><input type="text" name="country" value={editFormData.country || ''} onChange={handleEditFormChange} /></div>
+                                    <div className="form-group"><label>Gender</label><input type="text" name="gender" value={editFormData.gender || ''} onChange={handleEditFormChange} /></div>
+                                    <div className="form-group"><label>Race</label><input type="text" name="race" value={editFormData.race || ''} onChange={handleEditFormChange} /></div>
+                                    <div className="form-group full-width">
+                                        <label>Interests</label>
+                                        <div className="custom-dropdown">
+                                            <button type="button" onClick={() => setIsDropdownOpen(prev => !prev)} className="dropdown-button">
+                                                {(editFormData.interests || []).length} selected
+                                                <span className="dropdown-arrow">{isDropdownOpen ? '▲' : '▼'}</span>
+                                            </button>
+                                            {isDropdownOpen && (
+                                                <div className="dropdown-panel">
+                                                    {availableInterests.map((interest) => (
+                                                        <label key={interest.name} className="dropdown-item">
+                                                            <input type="checkbox" checked={(editFormData.interests || []).includes(interest.name)} onChange={() => handleEditInterestsChange(interest.name)} />
+                                                            {interest.name}
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                // --- DISPLAY VIEW ---
+                                <div className="profile-details">
+                                    <div className="form-group"><label>Username</label><input type="text" value={child.username} readOnly /></div>
+                                    <div className="form-group"><label>First Name</label><input type="text" value={child.first_name} readOnly /></div>
+                                    <div className="form-group"><label>Last Name</label><input type="text" value={child.last_name} readOnly /></div>
+                                    <div className="form-group"><label>Birthday</label><input type="text" value={child.birthday || 'N/A'} readOnly /></div>
+                                    <div className="form-group"><label>Country</label><input type="text" value={child.country || 'N/A'} readOnly /></div>
+                                    <div className="form-group"><label>Gender</label><input type="text" value={child.gender || 'N/A'} readOnly /></div>
+                                    <div className="form-group"><label>Race</label><input type="text" value={child.race || 'N/A'} readOnly /></div>
+                                    <div className="form-group full-width">
+                                        <label>Interests</label>
+                                        <div className="interests-display">
+                                            {child.interests && child.interests.length > 0 ? child.interests.map(i => i.name).join(', ') : 'No interests specified'}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="action-buttons">
+                                {editingChildId === child.id ? (
+                                    <>
+                                        <button className="btn save-btn" onClick={handleSaveClick}>Save Changes</button>
+                                        <button className="btn cancel-btn" onClick={handleCancelClick}>Cancel</button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <button className="btn edit-btn" onClick={() => handleEditClick(child)}>Edit Profile</button>
+                                        <button className="btn password-btn" onClick={() => handlePasswordModalOpen(child)}>Change Password</button>
+                                        <button className="btn delete-btn" onClick={() => handleDeleteClick(child)}>Delete Account</button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    ))
+                )}
             </main>
 
             {/* --- MODAL for Deleting Account --- */}

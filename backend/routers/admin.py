@@ -18,7 +18,7 @@ router = APIRouter(
     prefix="/admin"
 )
 
-@router.get("/viewAllUsers", response_model=ViewAllUserResponse)
+@router.get("/view-all-users", response_model=ViewAllUserResponse)
 def view_all_users(
     db: Session = Depends(get_db), 
     current_admin: User = Depends(get_current_admin_user)
@@ -42,4 +42,43 @@ def view_all_users(
         total_users=total_users,
         total_parents=total_parents,
         total_kids=total_kids
+    )
+    
+@router.delete("/delete-user/{user_id}", response_model=StatusMessage)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    user_to_delete = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(User.id == user_id)
+        .first()
+    )
+
+    if not user_to_delete:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    is_parent = user_to_delete.role.name.value == "PARENT"
+    username = user_to_delete.username # Store username before deletion
+
+    if is_parent:
+        children_to_delete = db.query(User).filter(User.primary_parent_id == user_to_delete.id).all()
+        for child in children_to_delete:
+            db.delete(child)
+    
+    db.delete(user_to_delete)
+    
+    db.commit()
+
+    # --- Conditional Message Logic ---
+    if is_parent:
+        message = f"Account for user '{username}' and all associated child accounts have been deleted."
+    else:
+        message = f"Account for user '{username}' has been deleted."
+    
+    return StatusMessage(
+        status="success",
+        message=message
     )
