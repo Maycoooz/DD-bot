@@ -81,6 +81,19 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
     return current_user
 
+
+
+async def get_current_admin_user(current_user: User = Depends(get_current_active_user)):
+    if current_user.role.name.value != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="The user does not have privileges to access this resource."
+        )
+    return current_user
+
+
+
+
 # ------------------------------- FOR EMAIL VERIFICATION ------------------------------- #
 def create_verification_token(data: dict, expires_delta: timedelta = timedelta(minutes=15)):
     to_encode = data.copy()

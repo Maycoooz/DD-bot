@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from db.database import create_tables_and_seed_it
 from contextlib import asynccontextmanager
 
-from routers import auth, users, parent
+from routers import auth, users, parent, admin
 
 
 @asynccontextmanager
@@ -39,5 +39,6 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/auth")
 app.include_router(users.router)
 app.include_router(parent.router)
+app.include_router(admin.router)
 
 

@@ -1,41 +1,65 @@
-import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/AdminDashboard.css';
+
+import AdminManageUsers from './AdminManageUsers';
+// Import other components as you create them
+
+const dashboardItems = [
+    { title: 'Manage Parents & Kids', view: 'manageUsers' },
+    { title: 'Manage Librarians', view: 'manageLibrarians' },
+    { title: 'Edit Landing Page Reviews', view: 'editReviews' },
+    { title: 'Edit Landing Page', view: 'editLandingPage' },
+];
 
 function AdminDashboard() {
     const navigate = useNavigate();
     const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+    const [activeView, setActiveView] = useState('home'); // 'home' shows the grid
 
     const handleLogout = () => {
         localStorage.clear();
         navigate('/login');
     };
 
-    // 1. Use function-based class names
-    const dashboardItems = [
-        { title: 'Manage Parents & Kids', path: '/admin/manage-users', className: 'card-manage-users' },
-        { title: 'Manage Librarians', path: '/admin/manage-librarians', className: 'card-manage-librarians' },
-        { title: 'Edit Landing Page Reviews', path: '/admin/edit-reviews', className: 'card-edit-reviews' },
-        { title: 'Edit Landing Page', path: '/admin/edit-landing-page', className: 'card-edit-landing' },
-    ];
+    const renderActiveView = () => {
+        switch (activeView) {
+            case 'manageUsers':
+                return <AdminManageUsers />;
+            // Add other cases here
+            default:
+                // This renders the grid of buttons
+                return (
+                    <main className="dashboard-grid">
+                        {dashboardItems.map((item, index) => (
+                            <button key={index} onClick={() => setActiveView(item.view)} className="dashboard-card">
+                                <h3>{item.title}</h3>
+                            </button>
+                        ))}
+                    </main>
+                );
+        }
+    };
 
     return (
         <div className="admin-dashboard-container">
             <header className="admin-header">
-                <h1>Admin Dashboard</h1>
+                {activeView === 'home' ? (
+                    <h1>Admin Dashboard</h1>
+                ) : (
+                    <button onClick={() => setActiveView('home')} className="header-back-btn">
+                        &larr; Back to Dashboard
+                    </button>
+                )}
                 <div className="header-actions">
                     <span>Welcome Admin, <strong>{profile.first_name}</strong></span>
                     <button onClick={handleLogout} className="logout-btn">Logout</button>
                 </div>
             </header>
 
-            <main className="dashboard-grid">
-                {dashboardItems.map((item, index) => (
-                    <Link key={index} to={item.path} className={`dashboard-card ${item.className}`}>
-                        <h3>{item.title}</h3>
-                    </Link>
-                ))}
-            </main>
+            <div className="admin-content-area">
+                {renderActiveView()}
+            </div>
         </div>
     );
 }

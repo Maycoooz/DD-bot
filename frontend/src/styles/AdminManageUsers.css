@@ -1,0 +1,136 @@
+/* --- MAIN CONTAINER & LAYOUT --- */
+.manage-users-container {
+    padding: 30px 50px;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    font-family: system-ui, sans-serif;
+}
+
+/* --- HEADER --- */
+.manage-users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.manage-users-header h1 {
+    margin: 0;
+    font-size: 2.2em;
+    color: #343a40;
+}
+
+.btn-back, .btn-logout {
+    padding: 10px 20px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.btn-back:hover, .btn-logout:hover {
+    background-color: #e9ecef;
+}
+
+/* --- STATS & SEARCH BAR --- */
+.stats-and-search {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.stats-summary {
+    display: flex;
+    gap: 30px;
+    font-size: 1.1em;
+    color: #495057;
+    font-weight: 500;
+}
+
+.search-bar input {
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    width: 300px;
+    font-size: 1em;
+}
+
+/* --- USERS TABLE --- */
+.users-table-container {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    overflow-x: auto;
+
+    max-height: 60vh; /* e.g., 60% of the viewport height */
+    overflow-y: auto;
+    position: relative; /* Required for sticky headers */
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.users-table th, .users-table td {
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.users-table th {
+    background-color: #f8f9fa;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    color: #6c757d;
+
+    position: sticky;
+    top: 0;
+    z-index: 1; /* Ensures headers stay above the scrolling content */
+}
+
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.users-table tbody tr:hover {
+    background-color: #f1f3f5;
+}
+
+/* --- ACTION BUTTONS & STATUS TAGS --- */
+.btn-view {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    background-color: #0d6efd;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-view:hover {
+    background-color: #0b5ed7;
+}
+
+.role-parent {
+    font-weight: bold;
+}
+
+.role-child {
+    font-weight: bold;
+}
+
+/* --- UTILITY & RESPONSIVE --- */
+.loading-state, .error-state {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.5em;
+    color: #6c757d;
+}
