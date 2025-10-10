@@ -255,6 +255,274 @@ body {
   color: #4f46e5;
 }
 
+/* Landing Page Styles */
+.landing-main section {
+  scroll-margin-top: 130px;
+}
+.landing-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* soft pastel gradient background */
+  background: linear-gradient(
+    180deg,
+    #fce1e4 0%,
+    #fde2b9 25%,
+    #fff8d2 50%,
+    #d7f2f5 75%,
+    #e4d2ff 100%
+  );
+  background-attachment: fixed;
+}
+
+.landing-page {
+  min-height: 100vh;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+}
+.landing-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+
+  /* Gradient bar to match your background */
+  background: linear-gradient(90deg, #d7f2f5 0%, #fde2f3 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.landing-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.landing-nav-link {
+  text-decoration: none;
+  font-size: 1.25rem;
+  color: #000000;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.landing-nav-link:hover {
+  color: #4f46e5;
+}
+
+.landing-auth-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.landing-button {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.landing-button-outline {
+  border: 1px solid #4f46e5;
+  color: #4f46e5;
+}
+
+.landing-button-filled {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.landing-button-primary {
+  background-color: #4f46e5;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+}
+
+.landing-main {
+  flex: 1;
+  padding: 8rem 2rem 2rem;
+}
+
+.landing-hero {
+  margin-bottom: 3rem;
+}
+
+.landing-hero-content {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.landing-intro-box, .landing-video-box {
+  flex: 1;
+  border: 1px solid #000000;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  min-height: 200px;
+}
+
+.landing-section-title {
+  position: relative;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #4f46e5;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Decorative underline with a gradient */
+.landing-section-title::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #60a5fa, #a78bfa, #f472b6);
+  margin: 0.5rem auto 0;
+  border-radius: 2px;
+}
+
+/* Description text below each section title */
+.landing-section-desc {
+  max-width: 650px;
+  margin: 0 auto 2.5rem;
+  text-align: center;
+  color: #80736b;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.landing-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.landing-feature-box {
+  border: 1px solid #000000;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.landing-steps {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.landing-step-box {
+  border: 1px solid #000000;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  width: 200px;
+}
+
+.landing-step-arrow {
+  font-size: 2rem;
+  color: #000000;
+}
+
+.landing-testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.landing-testimonial-box {
+  border: 1px solid #000000;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.landing-footer {
+  text-align: center;
+  padding: 2rem;
+  border-top: 1px solid #e5e7eb;
+}
+/* landing.PRICING SECTION */
+.landing-pricing {
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.landing-pricing-boxes {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.landing-pricing-box {
+  flex: 1;
+  min-width: 280px;
+  max-width: 400px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  text-align: left;
+  background-color: #f9fafb;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.landing-pricing-box h3 {
+  color: #111827;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.landing-pricing-box ul {
+  list-style: none;
+  padding-left: 0;
+  margin-bottom: 1.5rem;
+}
+
+.landing-pricing-box li {
+  margin-bottom: 0.5rem;
+  color: #4b5563;
+}
+
+.landing-price {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #4f46e5;
+  margin-bottom: 1rem;
+}
+
+.landing-premium {
+  background-color: #eef2ff;
+  border-color: #4f46e5;
+}
+
+/* Make navbar buttons look like links */
+.landing-nav button {
+  background: none;
+  border: none;
+  color: #4b5563;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.landing-nav button:hover {
+  color: #4f46e5;
+}
+/*end landing*/
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .header-content {
@@ -276,6 +544,22 @@ body {
 
   .footer-links {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .landing-hero-content {
+    flex-direction: column;
+  }
+  
+  .landing-features-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .landing-steps {
+    flex-direction: column;
+  }
+  
+  .landing-step-arrow {
+    transform: rotate(90deg);
   }
 }
 

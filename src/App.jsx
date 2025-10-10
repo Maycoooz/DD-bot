@@ -6,12 +6,14 @@ import SignupPage from "./Signup"
 import ParentDashboard from "./ParentDashboard"
 import AdminDashboard from "./AdminDashboard"
 import LibrarianDashboard from "./LibrarianDashboard"
+import LandingPage from "./LandingPage"
 import ProtectedRoute from "./ProtectedRoute"
 
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/home" element={<HomePage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/chat" element={<ChatbotPage />} />
