@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import '../styles/ChildrenDashboard.css';
+import logoImg from "../assets/logo.png";
+
 /**
  * @typedef {"user" | "bot"} Sender
  */
@@ -94,7 +96,7 @@ export default function ChildDashboard() {
         <header className="chat-header">
           <div className="brand">
             <span className="avatar bot">
-              <img src="/robot.png" alt="DD Bot" width={22} height={22} />
+              <img src={logoImg} alt="DD Bot" width={22} height={22} />
             </span>
             <div>
               <h2 className="brand-title">DD Bot</h2>
