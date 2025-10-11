@@ -5,7 +5,8 @@ from sqlalchemy import or_
 from auth.auth_handler import get_current_admin_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
 from schemas.admin import ViewAllUserResponse
-from models.tables import User
+from models.tables import User, LandingPage
+from schemas.landing_page import LandingPageResponse, LandingPageUpdate
 
 from typing import List
 
@@ -82,3 +83,20 @@ def delete_user(
         status="success",
         message=message
     )
+
+@router.get("/landing-page-content", response_model=List[LandingPageResponse])
+def get_landing_page_content(db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin_user)):
+    content = db.query(LandingPage).all()
+    return content
+
+@router.put("/landing-page-content/{item_id}", response_model=LandingPageResponse)
+def update_landing_page_content(item_id: int, content_update: LandingPageUpdate, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin_user)):
+    db_item = db.query(LandingPage).filter(LandingPage.id == item_id).first()
+    if not db_item:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Content item not found")
+    
+    db_item.display_text = content_update.display_text
+    db.commit()
+    db.refresh(db_item)
+    return db_item
+    

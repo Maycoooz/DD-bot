@@ -1,8 +1,42 @@
+import React, { useState, useEffect } from 'react';
 import { Link } from "react-router-dom";
+import api from "../api/axiosConfig";
 import "../styles/LandingPage.css";
 import logoImg from "../assets/logo.png";
 
 const LandingPage = () => {
+    // State for loading and dynamic page content
+    const [loading, setLoading] = useState(true);
+    const [pageContent, setPageContent] = useState({
+        INTRODUCTION: [],
+        FEATURE: [],
+        HOW_IT_WORKS: [],
+    });
+
+    // Fetch data from the public endpoint when the component loads
+    useEffect(() => {
+        const fetchContent = async () => {
+            try {
+                const response = await api.get('/landing-page-content');
+                // Group the content by type for easier rendering
+                const groupedContent = response.data.reduce((acc, item) => {
+                    const { display_type } = item;
+                    if (!acc[display_type]) {
+                        acc[display_type] = [];
+                    }
+                    acc[display_type].push(item);
+                    return acc;
+                }, {});
+                setPageContent(groupedContent);
+            } catch (error) {
+                console.error("Failed to load landing page content:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchContent();
+    }, []);
+
     // Smooth scroll function
     const scrollToSection = (id) => {
         const section = document.getElementById(id);
@@ -10,6 +44,10 @@ const LandingPage = () => {
             section.scrollIntoView({ behavior: "smooth" });
         }
     };
+
+    if (loading) {
+        return <div>Loading...</div>; // You can replace this with a styled spinner component
+    }
 
     return (
         <div className="landing-page">
@@ -22,7 +60,6 @@ const LandingPage = () => {
                     <button onClick={() => scrollToSection("testimonials")} className="landing-nav-link">Testimonials</button>
                     <button onClick={() => scrollToSection("pricing")} className="landing-nav-link">Pricing</button>
                     <div className="landing-auth-buttons">
-                        {/* Corrected link to /register */}
                         <Link to="/register" className="landing-button landing-button-outline">Sign up</Link>
                         <Link to="/login" className="landing-button landing-button-filled">Sign in</Link>
                     </div>
@@ -36,14 +73,13 @@ const LandingPage = () => {
                     <div className="landing-hero-content">
                         <div className="landing-intro-box">
                             <h1 className="landing-main-title">Perfect Books & Videos for Your Child, Instantly.</h1>
+                            {/* Render introduction from state */}
                             <p className="landing-intro-text">
-                                DD Bot is an intelligent chatbot designed to help parents find the perfect books and videos for their children. Our AI-powered recommendations are tailored to your child's age, interests, and learning goals.
+                                {pageContent.INTRODUCTION?.[0]?.display_text || "Default introduction text..."}
                             </p>
                         </div>
                         <div className="landing-video-box">
-                            <div className="landing-video-placeholder">
-                                Video Placeholder
-                            </div>
+                            <div className="landing-video-placeholder">Video Placeholder</div>
                         </div>
                     </div>
                 </section>
@@ -52,12 +88,14 @@ const LandingPage = () => {
                 <section id="features" className="landing-section">
                     <h2 className="landing-section-title">Our Features</h2>
                     <div className="landing-features-grid">
-                        <div className="landing-feature-box"><h3>Personalized Recommendations</h3><p>Get books and videos tailored to your child’s age and interests.</p></div>
-                        <div className="landing-feature-box"><h3>Educational Videos</h3><p>Curated videos that enhance your child’s reading and learning.</p></div>
-                        <div className="landing-feature-box"><h3>Safe Content</h3><p>All recommendations are age-appropriate and parent-approved.</p></div>
-                        <div className="landing-feature-box"><h3>Progress Tracking</h3><p>Monitor reading and watching habits to guide your child’s growth.</p></div>
-                        <div className="landing-feature-box"><h3>Parent Dashboard</h3><p>Manage child accounts and view personalized insights easily.</p></div>
-                        <div className="landing-feature-box"><h3>Multi-language Support</h3><p>Learn and explore in different languages.</p></div>
+                        {/* Render features from state using .map() */}
+                        {pageContent.FEATURE?.map((item, index) => (
+                            <div key={item.id} className="landing-feature-box">
+                                {/* You can add a 'title' field to your DB model for dynamic titles */}
+                                <h3>Feature {index + 1}</h3>
+                                <p>{item.display_text}</p>
+                            </div>
+                        ))}
                     </div>
                 </section>
 
@@ -65,15 +103,20 @@ const LandingPage = () => {
                 <section id="how-it-works" className="landing-section alternate-bg">
                     <h2 className="landing-section-title">How It Works</h2>
                     <div className="landing-steps">
-                        <div className="landing-step-box"><h3>1. Create Account</h3><p>Sign up and create profiles for your children.</p></div>
-                        <div className="landing-step-arrow">→</div>
-                        <div className="landing-step-box"><h3>2. Chat with Bot</h3><p>Tell us about your child’s interests and preferences.</p></div>
-                        <div className="landing-step-arrow">→</div>
-                        <div className="landing-step-box"><h3>3. Get Recommendations</h3><p>Receive personalized book and video suggestions instantly.</p></div>
+                        {/* Render "How It Works" steps from state */}
+                        {pageContent.HOW_IT_WORKS?.map((item, index) => (
+                            <React.Fragment key={item.id}>
+                                <div className="landing-step-box">
+                                    <h3>Step {index + 1}</h3>
+                                    <p>{item.display_text}</p>
+                                </div>
+                                {index < pageContent.HOW_IT_WORKS.length - 1 && <div className="landing-step-arrow">→</div>}
+                            </React.Fragment>
+                        ))}
                     </div>
                 </section>
 
-                {/* TESTIMONIALS */}
+                {/* TESTIMONIALS (Static for now) */}
                 <section id="testimonials" className="landing-section">
                     <h2 className="landing-section-title">Customer Reviews</h2>
                     <div className="landing-testimonials-grid">
@@ -84,7 +127,7 @@ const LandingPage = () => {
                     </div>
                 </section>
 
-                {/* PRICING */}
+                {/* PRICING (Static for now) */}
                 <section id="pricing" className="landing-section alternate-bg">
                     <h2 className="landing-section-title">Pricing Plans</h2>
                     <div className="landing-pricing-boxes">
@@ -98,7 +141,6 @@ const LandingPage = () => {
                                 <li className="disabled">❌ No parental progress tracking</li>
                             </ul>
                             <p className="landing-price">$0/month</p>
-                            {/* Corrected link to /register */}
                             <Link to="/register" className="landing-button landing-button-outline">Choose Free</Link>
                         </div>
                         <div className="landing-pricing-box landing-premium">
@@ -111,7 +153,6 @@ const LandingPage = () => {
                                 <li>✅ Priority support</li>
                             </ul>
                             <p className="landing-price">$9.99/month</p>
-                            {/* Corrected link to /register */}
                             <Link to="/register" className="landing-button landing-button-filled">Choose Premium</Link>
                         </div>
                     </div>

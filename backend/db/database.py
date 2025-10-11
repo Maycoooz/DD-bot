@@ -134,6 +134,52 @@ def insert_default_admin():
         print(f"An error has occured during default admin insertion: {e}")
     finally:
         db.close()
+        
+        
+# Default content for the landing page
+DEFAULT_CONTENT = [
+    # Introduction
+    {"display_type": "INTRODUCTION", "display_text": "DD Bot is an intelligent chatbot designed to help parents find the perfect books and videos for their children. Our AI-powered recommendations are tailored to your child's age, interests, and learning goals."},
+    
+    # Features (add one for each feature)
+    {"display_type": "FEATURE", "display_text": "Get books and videos tailored to your child’s age and interests."},
+    {"display_type": "FEATURE", "display_text": "Curated videos that enhance your child’s reading and learning."},
+    {"display_type": "FEATURE", "display_text": "All recommendations are age-appropriate and parent-approved."},
+    {"display_type": "FEATURE", "display_text": "Monitor reading and watching habits to guide your child’s growth."},
+    {"display_type": "FEATURE", "display_text": "Manage child accounts and view personalized insights easily."},
+    {"display_type": "FEATURE", "display_text": "Learn and explore in different languages."},
+
+    # How It Works
+    {"display_type": "HOW_IT_WORKS", "display_text": "Sign up and create profiles for your children."},
+    {"display_type": "HOW_IT_WORKS", "display_text": "Tell us about your child’s interests and preferences."},
+    {"display_type": "HOW_IT_WORKS", "display_text": "Receive personalized book and video suggestions instantly."},
+]
+
+def seed_landing_page():
+    from models.tables import LandingPage
+    db = SessionLocal()
+    try:
+        # Check if the table is already seeded
+        if db.query(LandingPage).count() > 0:
+            print("LandingPage table already contains data. Skipping seed.")
+            return
+
+        print("Seeding LandingPage table with default content...")
+        for item in DEFAULT_CONTENT:
+            db_item = LandingPage(
+                display_type=item["display_type"],
+                display_text=item["display_text"]
+            )
+            db.add(db_item)
+        
+        db.commit()
+        print("Successfully seeded LandingPage table.")
+    
+    except Exception as e:
+        print(f"An error occurred during seeding: {e}")
+        db.rollback()
+    finally:
+        db.close()
 
 
  
@@ -151,6 +197,7 @@ def create_tables_and_seed_it():
     insert_default_roles()
     insert_default_interests()
     insert_default_admin()
+    seed_landing_page()
     
 
     

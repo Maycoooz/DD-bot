@@ -162,6 +162,18 @@ class User(Base):
     )
     '''
 
+class LandingPage(Base):
+    __tablename__ = "landingpage"
+   
+    id = Column(Integer, primary_key=True, autoincrement="auto") 
+    
+    # Introduction, 6 Features, 3 How-It-Works, 2 Pricing(FREE, PRO)
+    display_type = Column(String(length=50), nullable=False)
+    
+    # What each of the display type shows
+    display_text = Column(String(length=255), nullable=False)
+    
+    
     
     
     

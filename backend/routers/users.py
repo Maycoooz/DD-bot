@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List
 
 from sqlalchemy.orm import Session
 
 from auth.auth_handler import get_current_active_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
 from schemas.users import ParentRegistrationResponse, ChangePassword
+from schemas.landing_page import LandingPageResponse
 from schemas.parent import ParentProfileUpdate
-from models.tables import User
+from models.tables import User, LandingPage
 
 router = APIRouter(
     tags=["Users"]
@@ -82,6 +84,14 @@ def change_password(
         message="Password updated successfully"
     )
     return status_message
+
+@router.get("/landing-page-content", response_model=List[LandingPageResponse])
+def get_public_landing_page_content(db: Session = Depends(get_db)):
+    """
+    Public endpoint to fetch all content items for the landing page.
+    """
+    content = db.query(LandingPage).all()
+    return content
 
 @router.post("/users/make-review/{user_id}", response_model=StatusMessage)
 def make_review():

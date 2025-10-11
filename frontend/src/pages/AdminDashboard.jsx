@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/AdminDashboard.css';
 
 import AdminManageUsers from './AdminManageUsers';
+import AdminEditLandingPage from './AdminEditLandingPage';
 // Import other components as you create them
 
 const dashboardItems = [
@@ -26,6 +27,8 @@ function AdminDashboard() {
         switch (activeView) {
             case 'manageUsers':
                 return <AdminManageUsers />;
+            case 'editLandingPage':
+                return <AdminEditLandingPage />
             // Add other cases here
             default:
                 // This renders the grid of buttons
