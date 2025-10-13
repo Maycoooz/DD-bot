@@ -1,0 +1,17 @@
+/* frontend/src/index.css */
+
+/* Use the Inter font for a modern look */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f4f7f6; /* Match the auth container background */
+}
+
+/* A simple global reset */
+* {
+    box-sizing: border-box;
+}

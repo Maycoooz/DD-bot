@@ -1,0 +1,64 @@
+.edit-landing-page h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.content-section {
+    margin-bottom: 40px;
+}
+
+.content-section h3 {
+    font-size: 1.4em;
+    color: #495057;
+    margin-bottom: 20px;
+}
+
+.content-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.content-item textarea {
+    flex-grow: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    font-size: 1em;
+    font-family: inherit;
+    min-height: 80px;
+    resize: vertical;
+}
+
+.content-item button {
+    padding: 12px 24px;
+    border: none;
+    background-color: #0d6efd;
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    height: fit-content;
+}
+.content-item button:hover {
+    background-color: #0b5ed7;
+}
+
+.message {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    text-align: center;
+    font-weight: 500;
+}
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+}

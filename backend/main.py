@@ -1,55 +1,46 @@
-# backend/main.py
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from db.database import create_tables_and_seed_it
 from contextlib import asynccontextmanager
 
-from .database import create_db_and_tables
-from .api import routes, parent, admin, librarian
+from routers import auth, users, parent, admin
 
-from backend.database import create_db_and_tables, engine
-from backend.models import Roles, UserType
-from sqlmodel import Session, select
-
-def seed_roles():
-    default_roles = [
-        UserType.ADMIN,
-        UserType.PARENT,
-        UserType.LIBRARIAN,
-        UserType.KID
-    ]
-
-    with Session(engine) as session:
-        for role_enum in default_roles:
-            existing = session.exec(select(Roles).where(Roles.name == role_enum)).first()
-            if not existing:
-                session.add(Roles(name=role_enum))
-                print(f"✅ Added role: {role_enum}")
-        session.commit()
-        print("🎉 Roles seeded automatically!")
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    create_db_and_tables()
-    seed_roles()
+async def lifespan_context(app: FastAPI):
+    try:
+        create_tables_and_seed_it()
+    except Exception as e:
+        print(f"Error during startup: {e}")
     yield
+    
 
-app = FastAPI(lifespan=lifespan)
-
-app.include_router(routes.router)
-app.include_router(parent.router)
-app.include_router(admin.router)
-app.include_router(librarian.router)
+app = FastAPI(
+    title="Chatbot for kids that recommends books and videos",
+    description="API to recommend books and videos",
+    version="0.1.0",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan_context,
+)
 
 origins = [
+    "http://localhost:8000",
     "http://localhost:5173",
-    "https://ddbot-ochre.vercel.app/",
-    "https://ddbot-ch6g.vercel.app",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
     allow_credentials=True,
+    allow_origins=origins,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
+
+# --- Routers ---
+app.include_router(auth.router, prefix="/auth")
+app.include_router(users.router)
+app.include_router(parent.router)
+app.include_router(admin.router)
+
+

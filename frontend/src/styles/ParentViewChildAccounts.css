@@ -1,0 +1,212 @@
+/* --- Core Layout & Page Container --- */
+.page-container {
+    width: 100%;
+    max-width: 900px;
+    margin: 2rem auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.page-header h2 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: #333;
+}
+
+/* --- Child Account Card --- */
+.child-account-card {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden; /* Ensures child elements respect the border radius */
+}
+
+.child-account-card h3 {
+    margin: 0;
+    padding: 16px 20px;
+    font-size: 1.25rem;
+    background-color: #f9fafb;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* --- Profile Details Grid --- */
+.profile-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    margin-bottom: 6px;
+    font-size: 0.875rem;
+    color: #555;
+    font-weight: 500;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: #f8f9fa; /* Read-only background */
+}
+
+/* Specific style for inputs in edit mode */
+.profile-details.editing .form-group input {
+    background-color: #ffffff;
+}
+
+.interests-display {
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    min-height: 40px; /* Match input height */
+    font-size: 0.95rem;
+    color: #333;
+}
+
+/* --- Action Buttons --- */
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 20px;
+    background-color: #f9fafb;
+    border-top: 1px solid #e0e0e0;
+}
+
+.btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.edit-btn { background-color: #3b82f6; color: white; }
+.edit-btn:hover { background-color: #2563eb; }
+
+.password-btn { background-color: #6b7280; color: white; }
+.password-btn:hover { background-color: #4b5563; }
+
+.delete-btn { background-color: #ef4444; color: white; }
+.delete-btn:hover { background-color: #dc2626; }
+
+.save-btn { background-color: #22c55e; color: white; }
+.save-btn:hover { background-color: #16a34a; }
+
+.cancel-btn { background-color: #a1a1aa; color: white; }
+.cancel-btn:hover { background-color: #71717a; }
+
+.delete-btn-confirm { background-color: #dc2626; color: white; }
+.delete-btn-confirm:hover { background-color: #b91c1c; }
+
+
+/* --- MODAL STYLES --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.modal-content p {
+    margin-bottom: 25px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.modal-form .form-group {
+    text-align: left;
+}
+
+.modal-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+/* --- MESSAGES (Error/Success) --- */
+.form-message {
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 0 0 20px 0;
+}
+.form-message.error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+}
+.form-message.success {
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+/* Simple Dropdown Styles */
+.custom-dropdown .dropdown-button {
+    text-align: left;
+    background-color: white;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+}
