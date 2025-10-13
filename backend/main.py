@@ -27,7 +27,7 @@ app = FastAPI(
 origins = [
     "http://localhost:8000",
     "http://localhost:5173",
-    "https://ddbot-ch6g-2t104nuhr-odstosjs-projects.vercel.app",
+    "https://ddbot-ch6g-6syoqa2fq-odstosjs-projects.vercel.app",
 ]
 
 app.add_middleware(
