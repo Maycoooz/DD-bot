@@ -1,5 +1,0 @@
-react
-react-dom
-react-router-dom
-vite
-@vitejs/plugin-react
