@@ -115,48 +115,50 @@ export const AuthProvider = ({ children }) => {
   }
 
   // ------------------ Signup ------------------
-  const signup = async (userData) => {
-    setIsLoading(true)
-    try {
-      const response = await fetch(`${API_BASE}/signup/`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: userData.username,
-          password: userData.password,
-          first_name: userData.first_name || "User",
-          last_name: userData.last_name || "Name",
-          email: userData.email || "user@example.com",
-          usertype: userData.usertype,
-        }),
-      })
-
-      const data = await response.json().catch(() => ({}))
-
-      if (!response.ok) {
-        return {
-          success: false,
-          message: data.detail || data.message || "Signup failed",
-        }
-      }
-
-      if (data.success && data.user) {
-        setUser({
-          user_id: data.user.id,
-          username: data.user.username,
-          role: data.user.usertype,
-        })
-      }
-
-      return { success: true }
-    } catch (error) {
-      return { success: false, message: error.message || "Signup failed" }
-    } finally {
-      setIsLoading(false)
+const signup = async (userData) => {
+  setIsLoading(true)
+  try {
+    // Select endpoint based on user type
+    let endpoint = "/auth/register"
+    if (userData.usertype === "librarian") {
+      endpoint = "/auth/register-librarian"
     }
-  }
 
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: userData.username,
+        password: userData.password,
+        first_name: userData.first_name || "User",
+        last_name: userData.last_name || "Name",
+        email: userData.email || "user@example.com",
+        country: userData.country || null,
+        gender: userData.gender || null,
+        birthday: userData.birthday || null,
+        race: userData.race || null,
+      }),
+    })
+
+    const data = await response.json().catch(() => ({}))
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: data.detail || data.message || "Signup failed",
+      }
+    }
+
+    // Success
+    return { success: true, message: data.message || "Signup successful" }
+  } catch (error) {
+    console.error("Signup error:", error)
+    return { success: false, message: error.message || "Signup failed" }
+  } finally {
+    setIsLoading(false)
+  }
+}
   // ------------------ Helpers ------------------
   const isAuthenticated = () => !!user
   const hasRole = (role) => user?.role === role
