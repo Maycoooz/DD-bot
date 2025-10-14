@@ -6,7 +6,7 @@ IMPORTANT!
 
 1. Ensure you have the latest version, if not fetch origin
 
-2. Go to the root directory of DD-BOT
+2. Go to the root directory of DD-BOT and run this in a terminal: python -m venv venv
 
 3. Open 3 terminals
 
