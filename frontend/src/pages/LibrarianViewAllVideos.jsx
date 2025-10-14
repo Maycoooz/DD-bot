@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import '../styles/LibrarianViewAllMedia.css'; 
+import EditVideoModal from './LibrarianEditVideo';
 
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -24,6 +25,8 @@ function ViewAllVideos() {
     const [totalPages, setTotalPages] = useState(0);
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
+    const [editingVideo, setEditingVideo] = useState(null);
+
     const fetchVideos = useCallback(async () => {
         setLoading(true);
         try {
@@ -32,7 +35,6 @@ function ViewAllVideos() {
                 size: 10,
                 search: debouncedSearchTerm,
             };
-            // Fetch from the videos endpoint
             const response = await api.get('/librarian/view-all-videos', { params });
             setVideos(response.data.items || []);
             setTotalPages(Math.ceil(response.data.total / params.size));
@@ -43,8 +45,25 @@ function ViewAllVideos() {
         }
     }, [currentPage, debouncedSearchTerm]);
 
-    useEffect(() => { setCurrentPage(1); }, [debouncedSearchTerm]);
-    useEffect(() => { fetchVideos(); }, [fetchVideos]);
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [debouncedSearchTerm]);
+
+    useEffect(() => {
+        fetchVideos();
+    }, [fetchVideos]);
+
+    const handleUpdateVideo = (updatedVideo) => {
+        setVideos(currentVideos =>
+            currentVideos.map(video => (video.id === updatedVideo.id ? updatedVideo : video))
+        );
+    };
+
+    const handleDeleteVideo = (deletedVideoId) => {
+        setVideos(currentVideos =>
+            currentVideos.filter(video => video.id !== deletedVideoId)
+        );
+    };
 
     return (
         <>
@@ -83,7 +102,9 @@ function ViewAllVideos() {
                                             <td>{video.category || 'N/A'}</td>
                                             <td>{video.source}</td>
                                             <td>{video.rating.toFixed(1)}</td>
-                                            <td><button className="btn-edit">Edit</button></td>
+                                            <td>
+                                                <button className="btn-edit" onClick={() => setEditingVideo(video)}>Edit</button>
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
@@ -105,6 +126,15 @@ function ViewAllVideos() {
                         </button>
                     </div>
                 </>
+            )}
+
+            {editingVideo && (
+                <EditVideoModal
+                    video={editingVideo}
+                    onClose={() => setEditingVideo(null)}
+                    onUpdate={handleUpdateVideo}
+                    onDelete={handleDeleteVideo}
+                />
             )}
         </>
     );

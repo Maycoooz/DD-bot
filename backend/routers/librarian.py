@@ -31,7 +31,7 @@ def check_link_exists(link: str, db: Session):
 
 
 
-# --- GET (Read) Routes - Public ---
+# --- GET Routes Public ---
 @router.get("/view-all-books", response_model=PaginatedBookResponse)
 def view_all_books(
     db: Session = Depends(get_db),
@@ -39,7 +39,7 @@ def view_all_books(
     page: int = 1,
     size: int = 10 # Default to 10 items per page
 ):
-    query = db.query(tables.Book)
+    query = db.query(tables.Book).order_by(tables.Book.id.desc())
 
     # If a search term is provided, filter by title
     if search:
@@ -61,7 +61,7 @@ def view_all_videos(
     page: int = 1,
     size: int = 10
 ):
-    query = db.query(tables.Video)
+    query = db.query(tables.Video).order_by(tables.Video.id.desc())
 
     if search:
         query = query.filter(tables.Video.title.contains(search))
@@ -113,8 +113,10 @@ def edit_book(
     if not db_book:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Book not found")
     
+    # Get the update data, excluding fields that were not sent
     update_dict = update_data.model_dump(exclude_unset=True)
     book_query.update(update_dict)
+    
     db.commit()
     db.refresh(db_book)
     return db_book
@@ -130,9 +132,10 @@ def edit_video(
     db_video = video_query.first()
     if not db_video:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found")
-        
+    
     update_dict = update_data.model_dump(exclude_unset=True)
     video_query.update(update_dict)
+    
     db.commit()
     db.refresh(db_video)
     return db_video

@@ -2,8 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import '../styles/LibrarianViewAllMedia.css';
+import EditBookModal from './LibrarianEditBook';
 
-// A debounce hook to prevent API calls on every keystroke
+// A debounce hook to prevent excessive API calls while typing
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -30,19 +31,22 @@ function ViewAllBooks() {
     const [totalPages, setTotalPages] = useState(0);
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
+    // State for the edit modal
+    const [editingBook, setEditingBook] = useState(null);
+
     const fetchBooks = useCallback(async () => {
         setLoading(true);
         try {
             const params = {
                 page: currentPage,
-                size: 10, // 10 items per page
+                size: 10,
                 search: debouncedSearchTerm,
             };
             const response = await api.get('/librarian/view-all-books', { params });
             setBooks(response.data.items || []);
             setTotalPages(Math.ceil(response.data.total / params.size));
         } catch (err) {
-            setError('Could not load books. Please try again.');
+            setError('Could not load books.');
         } finally {
             setLoading(false);
         }
@@ -56,6 +60,21 @@ function ViewAllBooks() {
     useEffect(() => {
         fetchBooks();
     }, [fetchBooks]);
+
+    // Handler to update a book in the list after editing
+    const handleUpdateBook = (updatedBook) => {
+        setBooks(currentBooks =>
+            currentBooks.map(book => (book.id === updatedBook.id ? updatedBook : book))
+        );
+    };
+
+    // Handler to remove a book from the list after deleting
+    const handleDeleteBook = (deletedBookId) => {
+        setBooks(currentBooks =>
+            currentBooks.filter(book => book.id !== deletedBookId)
+        );
+        // Optional: Re-fetch stats if total count needs to be updated immediately
+    };
 
     return (
         <>
@@ -94,7 +113,9 @@ function ViewAllBooks() {
                                             <td>{book.category || 'N/A'}</td>
                                             <td>{book.source}</td>
                                             <td>{book.rating.toFixed(1)}</td>
-                                            <td><button className="btn-edit">Edit</button></td>
+                                            <td>
+                                                <button className="btn-edit" onClick={() => setEditingBook(book)}>Edit</button>
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
@@ -116,6 +137,15 @@ function ViewAllBooks() {
                         </button>
                     </div>
                 </>
+            )}
+
+            {editingBook && (
+                <EditBookModal
+                    book={editingBook}
+                    onClose={() => setEditingBook(null)}
+                    onUpdate={handleUpdateBook}
+                    onDelete={handleDeleteBook}
+                />
             )}
         </>
     );
