@@ -1,6 +1,9 @@
 # HOW TO SET UP BEFORE YOU START DEVELOPMENT
 # ------------------------------------------
 
+IMPORTANT!
+- Make sure you have the .env file in the backend folder! If you don't have it ask Marcus.
+
 1. Ensure you have the latest version, if not fetch origin
 
 2. Go to the root directory of DD-BOT
