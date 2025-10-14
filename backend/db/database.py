@@ -135,6 +135,41 @@ def insert_default_admin():
     finally:
         db.close()
         
+def insert_default_librarian():
+    print("Inserting default librarian...")
+    from models.tables import User
+    
+    DEFAULT_ADMIN_PASSWORD = os.getenv("DEFAULT_ADMIN_PASSWORD")
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    password_hashed = pwd_context.hash(DEFAULT_ADMIN_PASSWORD)
+    
+    librarian_user = User(
+        username="librarian",
+        hashed_password=password_hashed,
+        first_name="Librarian",
+        last_name="01",
+        role_id = 4, # admin role id
+        is_verified = True
+    )
+    
+    db: Session = SessionLocal()
+    
+    try:
+        exists = db.query(User).filter(User.username == librarian_user.username).first()
+        
+        if not exists:
+            db.add(librarian_user)
+        else:
+            print(f"Default librarian already in database: {librarian_user.username}")
+              
+        db.commit()  
+          
+    except Exception as e:
+        db.rollback()
+        print(f"An error has occured during default librarian insertion: {e}")
+    finally:
+        db.close()
+        
         
 # Default content for the landing page
 DEFAULT_CONTENT = [
@@ -197,6 +232,7 @@ def create_tables_and_seed_it():
     insert_default_roles()
     insert_default_interests()
     insert_default_admin()
+    insert_default_librarian()
     seed_landing_page()
     
 
