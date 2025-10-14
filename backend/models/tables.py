@@ -45,7 +45,7 @@ class Book(Base):
     age_group = Column(String(length=50), nullable=True)
     category = Column(String(length=100))
     description = Column(TEXT)
-    link = Column(String(length=500), nullable=False)
+    link = Column(String(length=500), nullable=False, unique=True)
     rating = Column(FLOAT, default=0)
     source = Column(String(length=100), nullable=False, default="Kaggle")
     
@@ -66,7 +66,7 @@ class Video(Base):
     age_group = Column(String(length=50), nullable=True)
     category = Column(String(length=100))
     description = Column(TEXT)
-    link = Column(String(length=500), nullable=False)
+    link = Column(String(length=500), nullable=False, unique=True)
     rating = Column(FLOAT, default=0)
     source = Column(String(length=100), nullable=False, default="Youtube")
 

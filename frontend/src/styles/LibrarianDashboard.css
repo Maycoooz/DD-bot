@@ -1,0 +1,122 @@
+/* --- Main Container & Layout --- */
+.librarian-dashboard-container {
+    padding: 30px 50px;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    font-family: system-ui, sans-serif;
+}
+
+/* --- Header --- */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 20px;
+}
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 2em;
+    font-weight: 600;
+    color: #00a2ff;
+}
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.btn-logout {
+    padding: 10px 20px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+.btn-logout:hover { background-color: #e9ecef; }
+
+/* --- Stats Container --- */
+.stats-container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 50px;
+    text-align: center;
+}
+.stat-item {
+    background-color: #fff;
+    padding: 20px 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+}
+.stat-label {
+    display: block;
+    font-size: 1em;
+    color: #6c757d;
+    margin-bottom: 5px;
+}
+.stat-value {
+    font-size: 2em;
+    font-weight: 700;
+    color: #212529;
+}
+
+/* --- Main Grid --- */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 35px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.dashboard-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 25px;
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* --- Card Typography --- */
+.dashboard-card h3 {
+    margin: 0 0 10px;
+    font-size: 1.6em;
+    color: white;
+}
+
+.dashboard-card p {
+    margin: 0;
+    font-size: 1em;
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.5;
+}
+
+/* --- Card Color Variants --- */
+.card-add {
+    background-image: linear-gradient(135deg, #28a745 0%, #218838 100%);
+}
+
+.card-view {
+    background-image: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+}
+
+.loading-state {
+    text-align: center;
+    padding: 50px;
+    font-size: 1.5em;
+    color: #6c757d;
+}

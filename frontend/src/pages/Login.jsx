@@ -25,6 +25,8 @@ function Login() {
                 navigate('/child-dashboard');
             } else if (role === 'ADMIN') {
                 navigate('/admin-dashboard');
+            } else if (role === 'LIBRARIAN') {
+                navigate('/librarian-dashboard')
             } else {
                 navigate('/');
             }

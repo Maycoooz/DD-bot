@@ -1,0 +1,27 @@
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); display: flex;
+    justify-content: center; align-items: center; z-index: 1000;
+}
+.add-video-modal {
+    background-color: #fff; border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    width: 100%; max-width: 600px;
+}
+.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; border-bottom: 1px solid #e9ecef; }
+.modal-header h2 { margin: 0; font-size: 1.5em; }
+.btn-close { background: none; border: none; font-size: 2em; cursor: pointer; color: #6c757d; }
+.modal-form { padding: 25px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.form-group { display: flex; flex-direction: column; }
+.form-group.full-width { grid-column: 1 / -1; }
+.form-group label { margin-bottom: 6px; font-weight: 500; color: #495057; }
+.form-group input, .form-group textarea { padding: 10px; border: 1px solid #ced4da; border-radius: 6px; font-size: 1em; }
+.form-group textarea { min-height: 80px; resize: vertical; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; }
+.btn-cancel, .btn-save { padding: 10px 20px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+.btn-cancel { background-color: #f8f9fa; color: #495057; border: 1px solid #ced4da; }
+.btn-save { background-color: #198754; color: white; border: none; }
+.form-message { margin-bottom: 15px; padding: 12px; border-radius: 6px; text-align: center; }
+.form-message.error { background-color: #f8d7da; color: #721c24; }
+.form-message.success { background-color: #d4edda; color: #155724; }
