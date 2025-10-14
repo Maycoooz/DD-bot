@@ -1,6 +1,6 @@
 # In schemas/media.py
 from pydantic import BaseModel, ConfigDict
-from typing import Optional
+from typing import Optional, List
 
 # --- Book Schemas ---
 class BookBase(BaseModel):
@@ -28,6 +28,10 @@ class BookResponse(BookBase):
     rating: float
     source: str 
     model_config = ConfigDict(from_attributes=True)
+    
+class PaginatedBookResponse(BaseModel):
+    total: int
+    items: List[BookResponse]
 
 # --- Video Schemas ---
 class VideoBase(BaseModel):
@@ -55,3 +59,7 @@ class VideoResponse(VideoBase):
     rating: float
     source: str
     model_config = ConfigDict(from_attributes=True)
+    
+class PaginatedVideoResponse(BaseModel):
+    total: int
+    items: List[VideoResponse]

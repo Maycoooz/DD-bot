@@ -4,15 +4,17 @@ import api from '../api/axiosConfig';
 import '../styles/LibrarianDashboard.css';
 import AddBookModal from './LibrarianAddBook'
 import AddVideoModal from './LibrarianAddVideo';
+import ViewAllBooks from './LibrarianViewAllBooks';
+import ViewAllVideos from './LibrarianViewAllVideos';
 
 function LibrarianDashboard() {
     const navigate = useNavigate();
     const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-
     const [stats, setStats] = useState({ totalBooks: 0, totalVideos: 0 });
     const [loading, setLoading] = useState(true);
     const [isAddBookModalOpen, setIsAddBookModalOpen] = useState(false);
     const [isAddVideoModalOpen, setIsAddVideoModalOpen] = useState(false);
+    const [activeView, setActiveView] = useState('home'); 
 
     const fetchStats = async (isInitialLoad = false) => {
         if (isInitialLoad) {
@@ -23,10 +25,13 @@ function LibrarianDashboard() {
                 api.get('/librarian/view-all-books'),
                 api.get('/librarian/view-all-videos')
             ]);
+            
+            // Reads the 'total' property from both paginated responses
             setStats({
-                totalBooks: booksResponse.data.length,
-                totalVideos: videosResponse.data.length
+                totalBooks: booksResponse.data.total,
+                totalVideos: videosResponse.data.total
             });
+
         } catch (error) {
             console.error("Failed to fetch dashboard stats:", error);
         } finally {
@@ -45,20 +50,8 @@ function LibrarianDashboard() {
         navigate('/login');
     };
 
-    if (loading) {
-        return <div className="loading-state">Loading Dashboard...</div>;
-    }
-
-    return (
-        <div className="librarian-dashboard-container">
-            <header className="dashboard-header">
-                <h1>Librarian Dashboard</h1>
-                <div className="header-actions">
-                    <span>Welcome Librarian, <strong>{profile.first_name}</strong></span>
-                    <button onClick={handleLogout} className="btn-logout">Logout</button>
-                </div>
-            </header>
-
+    const renderHomeView = () => (
+        <>
             <div className="stats-container">
                 <div className="stat-item">
                     <span className="stat-label">Total Books</span>
@@ -69,39 +62,60 @@ function LibrarianDashboard() {
                     <span className="stat-value">{stats.totalVideos}</span>
                 </div>
             </div>
-
             <main className="dashboard-grid">
                 <button onClick={() => setIsAddBookModalOpen(true)} className="dashboard-card card-add">
-                    <h3>Add Book</h3>
-                    <p>Create a new book entry in the database.</p>
+                    <h3>Add Book</h3><p>Create a new book entry.</p>
                 </button>
-                <button onClick={() => navigate('/librarian/view-books')} className="dashboard-card card-view">
-                    <h3>View All Books</h3>
-                    <p>Browse and manage the existing book collection.</p>
+                <button onClick={() => setActiveView('viewBooks')} className="dashboard-card card-view">
+                    <h3>View All Books</h3><p>Browse and manage books.</p>
                 </button>
                 <button onClick={() => setIsAddVideoModalOpen(true)} className="dashboard-card card-add">
-                    <h3>Add Video</h3>
-                    <p>Create a new video entry in the database.</p>
+                    <h3>Add Video</h3><p>Create a new video entry.</p>
                 </button>
-                <button onClick={() => navigate('/librarian/view-videos')} className="dashboard-card card-view">
-                    <h3>View All Videos</h3>
-                    <p>Browse and manage the existing video collection.</p>
+                <button onClick={() => setActiveView('viewVideos')} className="dashboard-card card-view">
+                    <h3>View All Videos</h3><p>Browse and manage videos.</p>
                 </button>
             </main>
+        </>
+    );
 
-            {isAddBookModalOpen && (
-                <AddBookModal 
-                    onClose={() => setIsAddBookModalOpen(false)}
-                    onBookAdded={() => fetchStats(false)}
-                />
-            )}
+    const renderActiveView = () => {
+        switch (activeView) {
+            case 'viewBooks':
+                return <ViewAllBooks />;
+            case 'viewVideos':
+                return <ViewAllVideos />;
+            default:
+                return renderHomeView();
+        }
+    };
 
-            {isAddVideoModalOpen && (
-                <AddVideoModal
-                    onClose={() => setIsAddVideoModalOpen(false)}
-                    onVideoAdded={() => fetchStats(false)}
-                />
-            )}
+    if (loading) {
+        return <div className="loading-state">Loading Dashboard...</div>;
+    }
+
+    return (
+        <div className="librarian-dashboard-container">
+            <header className="dashboard-header">
+                {activeView === 'home' ? (
+                    <h1>Librarian Dashboard</h1>
+                ) : (
+                    <button onClick={() => setActiveView('home')} className="header-back-btn">
+                        &larr; Back to Dashboard
+                    </button>
+                )}
+                <div className="header-actions">
+                    <span>Welcome Librarian, <strong>{profile.first_name}</strong></span>
+                    <button onClick={handleLogout} className="btn-logout">Logout</button>
+                </div>
+            </header>
+
+            <div className="admin-content-area">
+                {renderActiveView()}
+            </div>
+
+            {isAddBookModalOpen && <AddBookModal onClose={() => setIsAddBookModalOpen(false)} onBookAdded={() => fetchStats(false)} />}
+            {isAddVideoModalOpen && <AddVideoModal onClose={() => setIsAddVideoModalOpen(false)} onVideoAdded={() => fetchStats(false)} />}
         </div>
     );
 }

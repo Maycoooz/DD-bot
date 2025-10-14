@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from db.database import get_db
 from models import tables
 from schemas.auth import StatusMessage
-from schemas.media import BookCreate, BookResponse, BookUpdate, VideoCreate, VideoResponse, VideoUpdate
+from schemas.media import BookCreate, BookResponse, BookUpdate, VideoCreate, VideoResponse, VideoUpdate, PaginatedBookResponse, PaginatedVideoResponse
 from auth.auth_handler import get_current_librarian_user
 
 router = APIRouter(
@@ -32,15 +32,44 @@ def check_link_exists(link: str, db: Session):
 
 
 # --- GET (Read) Routes - Public ---
-@router.get("/view-all-books", response_model=List[BookResponse])
-def view_all_books(db: Session = Depends(get_db)):
-    books = db.query(tables.Book).all()
-    return books
+@router.get("/view-all-books", response_model=PaginatedBookResponse)
+def view_all_books(
+    db: Session = Depends(get_db),
+    search: Optional[str] = None,
+    page: int = 1,
+    size: int = 10 # Default to 10 items per page
+):
+    query = db.query(tables.Book)
 
-@router.get("/view-all-videos", response_model=List[VideoResponse])
-def view_all_videos(db: Session = Depends(get_db)):
-    videos = db.query(tables.Video).all()
-    return videos
+    # If a search term is provided, filter by title
+    if search:
+        query = query.filter(tables.Book.title.contains(search))
+
+    # Get the total count of items that match the query
+    total = query.count()
+
+    # Apply pagination
+    books = query.offset((page - 1) * size).limit(size).all()
+
+    # Return the structured response
+    return PaginatedBookResponse(total=total, items=books)
+
+@router.get("/view-all-videos", response_model=PaginatedVideoResponse)
+def view_all_videos(
+    db: Session = Depends(get_db),
+    search: Optional[str] = None,
+    page: int = 1,
+    size: int = 10
+):
+    query = db.query(tables.Video)
+
+    if search:
+        query = query.filter(tables.Video.title.contains(search))
+
+    total = query.count()
+    videos = query.offset((page - 1) * size).limit(size).all()
+    
+    return PaginatedVideoResponse(total=total, items=videos)
 
 # --- POST (Create) Routes - Librarian Only ---
 @router.post("/add-book", response_model=BookResponse, status_code=status.HTTP_201_CREATED)
