@@ -73,7 +73,7 @@
     margin: 0 auto;
 }
 
-.dashboard-card {
+.librarian-dashboard-container .dashboard-card {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -92,13 +92,13 @@
 }
 
 /* --- Card Typography --- */
-.dashboard-card h3 {
+.librarian-dashboard-container .dashboard-card h3 {
     margin: 0 0 10px;
     font-size: 1.6em;
     color: white;
 }
 
-.dashboard-card p {
+.librarian-dashboard-container .dashboard-card p {
     margin: 0;
     font-size: 1em;
     color: rgba(255, 255, 255, 0.8);
