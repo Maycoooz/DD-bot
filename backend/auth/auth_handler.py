@@ -110,13 +110,14 @@ def create_verification_token(data: dict, expires_delta: timedelta = timedelta(m
 # ------------------------------- EMAIL CONFIG (SendGrid) ------------------------------- #
 conf = ConnectionConfig(
     MAIL_USERNAME="apikey",                      # literally the word "apikey"
-    MAIL_PASSWORD=os.getenv("SENDGRID_API_KEY"), # the SendGrid API key from Render
+    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"), # the SendGrid API key from Render
     MAIL_FROM=os.getenv("MAIL_FROM"),            # e.g. noreply@yourdomain.com or your Gmail
     MAIL_PORT=587,
     MAIL_SERVER="smtp.sendgrid.net",
     MAIL_STARTTLS=True,
     MAIL_SSL_TLS=False,
     USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True
 )
 
 async def send_verification_email(email: str, token: str):
