@@ -106,8 +106,8 @@ conf = ConnectionConfig(
     MAIL_FROM=os.getenv("MAIL_FROM"),            # e.g. noreply@yourdomain.com or your Gmail
     MAIL_PORT=587,
     MAIL_SERVER="smtp.sendgrid.net",
-    MAIL_TLS=True,
-    MAIL_SSL=False,
+    MAIL_STARTTLS=True,
+    MAIL_SSL_TLS=False,
     USE_CREDENTIALS=True,
 )
 
@@ -116,6 +116,7 @@ async def send_verification_email(email: str, token: str):
     verification_url = f"https://ddbot-ch6g.vercel.app/verify-email?token={token}"
 
     html_body = f"""
+    
     <html>
         <body>
             <h3>Welcome to DD-bot!</h3>
