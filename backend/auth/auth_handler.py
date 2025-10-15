@@ -98,6 +98,14 @@ async def get_current_librarian_user(current_user: User = Depends(get_current_ac
             detail="The user does not have privileges to perform this action."
         )
     return current_user
+    
+# ------------------------------- EMAIL VERIFICATION TOKEN ------------------------------- #
+def create_verification_token(data: dict, expires_delta: timedelta = timedelta(minutes=15)):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + expires_delta
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, VERIFICATION_EMAIL_SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
 
 # ------------------------------- EMAIL CONFIG (SendGrid) ------------------------------- #
 conf = ConnectionConfig(
