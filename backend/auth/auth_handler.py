@@ -109,16 +109,21 @@ def create_verification_token(data: dict, expires_delta: timedelta = timedelta(m
 
 # ------------------------------- EMAIL CONFIG (SendGrid) ------------------------------- #
 conf = ConnectionConfig(
-    MAIL_USERNAME="apikey",                      # literally the word "apikey"
-    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"), # the SendGrid API key from Render
-    MAIL_FROM=os.getenv("MAIL_FROM"),            # e.g. noreply@yourdomain.com or your Gmail
-    MAIL_PORT=587,
-    MAIL_SERVER="smtp.sendgrid.net",
-    MAIL_STARTTLS=True,
+    MAIL_USERNAME="apikey",                      
+    MAIL_PASSWORD=os.getenv("MAIL_PASSWORD"),    # Your SendGrid API key
+    MAIL_FROM=os.getenv("MAIL_FROM"),
+    MAIL_PORT=587,                               # This line stays but will be ignored
+    MAIL_SERVER="smtp.sendgrid.net",             # Ignored in API mode
+    MAIL_FROM_NAME="DD-bot",                     # Optional
+    MAIL_STARTTLS=False,
     MAIL_SSL_TLS=False,
     USE_CREDENTIALS=True,
-    VALIDATE_CERTS=True
+    VALIDATE_CERTS=True,
+    SUPPRESS_SEND=False,
+    TEMPLATE_FOLDER=None,
+    MAIL_BACKEND="sendgrid"                      # 👈 NEW: use SendGrid API instead of SMTP
 )
+
 
 async def send_verification_email(email: str, token: str):
     # Your front-end link (Vercel app) for email verification:
