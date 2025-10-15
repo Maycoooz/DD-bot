@@ -99,38 +99,45 @@ async def get_current_librarian_user(current_user: User = Depends(get_current_ac
         )
     return current_user
 
-
-
-
-# ------------------------------- FOR EMAIL VERIFICATION ------------------------------- #
-def create_verification_token(data: dict, expires_delta: timedelta = timedelta(minutes=15)):
-    to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, VERIFICATION_EMAIL_SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-
+# ------------------------------- EMAIL CONFIG (SendGrid) ------------------------------- #
 conf = ConnectionConfig(
-    MAIL_USERNAME = os.getenv("MAIL_USERNAME"),
-    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD"),
-    MAIL_FROM = os.getenv("MAIL_FROM"),
-    MAIL_PORT = os.getenv("MAIL_PORT"),
-    MAIL_SERVER = os.getenv("MAIL_SERVER"),
-    MAIL_STARTTLS = True,
-    MAIL_SSL_TLS = False,
-    USE_CREDENTIALS = True,
-    VALIDATE_CERTS = True
+    MAIL_USERNAME="apikey",                      # literally the word "apikey"
+    MAIL_PASSWORD=os.getenv("SENDGRID_API_KEY"), # the SendGrid API key from Render
+    MAIL_FROM=os.getenv("MAIL_FROM"),            # e.g. noreply@yourdomain.com or your Gmail
+    MAIL_PORT=587,
+    MAIL_SERVER="smtp.sendgrid.net",
+    MAIL_TLS=True,
+    MAIL_SSL=False,
+    USE_CREDENTIALS=True,
 )
 
 async def send_verification_email(email: str, token: str):
-    verification_url = f"http://localhost:5173/verify-email?token={token}"
-    
+    # Your front-end link (Vercel app) for email verification:
+    verification_url = f"https://ddbot-ch6g.vercel.app/verify-email?token={token}"
+
+    html_body = f"""
+    <html>
+        <body>
+            <h3>Welcome to DD-bot!</h3>
+            <p>Click the link below to verify your email address:</p>
+            <a href="{verification_url}" target="_blank"
+               style="background:#4CAF50;color:white;padding:10px 15px;
+                      text-decoration:none;border-radius:5px;">Verify Email</a>
+            <p>If you didn’t create this account, just ignore this email.</p>
+        </body>
+    </html>
+    """
+
     message = MessageSchema(
-        subject = "Verify Your Email Address",
-        recipients = [email],
-        body = f"Please click on the link to verify your email: {verification_url}",
-        subtype = "html"
+        subject="Verify Your DD-bot Email",
+        recipients=[email],
+        body=html_body,
+        subtype="html",
     )
-    
+
     fm = FastMail(conf)
-    await fm.send_message(message)
+    try:
+        await fm.send_message(message)
+        print(f"✅ Verification email sent to {email}")
+    except Exception as e:
+        print(f"❌ Email sending failed: {e}")
