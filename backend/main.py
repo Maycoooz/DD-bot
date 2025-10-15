@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from db.database import create_tables_and_seed_it
 from contextlib import asynccontextmanager
 
-from routers import auth, users, parent, admin
+from routers import auth, users, parent, admin, librarian
 
 
 @asynccontextmanager
@@ -27,7 +27,6 @@ app = FastAPI(
 origins = [
     "http://localhost:8000",
     "http://localhost:5173",
-    "https://ddbot-ch6g.vercel.app",
 ]
 
 app.add_middleware(
@@ -43,5 +42,6 @@ app.include_router(auth.router, prefix="/auth")
 app.include_router(users.router)
 app.include_router(parent.router)
 app.include_router(admin.router)
+app.include_router(librarian.router)
 
 
