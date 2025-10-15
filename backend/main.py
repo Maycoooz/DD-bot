@@ -28,7 +28,7 @@ origins = [
     "http://localhost:8000",
     "http://localhost:5173",
     "https://ddbot-ch6g.vercel.app",
-    "https://www.ddbot-ch6g.vercel.app".
+    "https://www.ddbot-ch6g.vercel.app"
 ]
 
 app.add_middleware(
