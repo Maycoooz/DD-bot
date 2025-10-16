@@ -44,6 +44,7 @@ function AdminManageLibrarians() {
                         <tr>
                             <th>Username</th>
                             <th>Name</th>
+                            <th>Email</th> {/* Added Email Header */}
                             <th>Email Status</th>
                             <th>Admin Approval</th>
                             <th>Actions</th>
@@ -54,6 +55,7 @@ function AdminManageLibrarians() {
                             <tr key={librarian.id}>
                                 <td>{librarian.username}</td>
                                 <td>{`${librarian.first_name} ${librarian.last_name}`}</td>
+                                <td>{librarian.email || 'N/A'}</td> {/* Added Email Data */}
                                 <td>{librarian.is_verified ? 'Verified' : 'Pending'}</td>
                                 <td>{librarian.librarian_verified ? 'Approved' : 'Pending'}</td>
                                 <td>

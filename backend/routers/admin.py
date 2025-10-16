@@ -5,7 +5,8 @@ from sqlalchemy import or_
 from auth.auth_handler import get_current_admin_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
 from schemas.admin import ViewAllUserResponse
-from schemas.librarian import LibrarianResponse, LibrarianWithMediaResponse
+from schemas.librarian import LibrarianResponse
+from schemas.media import PaginatedBookResponse, PaginatedVideoResponse
 from models.tables import User, LandingPage, Book, Video
 from schemas.landing_page import LandingPageResponse, LandingPageUpdate
 
@@ -111,26 +112,6 @@ def view_all_librarians(
     librarians = db.query(User).filter(User.role_id == 4).all() # 4 is LIBRARIAN role_id
     return librarians
     
-@router.get("/view-librarian/{librarian_id}", response_model=LibrarianWithMediaResponse)
-def view_librarian_details(
-    librarian_id: int,
-    db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin_user)
-):
-    librarian = db.query(User).filter(User.id == librarian_id, User.role_id == 4).first()
-    if not librarian:
-        raise HTTPException(status_code=404, detail="Librarian not found")
-
-    books = db.query(Book).filter(Book.source == librarian.username).all()
-    videos = db.query(Video).filter(Video.source == librarian.username).all()
-    
-    # Manually construct the response object
-    return LibrarianWithMediaResponse(
-        **librarian.__dict__,
-        books=books,
-        videos=videos
-    )
-    
 @router.delete("/delete-librarian/{librarian_id}", response_model=StatusMessage)
 def delete_librarian_and_media(
     librarian_id: int,
@@ -153,3 +134,39 @@ def delete_librarian_and_media(
     db.commit()
     
     return StatusMessage(status="success", message=f"Librarian '{librarian_username}' and all their contributions have been deleted.")
+
+# Endpoint to get a paginated list of books by a specific librarian
+@router.get("/librarian/{librarian_id}/books", response_model=PaginatedBookResponse)
+def get_librarian_books(
+    librarian_id: int,
+    db: Session = Depends(get_db),
+    page: int = 1,
+    size: int = 5  # Show 5 items per page
+):
+    librarian = db.query(User).filter(User.id == librarian_id, User.role_id == 4).first()
+    if not librarian:
+        raise HTTPException(status_code=404, detail="Librarian not found")
+
+    query = db.query(Book).filter(Book.source == librarian.username).order_by(Book.id.desc())
+    total = query.count()
+    books = query.offset((page - 1) * size).limit(size).all()
+    
+    return PaginatedBookResponse(total=total, items=books)
+
+# Endpoint to get a paginated list of videos by a specific librarian
+@router.get("/librarian/{librarian_id}/videos", response_model=PaginatedVideoResponse)
+def get_librarian_videos(
+    librarian_id: int,
+    db: Session = Depends(get_db),
+    page: int = 1,
+    size: int = 5
+):
+    librarian = db.query(User).filter(User.id == librarian_id, User.role_id == 4).first()
+    if not librarian:
+        raise HTTPException(status_code=404, detail="Librarian not found")
+
+    query = db.query(Video).filter(Video.source == librarian.username).order_by(Video.id.desc())
+    total = query.count()
+    videos = query.offset((page - 1) * size).limit(size).all()
+    
+    return PaginatedVideoResponse(total=total, items=videos)

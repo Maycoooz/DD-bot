@@ -6,15 +6,35 @@
 .view-librarian-modal {
     background-color: #fff; border-radius: 12px;
     box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-    width: 100%; max-width: 600px;
+    width: 100%; max-width: 800px;
 }
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; border-bottom: 1px solid #e9ecef; }
 .modal-header h3 { margin: 0; font-size: 1.5em; }
 .btn-back { padding: 8px 16px; border: 1px solid #ced4da; background: #fff; border-radius: 6px; cursor: pointer; }
-.modal-body { padding: 25px; max-height: 60vh; overflow-y: auto; }
-.media-section { margin-bottom: 20px; }
-.media-section h4 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 5px; }
-.media-list { list-style-type: disc; padding-left: 20px; }
-.modal-footer { padding: 20px 25px; border-top: 1px solid #e9ecef; text-align: center; }
-.warning-text { color: #dc3545; font-size: 0.9em; margin-bottom: 15px; }
+
+.librarian-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 20px 25px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+.librarian-details div { display: flex; flex-direction: column; }
+.librarian-details label { font-size: 0.8em; color: #6c757d; text-transform: uppercase; margin-bottom: 2px; }
+.librarian-details span { font-weight: 500; }
+
+.modal-body { padding: 25px; max-height: 50vh; overflow-y: auto; }
+.media-section { margin-bottom: 25px; }
+.media-section h4 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+
+.media-table-modal { width: 100%; border-collapse: collapse; }
+.media-table-modal th, .media-table-modal td { padding: 8px; text-align: left; border-bottom: 1px solid #f1f3f5; }
+.media-table-modal th { font-size: 0.9em; color: #6c757d; }
+
+.pagination-controls-modal { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 10px; font-size: 0.9em; }
+.pagination-controls-modal button { padding: 4px 8px; border: 1px solid #ced4da; background: #fff; border-radius: 4px; cursor: pointer; }
+.pagination-controls-modal button:disabled { background-color: #e9ecef; cursor: not-allowed; }
+
+.modal-footer { padding: 20px 25px; border-top: 1px solid #e9ecef; text-align: right; }
 .btn-delete { padding: 10px 25px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; background-color: #dc3545; color: white; }

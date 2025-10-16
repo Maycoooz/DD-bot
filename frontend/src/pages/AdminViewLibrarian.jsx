@@ -2,27 +2,58 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import '../styles/AdminViewLibrarian.css';
 
-function ViewLibrarianModal({ librarian, onClose, onDelete }) {
-    const [details, setDetails] = useState(null);
+const PaginatedMediaTable = ({ title, fetchFunction }) => {
+    const [data, setData] = useState({ items: [], total: 0 });
+    const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+    const size = 5; // 5 items per page
 
     useEffect(() => {
-        const fetchDetails = async () => {
+        const fetchData = async () => {
+            setLoading(true);
             try {
-                const response = await api.get(`/admin/view-librarian/${librarian.id}`);
-                setDetails(response.data);
-            } catch (err) {
-                setError('Failed to load librarian details.');
+                const response = await fetchFunction(currentPage, size);
+                setData(response.data);
+            } catch (error) {
+                console.error(`Failed to fetch ${title}:`, error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchDetails();
-    }, [librarian.id]);
+        fetchData();
+    }, [currentPage, fetchFunction, title]);
+
+    const totalPages = Math.ceil(data.total / size);
+
+    return (
+        <div className="media-section">
+            <h4>{title} ({data.total})</h4>
+            {loading ? <p>Loading...</p> : (
+                <>
+                    <table className="media-table-modal">
+                        <thead><tr><th>Title</th></tr></thead>
+                        <tbody>
+                            {data.items.length > 0 ? data.items.map(item => (
+                                <tr key={item.id}><td>{item.title}</td></tr>
+                            )) : <tr><td>No items found.</td></tr>}
+                        </tbody>
+                    </table>
+                    <div className="pagination-controls-modal">
+                        <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>Prev</button>
+                        <span>Page {currentPage} of {totalPages || 1}</span>
+                        <button onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}>Next</button>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
+
+function ViewLibrarianModal({ librarian, onClose, onDelete }) {
+    const [error, setError] = useState('');
 
     const handleDelete = async () => {
-        if (window.confirm(`Are you sure you want to delete librarian '${librarian.username}' and all their contributions? This action cannot be undone.`)) {
+        if (window.confirm(`Are you sure you want to delete librarian '${librarian.username}' and all their contributions? This is irreversible.`)) {
             try {
                 await api.delete(`/admin/delete-librarian/${librarian.id}`);
                 onDelete(librarian.id);
@@ -36,29 +67,28 @@ function ViewLibrarianModal({ librarian, onClose, onDelete }) {
         <div className="modal-overlay">
             <div className="view-librarian-modal">
                 <div className="modal-header">
-                    <h3>{librarian.username}</h3>
+                    <h3>View Librarian</h3>
                     <button onClick={onClose} className="btn-back">Back</button>
                 </div>
+                <div className="librarian-details">
+                    <div><label>Username</label><span>{librarian.username}</span></div>
+                    <div><label>First Name</label><span>{librarian.first_name}</span></div>
+                    <div><label>Last Name</label><span>{librarian.last_name}</span></div>
+                    <div><label>Email Verified</label><span>{librarian.is_verified ? 'Yes' : 'No'}</span></div>
+                    <div><label>Admin Approved</label><span>{librarian.librarian_verified ? 'Yes' : 'No'}</span></div>
+                </div>
                 <div className="modal-body">
-                    {loading ? <p>Loading details...</p> : error ? <p className="error-state">{error}</p> : (
-                        <>
-                            <div className="media-section">
-                                <h4>Books Added ({details?.books.length || 0})</h4>
-                                <ul className="media-list">
-                                    {details?.books.map(book => <li key={book.id}>{book.title}</li>)}
-                                </ul>
-                            </div>
-                            <div className="media-section">
-                                <h4>Videos Added ({details?.videos.length || 0})</h4>
-                                <ul className="media-list">
-                                    {details?.videos.map(video => <li key={video.id}>{video.title}</li>)}
-                                </ul>
-                            </div>
-                        </>
-                    )}
+                    {error && <p className="error-state">{error}</p>}
+                    <PaginatedMediaTable 
+                        title="Books Added"
+                        fetchFunction={(page, size) => api.get(`/admin/librarian/${librarian.id}/books`, { params: { page, size } })}
+                    />
+                    <PaginatedMediaTable 
+                        title="Videos Added"
+                        fetchFunction={(page, size) => api.get(`/admin/librarian/${librarian.id}/videos`, { params: { page, size } })}
+                    />
                 </div>
                 <div className="modal-footer">
-                    <p className="warning-text">Warning! Deleting this librarian will also permanently delete all books and videos they have added.</p>
                     <button onClick={handleDelete} className="btn-delete">Delete Librarian</button>
                 </div>
             </div>

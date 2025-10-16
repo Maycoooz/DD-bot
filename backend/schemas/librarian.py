@@ -39,7 +39,3 @@ class LibrarianResponse(BaseModel):
     librarian_verified: bool
     
     model_config = ConfigDict(from_attributes=True)
-    
-class LibrarianWithMediaResponse(LibrarianRegistrationResponse):
-    books: List[BookResponse]
-    videos: List[VideoResponse]
