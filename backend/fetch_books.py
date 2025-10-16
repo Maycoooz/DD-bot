@@ -21,12 +21,12 @@ with open(csv_file, newline='', encoding="utf-8") as f:
         age_group = row.get("Age", "Unknown")[:255]
         description = row.get("Description", "") or row.get("Product_Details", "")
         link = row.get("Link", "")
-        rating = row.get("Rating_out_of_5", 0)
+        rating = 0
 
-        cursor.execute("SELECT COUNT(*) FROM Book WHERE title=%s AND link=%s", (title, link))
+        cursor.execute("SELECT COUNT(*) FROM book WHERE title=%s AND link=%s", (title, link))
         if cursor.fetchone()[0] == 0:
             cursor.execute("""
-                INSERT INTO Book (title, author, age_group, category, description, link, rating, source)
+                INSERT INTO book (title, author, age_group, category, description, link, rating, source)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """, (title, author, age_group, "Children", description, link, rating, "Kaggle"))
             books_added += 1

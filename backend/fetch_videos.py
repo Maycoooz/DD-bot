@@ -48,10 +48,10 @@ while True:
         link = f"https://www.youtube.com/watch?v={item['id']['videoId']}"
         rating = 0
 
-        cursor.execute("SELECT COUNT(*) FROM Video WHERE title=%s AND link=%s", (title, link))
+        cursor.execute("SELECT COUNT(*) FROM video WHERE title=%s AND link=%s", (title, link))
         if cursor.fetchone()[0] == 0:
             cursor.execute("""
-                INSERT INTO Video (title, creator, age_group, category, description, link, rating, source)
+                INSERT INTO video (title, creator, age_group, category, description, link, rating, source)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """, (title, creator, age_group, category, description, link, rating, "YouTube"))
             videos_added += 1

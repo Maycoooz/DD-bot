@@ -36,6 +36,7 @@ function ViewAllVideos() {
                 search: debouncedSearchTerm,
             };
             const response = await api.get('/librarian/view-all-videos', { params });
+            console.log("api respinse for videos:" , response.data);
             setVideos(response.data.items || []);
             setTotalPages(Math.ceil(response.data.total / params.size));
         } catch (err) {

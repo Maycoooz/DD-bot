@@ -128,8 +128,15 @@ async def login_for_access_token( form_data: OAuth2PasswordRequestForm = Depends
     if not user.is_verified:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Please verify your email before logging in.")
         
-    # Get role information as well
+    # Get role information
     user_role_name = user.role.name.value
+    
+    # Additional check ONLY for librarians to see if an admin has approved them
+    if user_role_name == "LIBRARIAN" and not user.librarian_verified:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your librarian account is awaiting admin approval. Please check back later."
+        )
         
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(

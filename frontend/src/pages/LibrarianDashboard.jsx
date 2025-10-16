@@ -15,6 +15,7 @@ function LibrarianDashboard() {
     const [isAddBookModalOpen, setIsAddBookModalOpen] = useState(false);
     const [isAddVideoModalOpen, setIsAddVideoModalOpen] = useState(false);
     const [activeView, setActiveView] = useState('home'); 
+    const [refreshKey, setRefreshKey] = useState(0);
 
     const fetchStats = async (isInitialLoad = false) => {
         if (isInitialLoad) {
@@ -22,14 +23,13 @@ function LibrarianDashboard() {
         }
         try {
             const [booksResponse, videosResponse] = await Promise.all([
-                api.get('/librarian/view-all-books'),
-                api.get('/librarian/view-all-videos')
+                api.get('/librarian/view-all-books'), 
+                api.get('/librarian/view-all-videos') 
             ]);
             
-            // Reads the 'total' property from both paginated responses
             setStats({
                 totalBooks: booksResponse.data.total,
-                totalVideos: videosResponse.data.total
+                totalVideos: videosResponse.data.total 
             });
 
         } catch (error) {
@@ -82,9 +82,9 @@ function LibrarianDashboard() {
     const renderActiveView = () => {
         switch (activeView) {
             case 'viewBooks':
-                return <ViewAllBooks />;
+                return <ViewAllBooks key={`books-${refreshKey}`} />;
             case 'viewVideos':
-                return <ViewAllVideos />;
+                return <ViewAllVideos key={`videos-${refreshKey}`} />;
             default:
                 return renderHomeView();
         }
@@ -114,8 +114,25 @@ function LibrarianDashboard() {
                 {renderActiveView()}
             </div>
 
-            {isAddBookModalOpen && <AddBookModal onClose={() => setIsAddBookModalOpen(false)} onBookAdded={() => fetchStats(false)} />}
-            {isAddVideoModalOpen && <AddVideoModal onClose={() => setIsAddVideoModalOpen(false)} onVideoAdded={() => fetchStats(false)} />}
+            {isAddBookModalOpen && 
+                <AddBookModal 
+                    onClose={() => setIsAddBookModalOpen(false)} 
+                    onBookAdded={() => {
+                        fetchStats(false);
+                        setRefreshKey(prevKey => prevKey + 1);
+                    }} 
+                />
+            }
+
+            {isAddVideoModalOpen && 
+                <AddVideoModal 
+                    onClose={() => setIsAddVideoModalOpen(false)} 
+                    onVideoAdded={() => {
+                        fetchStats(false);
+                        setRefreshKey(prevKey => prevKey + 1);
+                    }} 
+                />
+            }
         </div>
     );
 }

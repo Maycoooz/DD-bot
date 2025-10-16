@@ -133,6 +133,7 @@ class User(Base):
     tier = Column(Enum(SubscriptionTier, native_enum=False, length=30), nullable=True) 
     role_id = Column(Integer, ForeignKey("role.id"), nullable=False)
     is_verified = Column(Boolean, default=False, nullable=False, index=True)
+    librarian_verified = Column(Boolean, default=False, nullable=False, index=True)
     
     role = relationship("Role", back_populates="users")
     

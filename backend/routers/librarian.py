@@ -62,13 +62,15 @@ def view_all_videos(
     size: int = 10
 ):
     query = db.query(tables.Video).order_by(tables.Video.id.desc())
-
+    print(f"DEBUG: Found {query.count()} videos in the database before filtering.")
     if search:
         query = query.filter(tables.Video.title.contains(search))
 
+    # Get the total count before pagination
     total = query.count()
+    # Apply pagination to the query
     videos = query.offset((page - 1) * size).limit(size).all()
-    
+    # Return the paginated response object
     return PaginatedVideoResponse(total=total, items=videos)
 
 # --- POST (Create) Routes - Librarian Only ---

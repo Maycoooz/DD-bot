@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.declarative import declarative_base
 from dotenv import load_dotenv
 from passlib.context import CryptContext
+from datetime import date
 
 import os
 load_dotenv()
@@ -135,38 +136,138 @@ def insert_default_admin():
     finally:
         db.close()
         
-def insert_default_librarian():
-    print("Inserting default librarian...")
-    from models.tables import User
+import os
+from datetime import date
+from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+from db.database import SessionLocal # Assuming this is your session maker
+from models.tables import User
+
+def insert_default_librarians():
+    """
+    Inserts two default librarian accounts for testing:
+    1. A fully verified librarian.
+    2. A librarian who is email-verified but pending admin approval.
+    """
+    print("Inserting default librarian accounts...")
     
-    DEFAULT_ADMIN_PASSWORD = os.getenv("DEFAULT_ADMIN_PASSWORD")
+    librarian_configs = [
+        {
+            "username": "librarian_full",
+            "email": "librarian_full@example.com",
+            "first_name": "Librarian",
+            "last_name": "Approved",
+            "country": "Singapore",
+            "gender": "Female",
+            "birthday": date(1990, 1, 1),
+            "race": "Not Specified",
+            "env_password_var": "DEFAULT_LIBRARIAN_FULL_PASSWORD",
+            "is_verified": True,
+            "librarian_verified": True
+        },
+        {
+            "username": "librarian_pending",
+            "email": "librarian_pending@example.com",
+            "first_name": "Librarian",
+            "last_name": "Pending",
+            "country": "Singapore",
+            "gender": "Male",
+            "birthday": date(1995, 5, 5),
+            "race": "Not Specified",
+            "env_password_var": "DEFAULT_LIBRARIAN_PENDING_PASSWORD",
+            "is_verified": True,
+            "librarian_verified": False
+        }
+    ]
+    
+    db: Session = SessionLocal()
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    password_hashed = pwd_context.hash(DEFAULT_ADMIN_PASSWORD)
     
-    librarian_user = User(
-        username="librarian",
+    try:
+        for config in librarian_configs:
+            exists = db.query(User).filter(User.username == config["username"]).first()
+            if exists:
+                print(f"Default librarian '{config['username']}' already exists.")
+                continue
+
+            password = os.getenv("DEFAULT_ADMIN_PASSWORD")
+            if not password:
+                print(f"ERROR: Password environment variable '{config['env_password_var']}' not set. Skipping '{config['username']}'.")
+                continue
+            
+            password_hashed = pwd_context.hash(password)
+            
+            new_librarian = User(
+                username=config["username"],
+                email=config["email"],
+                hashed_password=password_hashed,
+                first_name=config["first_name"],
+                last_name=config["last_name"],
+                country=config["country"],
+                gender=config["gender"],
+                birthday=config["birthday"],
+                race=config["race"],
+                role_id=4, # Assuming 4 is the LIBRARIAN role ID
+                is_verified=config["is_verified"],
+                librarian_verified=config["librarian_verified"]
+            )
+            db.add(new_librarian)
+            print(f"Staged default librarian '{config['username']}' for creation.")
+
+        db.commit()
+        print("Librarian accounts committed successfully.")
+        
+    except Exception as e:
+        db.rollback()
+        print(f"An error occurred during default librarian insertion: {e}")
+    finally:
+        db.close()
+
+def insert_default_parent():
+    print("Inserting default parent account...")
+    
+    DEFAULT_PARENT_PASSWORD = os.getenv("DEFAULT_ADMIN_PASSWORD")
+    
+    # Safety check for the missing password
+    if not DEFAULT_PARENT_PASSWORD:
+        print("ERROR: DEFAULT_PARENT_PASSWORD environment variable not set. Cannot create parent.")
+        return
+
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    password_hashed = pwd_context.hash(DEFAULT_PARENT_PASSWORD)
+    
+    # Define the parent user's details
+    parent_user = User(
+        username="parent",
+        email="parent@example.com",
         hashed_password=password_hashed,
-        first_name="Librarian",
+        first_name="Parent",
         last_name="01",
-        role_id = 4, # admin role id
-        is_verified = True
+        country="Singapore",
+        gender="Male",
+        birthday=date(1985, 10, 15),
+        race="Chinese",
+        role_id=2,  # Assuming 2 is the PARENT role ID
+        is_verified=True,
+        tier="FREE"
     )
     
     db: Session = SessionLocal()
     
     try:
-        exists = db.query(User).filter(User.username == librarian_user.username).first()
+        # Check if a user with this username already exists
+        exists = db.query(User).filter(User.username == parent_user.username).first()
         
         if not exists:
-            db.add(librarian_user)
+            db.add(parent_user)
+            db.commit()
+            print("Default parent user 'parent' created successfully.")
         else:
-            print(f"Default librarian already in database: {librarian_user.username}")
-              
-        db.commit()  
-          
+            print(f"Default parent '{exists.username}' already exists in the database.")
+        
     except Exception as e:
         db.rollback()
-        print(f"An error has occured during default librarian insertion: {e}")
+        print(f"An error occurred during default parent insertion: {e}")
     finally:
         db.close()
         
@@ -232,7 +333,8 @@ def create_tables_and_seed_it():
     insert_default_roles()
     insert_default_interests()
     insert_default_admin()
-    insert_default_librarian()
+    insert_default_librarians()
+    insert_default_parent()
     seed_landing_page()
     
 
