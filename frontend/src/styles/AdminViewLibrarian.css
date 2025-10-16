@@ -14,15 +14,30 @@
 
 .librarian-details {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 15px;
+    /* This creates a fixed 3-column grid */
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px; /* Increased gap for better spacing */
     padding: 20px 25px;
     background-color: #f8f9fa;
     border-bottom: 1px solid #e9ecef;
 }
-.librarian-details div { display: flex; flex-direction: column; }
-.librarian-details label { font-size: 0.8em; color: #6c757d; text-transform: uppercase; margin-bottom: 2px; }
-.librarian-details span { font-weight: 500; }
+
+.librarian-details div {
+    display: flex;
+    flex-direction: column;
+}
+
+.librarian-details label {
+    font-size: 0.8em;
+    color: #6c757d;
+    text-transform: uppercase;
+    margin-bottom: 4px; /* Added more space */
+}
+
+.librarian-details span {
+    font-weight: 500;
+    font-size: 1em; /* Standardized font size */
+}
 
 .modal-body { padding: 25px; max-height: 50vh; overflow-y: auto; }
 .media-section { margin-bottom: 25px; }
@@ -38,3 +53,12 @@
 
 .modal-footer { padding: 20px 25px; border-top: 1px solid #e9ecef; text-align: right; }
 .btn-delete { padding: 10px 25px; border-radius: 6px; font-weight: 600; cursor: pointer; border: none; background-color: #dc3545; color: white; }
+.btn-approve {
+    padding: 10px 25px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background-color: #198754;
+    color: white;
+}

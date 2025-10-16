@@ -170,3 +170,23 @@ def get_librarian_videos(
     videos = query.offset((page - 1) * size).limit(size).all()
     
     return PaginatedVideoResponse(total=total, items=videos)
+
+# approve a librarian by an admin
+@router.patch("/approve-librarian/{librarian_id}", response_model=LibrarianResponse)
+def approve_librarian(
+    librarian_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    librarian = db.query(User).filter(User.id == librarian_id, User.role_id == 4).first()
+    if not librarian:
+        raise HTTPException(status_code=404, detail="Librarian not found")
+    
+    if librarian.librarian_verified:
+        raise HTTPException(status_code=400, detail="Librarian is already approved.")
+        
+    librarian.librarian_verified = True
+    db.commit()
+    db.refresh(librarian)
+    
+    return librarian

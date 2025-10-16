@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import '../styles/AdminViewLibrarian.css';
+import ConfirmationModal from './ConfirmationModal';
 
 const PaginatedMediaTable = ({ title, fetchFunction }) => {
     const [data, setData] = useState({ items: [], total: 0 });
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(true);
-    const size = 5; // 5 items per page
+    const size = 5;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -49,50 +50,84 @@ const PaginatedMediaTable = ({ title, fetchFunction }) => {
     );
 };
 
-function ViewLibrarianModal({ librarian, onClose, onDelete }) {
+function ViewLibrarianModal({ librarian, onClose, onDelete, onApprove }) {
     const [error, setError] = useState('');
+    // 2. Add state for both confirmation modals
+    const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+    const [isConfirmingApprove, setIsConfirmingApprove] = useState(false);
 
-    const handleDelete = async () => {
-        if (window.confirm(`Are you sure you want to delete librarian '${librarian.username}' and all their contributions? This is irreversible.`)) {
-            try {
-                await api.delete(`/admin/delete-librarian/${librarian.id}`);
-                onDelete(librarian.id);
-            } catch (err) {
-                setError(err.response?.data?.detail || 'Failed to delete librarian.');
-            }
+    // This function is called when the user confirms the deletion
+    const handleConfirmDelete = async () => {
+        try {
+            await api.delete(`/admin/delete-librarian/${librarian.id}`);
+            onDelete(librarian.id);
+        } catch (err) {
+            setError(err.response?.data?.detail || 'Failed to delete librarian.');
+        } finally {
+            setIsConfirmingDelete(false); // Always close the modal
         }
     };
 
+    // This function is called when the user confirms the approval
+    const handleConfirmApprove = () => {
+        onApprove(librarian);
+        setIsConfirmingApprove(false);
+    };
+
     return (
-        <div className="modal-overlay">
-            <div className="view-librarian-modal">
-                <div className="modal-header">
-                    <h3>View Librarian</h3>
-                    <button onClick={onClose} className="btn-back">Back</button>
-                </div>
-                <div className="librarian-details">
-                    <div><label>Username</label><span>{librarian.username}</span></div>
-                    <div><label>First Name</label><span>{librarian.first_name}</span></div>
-                    <div><label>Last Name</label><span>{librarian.last_name}</span></div>
-                    <div><label>Email Verified</label><span>{librarian.is_verified ? 'Yes' : 'No'}</span></div>
-                    <div><label>Admin Approved</label><span>{librarian.librarian_verified ? 'Yes' : 'No'}</span></div>
-                </div>
-                <div className="modal-body">
-                    {error && <p className="error-state">{error}</p>}
-                    <PaginatedMediaTable 
-                        title="Books Added"
-                        fetchFunction={(page, size) => api.get(`/admin/librarian/${librarian.id}/books`, { params: { page, size } })}
-                    />
-                    <PaginatedMediaTable 
-                        title="Videos Added"
-                        fetchFunction={(page, size) => api.get(`/admin/librarian/${librarian.id}/videos`, { params: { page, size } })}
-                    />
-                </div>
-                <div className="modal-footer">
-                    <button onClick={handleDelete} className="btn-delete">Delete Librarian</button>
+        <>
+            <div className="modal-overlay">
+                <div className="view-librarian-modal">
+                    <div className="modal-header">
+                        <h3>View Librarian</h3>
+                        <button onClick={onClose} className="btn-back">Back</button>
+                    </div>
+                    <div className="librarian-details">
+                        <div><label>Username</label><span>{librarian.username}</span></div>
+                        <div><label>Name</label><span>{`${librarian.first_name} ${librarian.last_name}`}</span></div>
+                        <div><label>Email</label><span>{librarian.email || 'N/A'}</span></div>
+                        <div><label>Email Verified</label><span>{librarian.is_verified ? 'Yes' : 'No'}</span></div>
+                        <div><label>Admin Approved</label><span>{librarian.librarian_verified ? 'Yes' : 'No'}</span></div>
+                    </div>
+                    <div className="modal-body">
+                        {error && <p className="error-state">{error}</p>}
+                        <PaginatedMediaTable 
+                            title="Books Added"
+                            fetchFunction={(page, size) => api.get(`/admin/librarian/${librarian.id}/books`, { params: { page, size } })}
+                        />
+                        <PaginatedMediaTable 
+                            title="Videos Added"
+                            fetchFunction={(page, size) => api.get(`/admin/librarian/${librarian.id}/videos`, { params: { page, size } })}
+                        />
+                    </div>
+                    <div className="modal-footer">
+                        {/* 3. Update onClick handlers to open the confirmation modals */}
+                        {!librarian.librarian_verified && (
+                            <button onClick={() => setIsConfirmingApprove(true)} className="btn-approve">Approve Librarian</button>
+                        )}
+                        <button onClick={() => setIsConfirmingDelete(true)} className="btn-delete">Delete Librarian</button>
+                    </div>
                 </div>
             </div>
-        </div>
+
+            {/* 4. Conditionally render the confirmation modals */}
+            {isConfirmingDelete && (
+                <ConfirmationModal
+                    message={`Are you sure you want to delete librarian '${librarian.username}' and all their contributions?`}
+                    onConfirm={handleConfirmDelete}
+                    onCancel={() => setIsConfirmingDelete(false)}
+                />
+            )}
+
+            {isConfirmingApprove && (
+                <ConfirmationModal
+                    message={`Are you sure you want to approve librarian '${librarian.username}'?`}
+                    onConfirm={handleConfirmApprove}
+                    onCancel={() => setIsConfirmingApprove(false)}
+                    confirmButtonClass="btn-approve" // This custom class makes the confirm button green
+                />
+            )}
+        </>
     );
 }
 

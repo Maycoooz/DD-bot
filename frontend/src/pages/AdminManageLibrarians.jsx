@@ -30,6 +30,25 @@ function AdminManageLibrarians() {
         setViewingLibrarian(null);
     };
 
+    // Handler for Approving a Librarian 
+    const handleApproveLibrarian = async (librarianToApprove) => {
+        try {
+            const response = await api.patch(`/admin/approve-librarian/${librarianToApprove.id}`);
+            
+            // Update the librarian in the local state to reflect the approval
+            setLibrarians(prev => 
+                prev.map(lib => 
+                    lib.id === librarianToApprove.id ? response.data : lib
+                )
+            );
+
+            setSuccess(`Librarian '${librarianToApprove.username}' has been approved.`);
+            setViewingLibrarian(null); // Close the modal
+        } catch (err) {
+            setError(err.response?.data?.detail || "Failed to approve librarian.");
+        }
+    };
+
     if (loading) return <div>Loading...</div>;
 
     return (
@@ -44,7 +63,7 @@ function AdminManageLibrarians() {
                         <tr>
                             <th>Username</th>
                             <th>Name</th>
-                            <th>Email</th> {/* Added Email Header */}
+                            <th>Email</th>
                             <th>Email Status</th>
                             <th>Admin Approval</th>
                             <th>Actions</th>
@@ -55,7 +74,7 @@ function AdminManageLibrarians() {
                             <tr key={librarian.id}>
                                 <td>{librarian.username}</td>
                                 <td>{`${librarian.first_name} ${librarian.last_name}`}</td>
-                                <td>{librarian.email || 'N/A'}</td> {/* Added Email Data */}
+                                <td>{librarian.email || 'N/A'}</td>
                                 <td>{librarian.is_verified ? 'Verified' : 'Pending'}</td>
                                 <td>{librarian.librarian_verified ? 'Approved' : 'Pending'}</td>
                                 <td>
@@ -72,6 +91,7 @@ function AdminManageLibrarians() {
                     librarian={viewingLibrarian}
                     onClose={() => setViewingLibrarian(null)}
                     onDelete={handleDeleteLibrarian}
+                    onApprove={handleApproveLibrarian}
                 />
             )}
         </>
