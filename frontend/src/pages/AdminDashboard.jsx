@@ -4,6 +4,7 @@ import '../styles/AdminDashboard.css';
 
 import AdminManageUsers from './AdminManageUsers';
 import AdminEditLandingPage from './AdminEditLandingPage';
+import AdminManageLibrarians from './AdminManageLibrarians';
 // Import other components as you create them
 
 const dashboardItems = [
@@ -28,7 +29,9 @@ function AdminDashboard() {
             case 'manageUsers':
                 return <AdminManageUsers />;
             case 'editLandingPage':
-                return <AdminEditLandingPage />
+                return <AdminEditLandingPage />;
+            case 'manageLibrarians':
+                return <AdminManageLibrarians />;
             // Add other cases here
             default:
                 // This renders the grid of buttons

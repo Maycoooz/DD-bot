@@ -5,7 +5,8 @@ from sqlalchemy import or_
 from auth.auth_handler import get_current_admin_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
 from schemas.admin import ViewAllUserResponse
-from models.tables import User, LandingPage
+from schemas.librarian import LibrarianResponse, LibrarianWithMediaResponse
+from models.tables import User, LandingPage, Book, Video
 from schemas.landing_page import LandingPageResponse, LandingPageUpdate
 
 from typing import List
@@ -19,6 +20,7 @@ router = APIRouter(
     prefix="/admin"
 )
 
+# view parent & kids 
 @router.get("/view-all-users", response_model=ViewAllUserResponse)
 def view_all_users(
     db: Session = Depends(get_db), 
@@ -44,7 +46,8 @@ def view_all_users(
         total_parents=total_parents,
         total_kids=total_kids
     )
-    
+
+# delete parent or kid 
 @router.delete("/delete-user/{user_id}", response_model=StatusMessage)
 def delete_user(
     user_id: int,
@@ -99,4 +102,54 @@ def update_landing_page_content(item_id: int, content_update: LandingPageUpdate,
     db.commit()
     db.refresh(db_item)
     return db_item
+
+@router.get("/view-all-librarians", response_model=List[LibrarianResponse])
+def view_all_librarians(
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    librarians = db.query(User).filter(User.role_id == 4).all() # 4 is LIBRARIAN role_id
+    return librarians
     
+@router.get("/view-librarian/{librarian_id}", response_model=LibrarianWithMediaResponse)
+def view_librarian_details(
+    librarian_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    librarian = db.query(User).filter(User.id == librarian_id, User.role_id == 4).first()
+    if not librarian:
+        raise HTTPException(status_code=404, detail="Librarian not found")
+
+    books = db.query(Book).filter(Book.source == librarian.username).all()
+    videos = db.query(Video).filter(Video.source == librarian.username).all()
+    
+    # Manually construct the response object
+    return LibrarianWithMediaResponse(
+        **librarian.__dict__,
+        books=books,
+        videos=videos
+    )
+    
+@router.delete("/delete-librarian/{librarian_id}", response_model=StatusMessage)
+def delete_librarian_and_media(
+    librarian_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    librarian = db.query(User).filter(User.id == librarian_id, User.role_id == 4).first()
+    if not librarian:
+        raise HTTPException(status_code=404, detail="Librarian not found")
+        
+    librarian_username = librarian.username
+
+    # Delete all media sourced by this librarian
+    db.query(Book).filter(Book.source == librarian_username).delete(synchronize_session=False)
+    db.query(Video).filter(Video.source == librarian_username).delete(synchronize_session=False)
+    
+    # Delete the librarian user
+    db.delete(librarian)
+    
+    db.commit()
+    
+    return StatusMessage(status="success", message=f"Librarian '{librarian_username}' and all their contributions have been deleted.")
