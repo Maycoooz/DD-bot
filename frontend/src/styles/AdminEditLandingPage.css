@@ -62,3 +62,34 @@
     background-color: #d4edda;
     color: #155724;
 }
+
+/* Add stuff for the free and pro plans */
+
+.add-feature-form {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px dashed #ced4da;
+}
+
+.add-feature-form input {
+    flex-grow: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    font-size: 1em;
+}
+
+.add-feature-form button {
+    padding: 12px 24px;
+    border: none;
+    background-color: #28a745; 
+    color: white;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.add-feature-form button:hover {
+    background-color: #218838;
+}

@@ -8,7 +8,7 @@ from schemas.admin import ViewAllUserResponse
 from schemas.librarian import LibrarianResponse
 from schemas.media import PaginatedBookResponse, PaginatedVideoResponse
 from models.tables import User, LandingPage, Book, Video
-from schemas.landing_page import LandingPageResponse, LandingPageUpdate
+from schemas.landing_page import LandingPageResponse, LandingPageUpdate, LandingPageCreate
 
 from typing import List
 
@@ -118,6 +118,18 @@ def update_landing_page_content(
     db.commit()
     db.refresh(db_item)
     return db_item
+
+@router.post("/landing-page-content", response_model=LandingPageResponse, status_code=status.HTTP_201_CREATED)
+def create_landing_page_content(
+    content_create: LandingPageCreate,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user)
+):
+    new_item = LandingPage(**content_create.model_dump())
+    db.add(new_item)
+    db.commit()
+    db.refresh(new_item)
+    return new_item
 
 @router.get("/view-all-librarians", response_model=List[LibrarianResponse])
 def view_all_librarians(
