@@ -1,0 +1,9 @@
+.add-review-container { padding: 10px; }
+.add-review-container h2 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.review-form { max-width: 600px; }
+.star-rating .star { font-size: 2.5em; cursor: pointer; color: #ccc; }
+.star-rating .star.filled { color: #ffc107; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-weight: 500; margin-bottom: 8px; }
+.form-group textarea { width: 100%; min-height: 120px; padding: 10px; border-radius: 6px; border: 1px solid #ced4da; }
+.review-form button { padding: 12px 25px; border: none; background: #0d6efd; color: white; border-radius: 6px; font-weight: 600; cursor: pointer; }

@@ -98,14 +98,4 @@ def get_public_landing_page_content(
     content = db.query(LandingPage).all()
     return content
 
-# Parents and Kids 
-@router.post("/users/make-review/{user_id}", response_model=StatusMessage)
-def make_review():
-    pass
-
-# Parents and Kids
-@router.delete("/users/delete-review/{user_id}", response_model=StatusMessage)
-def delete_review():
-    pass
-        
     

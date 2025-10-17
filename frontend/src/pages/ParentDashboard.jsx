@@ -10,6 +10,8 @@ import CreateChild from './ParentCreateChild.jsx';
 import ViewChildAccounts from './ParentViewChildAccounts.jsx'
 import ParentSearchBooks from './ParentSearchBooks.jsx';
 import ParentSearchVideos from './ParentSearchVideos.jsx';
+import AddAppReview from './AddAppReview.jsx';
+import DeleteAppReview from './DeleteAppReview.jsx';
 
 // --- Dashboard Menu Definition ---
 const menuItems = {
@@ -103,9 +105,9 @@ function ParentDashboard() {
             case 'searchVideos':
                 return <ParentSearchVideos></ParentSearchVideos>;
             case 'addReview':
-                return <div><h2>Add Review</h2><p>Review form coming soon...</p></div>;
+                return <AddAppReview></AddAppReview>;
             case 'deleteReview':
-                return <div><h2>Delete Review</h2><p>Delete review interface coming soon...</p></div>;
+                return <DeleteAppReview></DeleteAppReview>
             default:
                 return <div><h2>Welcome</h2><p>Select an option from the sidebar to begin.</p></div>;
         }

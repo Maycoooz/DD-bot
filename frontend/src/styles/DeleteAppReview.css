@@ -1,0 +1,13 @@
+.delete-review-container { padding: 10px; }
+.delete-review-container h2 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.reviews-list { display: flex; flex-direction: column; gap: 20px; }
+.review-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px; border: 1px solid #e9ecef; border-radius: 8px; background: #fff; }
+.review-content .review-stars { color: #ffc107; font-size: 1.2em; }
+.review-content .review-text { margin: 10px 0; color: #495057; }
+.review-content .review-meta {
+    font-size: 0.85em; 
+    color: #6c757d;   
+    margin-top: 10px; 
+    display: block;   
+}
+.btn-delete { padding: 8px 16px; border: none; background-color: #dc3545; color: white; border-radius: 6px; cursor: pointer; }
