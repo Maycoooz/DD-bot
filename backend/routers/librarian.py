@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy import distinct
 from typing import List, Optional
 
 from db.database import get_db
@@ -29,6 +30,15 @@ def check_link_exists(link: str, db: Session):
             detail=f"This link is already in use by the video titled: '{video_exists.title}'"
         )
 
+@router.get("/media-sources", response_model=List[str])
+def get_media_sources(db: Session = Depends(get_db)):
+    book_sources = db.query(distinct(tables.Book.source)).all()
+    video_sources = db.query(distinct(tables.Video.source)).all()
+    
+    # Combine sources from both tables into a set to get unique values
+    all_sources = {source[0] for source in book_sources + video_sources if source[0]}
+    
+    return sorted(list(all_sources))
 
 
 # --- GET Routes Public ---
@@ -36,41 +46,36 @@ def check_link_exists(link: str, db: Session):
 def view_all_books(
     db: Session = Depends(get_db),
     search: Optional[str] = None,
+    source: Optional[str] = None, 
     page: int = 1,
-    size: int = 10 # Default to 10 items per page
+    size: int = 10
 ):
     query = db.query(tables.Book).order_by(tables.Book.id.desc())
-
-    # If a search term is provided, filter by title
     if search:
         query = query.filter(tables.Book.title.contains(search))
+    if source:
+        query = query.filter(tables.Book.source == source)
 
-    # Get the total count of items that match the query
     total = query.count()
-
-    # Apply pagination
     books = query.offset((page - 1) * size).limit(size).all()
-
-    # Return the structured response
     return PaginatedBookResponse(total=total, items=books)
 
 @router.get("/view-all-videos", response_model=PaginatedVideoResponse)
 def view_all_videos(
     db: Session = Depends(get_db),
     search: Optional[str] = None,
+    source: Optional[str] = None, # New filter parameter
     page: int = 1,
     size: int = 10
 ):
     query = db.query(tables.Video).order_by(tables.Video.id.desc())
-    print(f"DEBUG: Found {query.count()} videos in the database before filtering.")
     if search:
         query = query.filter(tables.Video.title.contains(search))
+    if source:
+        query = query.filter(tables.Video.source == source)
 
-    # Get the total count before pagination
     total = query.count()
-    # Apply pagination to the query
     videos = query.offset((page - 1) * size).limit(size).all()
-    # Return the paginated response object
     return PaginatedVideoResponse(total=total, items=videos)
 
 # --- POST (Create) Routes - Librarian Only ---

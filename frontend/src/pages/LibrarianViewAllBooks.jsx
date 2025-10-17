@@ -4,35 +4,40 @@ import api from '../api/axiosConfig';
 import '../styles/LibrarianViewAllMedia.css';
 import EditBookModal from './LibrarianEditBook';
 
-// A debounce hook to prevent excessive API calls while typing
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedValue(value);
-        }, delay);
-        return () => {
-            clearTimeout(handler);
-        };
+        const handler = setTimeout(() => { setDebouncedValue(value); }, delay);
+        return () => { clearTimeout(handler); };
     }, [value, delay]);
     return debouncedValue;
 };
 
 function ViewAllBooks() {
-    const navigate = useNavigate();
-    
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    
-    // State for search and pagination
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [editingBook, setEditingBook] = useState(null);
+    
+    const [sourceFilter, setSourceFilter] = useState('');
+    const [availableSources, setAvailableSources] = useState([]);
+    
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-    // State for the edit modal
-    const [editingBook, setEditingBook] = useState(null);
+    useEffect(() => {
+        const fetchSources = async () => {
+            try {
+                const response = await api.get('/librarian/media-sources');
+                setAvailableSources(response.data);
+            } catch (err) {
+                console.error("Failed to fetch media sources:", err);
+            }
+        };
+        fetchSources();
+    }, []);
 
     const fetchBooks = useCallback(async () => {
         setLoading(true);
@@ -41,6 +46,7 @@ function ViewAllBooks() {
                 page: currentPage,
                 size: 10,
                 search: debouncedSearchTerm,
+                source: sourceFilter,
             };
             const response = await api.get('/librarian/view-all-books', { params });
             setBooks(response.data.items || []);
@@ -50,49 +56,43 @@ function ViewAllBooks() {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, debouncedSearchTerm]);
+    }, [currentPage, debouncedSearchTerm, sourceFilter]);
 
-    useEffect(() => {
-        // Reset to page 1 whenever the search term changes
-        setCurrentPage(1);
-    }, [debouncedSearchTerm]);
+    useEffect(() => { setCurrentPage(1); }, [debouncedSearchTerm, sourceFilter]);
+    useEffect(() => { fetchBooks(); }, [fetchBooks]);
 
-    useEffect(() => {
-        fetchBooks();
-    }, [fetchBooks]);
-
-    // Handler to update a book in the list after editing
     const handleUpdateBook = (updatedBook) => {
         setBooks(currentBooks =>
             currentBooks.map(book => (book.id === updatedBook.id ? updatedBook : book))
         );
     };
 
-    // Handler to remove a book from the list after deleting
     const handleDeleteBook = (deletedBookId) => {
         setBooks(currentBooks =>
             currentBooks.filter(book => book.id !== deletedBookId)
         );
-        // Optional: Re-fetch stats if total count needs to be updated immediately
     };
 
     return (
         <>
             <h2>View All Books</h2>
-            <div className="search-container">
+            <div className="filters-container">
                 <input
                     type="text"
                     placeholder="Search by Title..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
+                <select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)}>
+                    <option value="">Filter by source...</option>
+                    {availableSources.map(source => (
+                        <option key={source} value={source}>{source}</option>
+                    ))}
+                </select>
             </div>
 
-            {loading ? (
-                <div className="loading-state">Loading...</div>
-            ) : error ? (
-                <div className="error-state">{error}</div>
-            ) : (
+            {loading ? ( <div className="loading-state">Loading...</div> ) : 
+             error ? ( <div className="error-state">{error}</div> ) : (
                 <>
                     <div className="media-table-container">
                         <table className="media-table">
@@ -106,35 +106,23 @@ function ViewAllBooks() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {books.length > 0 ? (
-                                    books.map(book => (
-                                        <tr key={book.id}>
-                                            <td>{book.title}</td>
-                                            <td>{book.category || 'N/A'}</td>
-                                            <td>{book.source}</td>
-                                            <td>{book.rating.toFixed(1)}</td>
-                                            <td>
-                                                <button className="btn-edit" onClick={() => setEditingBook(book)}>Edit</button>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan="5" style={{ textAlign: 'center' }}>No books found.</td>
+                                {books.map(book => (
+                                    <tr key={book.id}>
+                                        <td>{book.title}</td>
+                                        <td>{book.category || 'N/A'}</td>
+                                        <td>{book.source}</td>
+                                        <td>{book.rating.toFixed(1)}</td>
+                                        <td><button className="btn-edit" onClick={() => setEditingBook(book)}>Edit</button></td>
                                     </tr>
-                                )}
+                                ))}
                             </tbody>
                         </table>
                     </div>
 
                     <div className="pagination-controls">
-                        <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>
-                            Previous
-                        </button>
+                        <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>Previous</button>
                         <span>Page {currentPage} of {totalPages || 1}</span>
-                        <button onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}>
-                            Next
-                        </button>
+                        <button onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}>Next</button>
                     </div>
                 </>
             )}

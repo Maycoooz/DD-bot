@@ -23,9 +23,25 @@ function ViewAllVideos() {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [editingVideo, setEditingVideo] = useState(null);
+
+    const [sourceFilter, setSourceFilter] = useState('');
+    const [availableSources, setAvailableSources] = useState([]);
+    
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
 
-    const [editingVideo, setEditingVideo] = useState(null);
+    // Fetch the list of available sources on component mount 
+    useEffect(() => {
+        const fetchSources = async () => {
+            try {
+                const response = await api.get('/librarian/media-sources');
+                setAvailableSources(response.data);
+            } catch (err) {
+                console.error("Failed to fetch media sources:", err);
+            }
+        };
+        fetchSources();
+    }, []);
 
     const fetchVideos = useCallback(async () => {
         setLoading(true);
@@ -34,9 +50,9 @@ function ViewAllVideos() {
                 page: currentPage,
                 size: 10,
                 search: debouncedSearchTerm,
+                source: sourceFilter, // Add source to API params
             };
             const response = await api.get('/librarian/view-all-videos', { params });
-            console.log("api respinse for videos:" , response.data);
             setVideos(response.data.items || []);
             setTotalPages(Math.ceil(response.data.total / params.size));
         } catch (err) {
@@ -44,16 +60,11 @@ function ViewAllVideos() {
         } finally {
             setLoading(false);
         }
-    }, [currentPage, debouncedSearchTerm]);
+    }, [currentPage, debouncedSearchTerm, sourceFilter]); // Add sourceFilter to dependencies
 
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [debouncedSearchTerm]);
-
-    useEffect(() => {
-        fetchVideos();
-    }, [fetchVideos]);
-
+    useEffect(() => { setCurrentPage(1); }, [debouncedSearchTerm, sourceFilter]);
+    useEffect(() => { fetchVideos(); }, [fetchVideos]);
+    
     const handleUpdateVideo = (updatedVideo) => {
         setVideos(currentVideos =>
             currentVideos.map(video => (video.id === updatedVideo.id ? updatedVideo : video))
@@ -64,18 +75,25 @@ function ViewAllVideos() {
         setVideos(currentVideos =>
             currentVideos.filter(video => video.id !== deletedVideoId)
         );
+        fetchVideos(); // Re-fetch to keep pagination accurate
     };
 
     return (
         <>
             <h2>View All Videos</h2>
-            <div className="search-container">
+            <div className="filters-container">
                 <input
                     type="text"
                     placeholder="Search by Title..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
+                <select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)}>
+                    <option value="">Filter by source...</option>
+                    {availableSources.map(source => (
+                        <option key={source} value={source}>{source}</option>
+                    ))}
+                </select>
             </div>
 
             {loading ? (
