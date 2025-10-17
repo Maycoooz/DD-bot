@@ -3,6 +3,7 @@ import api from '../api/axiosConfig';
 import '../styles/AdminViewLibrarian.css';
 import ConfirmationModal from './ConfirmationModal';
 
+// A reusable component for paginated media tables
 const PaginatedMediaTable = ({ title, fetchFunction }) => {
     const [data, setData] = useState({ items: [], total: 0 });
     const [currentPage, setCurrentPage] = useState(1);
@@ -32,11 +33,27 @@ const PaginatedMediaTable = ({ title, fetchFunction }) => {
             {loading ? <p>Loading...</p> : (
                 <>
                     <table className="media-table-modal">
-                        <thead><tr><th>Title</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Link</th>
+                            </tr>
+                        </thead>
                         <tbody>
                             {data.items.length > 0 ? data.items.map(item => (
-                                <tr key={item.id}><td>{item.title}</td></tr>
-                            )) : <tr><td>No items found.</td></tr>}
+                                <tr key={item.id}>
+                                    <td>{item.title}</td>
+                                    <td>
+                                        <a href={item.link} target="_blank" rel="noopener noreferrer">
+                                            Open Link to Media
+                                        </a>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan="2">No items found.</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                     <div className="pagination-controls-modal">
@@ -52,11 +69,9 @@ const PaginatedMediaTable = ({ title, fetchFunction }) => {
 
 function ViewLibrarianModal({ librarian, onClose, onDelete, onApprove }) {
     const [error, setError] = useState('');
-    // 2. Add state for both confirmation modals
     const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
     const [isConfirmingApprove, setIsConfirmingApprove] = useState(false);
 
-    // This function is called when the user confirms the deletion
     const handleConfirmDelete = async () => {
         try {
             await api.delete(`/admin/delete-librarian/${librarian.id}`);
@@ -64,11 +79,10 @@ function ViewLibrarianModal({ librarian, onClose, onDelete, onApprove }) {
         } catch (err) {
             setError(err.response?.data?.detail || 'Failed to delete librarian.');
         } finally {
-            setIsConfirmingDelete(false); // Always close the modal
+            setIsConfirmingDelete(false);
         }
     };
 
-    // This function is called when the user confirms the approval
     const handleConfirmApprove = () => {
         onApprove(librarian);
         setIsConfirmingApprove(false);
@@ -101,7 +115,6 @@ function ViewLibrarianModal({ librarian, onClose, onDelete, onApprove }) {
                         />
                     </div>
                     <div className="modal-footer">
-                        {/* 3. Update onClick handlers to open the confirmation modals */}
                         {!librarian.librarian_verified && (
                             <button onClick={() => setIsConfirmingApprove(true)} className="btn-approve">Approve Librarian</button>
                         )}
@@ -110,7 +123,6 @@ function ViewLibrarianModal({ librarian, onClose, onDelete, onApprove }) {
                 </div>
             </div>
 
-            {/* 4. Conditionally render the confirmation modals */}
             {isConfirmingDelete && (
                 <ConfirmationModal
                     message={`Are you sure you want to delete librarian '${librarian.username}' and all their contributions?`}
@@ -124,7 +136,7 @@ function ViewLibrarianModal({ librarian, onClose, onDelete, onApprove }) {
                     message={`Are you sure you want to approve librarian '${librarian.username}'?`}
                     onConfirm={handleConfirmApprove}
                     onCancel={() => setIsConfirmingApprove(false)}
-                    confirmButtonClass="btn-approve" // This custom class makes the confirm button green
+                    confirmButtonClass="btn-approve"
                 />
             )}
         </>
