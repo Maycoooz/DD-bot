@@ -275,36 +275,53 @@ def insert_default_parent():
 # Default content for the landing page
 DEFAULT_CONTENT = [
     # Introduction
-    {"display_type": "INTRODUCTION", "display_text": "DD Bot is an intelligent chatbot designed to help parents find the perfect books and videos for their children. Our AI-powered recommendations are tailored to your child's age, interests, and learning goals."},
+    {"display_type": "INTRODUCTION", "title": "Introduction", 
+     "display_text": "DD Bot is an intelligent chatbot designed to help parents find the perfect books and videos for their children. Our AI-powered recommendations are tailored to your child's age, interests, and learning goals."},
     
-    # Features (add one for each feature)
-    {"display_type": "FEATURE", "display_text": "Get books and videos tailored to your child’s age and interests."},
-    {"display_type": "FEATURE", "display_text": "Curated videos that enhance your child’s reading and learning."},
-    {"display_type": "FEATURE", "display_text": "All recommendations are age-appropriate and parent-approved."},
-    {"display_type": "FEATURE", "display_text": "Monitor reading and watching habits to guide your child’s growth."},
-    {"display_type": "FEATURE", "display_text": "Manage child accounts and view personalized insights easily."},
-    {"display_type": "FEATURE", "display_text": "Learn and explore in different languages."},
+    # Video
+    {"display_type": "VIDEO", "title": "Promo Video", "display_text": "https://www.youtube.com/embed/your_video_id_here"},
+
+    # Features
+    {"display_type": "FEATURE", "title": "Personalized Recommendations", "display_text": "Get books and videos tailored to your child's age and interest."},
+    {"display_type": "FEATURE", "title": "Educational Videos", "display_text": "Curated videos that enhance your child's reading and learning."},
+    {"display_type": "FEATURE", "title": "Safe Content", "display_text": "All recommendations are age-appropriate."},
+    {"display_type": "FEATURE", "title": "Parental Monitoring", "display_text": "Monitor readning and watching habits to guide your child's growth." },
+    {"display_type": "FEATURE", "title": "Parental Guidance", "display_text": "Manage child accounts and view personalized insights easily."},
+    {"display_type": "FEATURE", "title": "Growing database", "display_text": "Ever growing database of books and videos added."},
 
     # How It Works
-    {"display_type": "HOW_IT_WORKS", "display_text": "Sign up and create profiles for your children."},
-    {"display_type": "HOW_IT_WORKS", "display_text": "Tell us about your child’s interests and preferences."},
-    {"display_type": "HOW_IT_WORKS", "display_text": "Receive personalized book and video suggestions instantly."},
+    {"display_type": "HOW_IT_WORKS", "title": "Step 1", "display_text": "Sign up and create profiles..."},
+    {"display_type": "HOW_IT_WORKS", "title": "Step 2", "display_text": "Tell us about your child’s interests..."},
+    {"display_type": "HOW_IT_WORKS", "title": "Step 3", "display_text": "Receive personalized book and video..."},
+
+    # Pricing - Free Plan
+    {"display_type": "PRICING", "grouping_key": "FREE_PLAN", "display_text": "1 Child Profile"},
+    {"display_type": "PRICING", "grouping_key": "FREE_PLAN", "display_text": "Limited access to books and videos"},
+    {"display_type": "PRICING", "grouping_key": "FREE_PLAN", "display_text": "No parental dashboard & analytics"},
+
+    # Pricing - Pro Plan
+    {"display_type": "PRICING", "grouping_key": "PRO_PLAN", "display_text": "Unlimited access to books & videos"},
+    {"display_type": "PRICING", "grouping_key": "PRO_PLAN", "display_text": "Up to 5 child profiles"},
+    {"display_type": "PRICING", "grouping_key": "PRO_PLAN", "display_text": "Parental dashboard & analytics"},
+    {"display_type": "PRICING", "grouping_key": "PRO_PLAN", "display_text": "Priority support"},
+    
 ]
 
 def seed_landing_page():
     from models.tables import LandingPage
     db = SessionLocal()
     try:
-        # Check if the table is already seeded
         if db.query(LandingPage).count() > 0:
             print("LandingPage table already contains data. Skipping seed.")
             return
 
-        print("Seeding LandingPage table with default content...")
+        print("Seeding LandingPage table...")
         for item in DEFAULT_CONTENT:
             db_item = LandingPage(
                 display_type=item["display_type"],
-                display_text=item["display_text"]
+                title=item.get("title"), # Use .get() for optional fields
+                display_text=item["display_text"],
+                grouping_key=item.get("grouping_key")
             )
             db.add(db_item)
         

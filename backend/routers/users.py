@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from typing import List
 
 from sqlalchemy.orm import Session
@@ -86,10 +86,15 @@ def change_password(
     return status_message
 
 @router.get("/landing-page-content", response_model=List[LandingPageResponse])
-def get_public_landing_page_content(db: Session = Depends(get_db)):
-    """
-    Public endpoint to fetch all content items for the landing page.
-    """
+def get_public_landing_page_content(
+    response: Response, 
+    db: Session = Depends(get_db)
+):
+    # Add headers to prevent browser caching
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+
     content = db.query(LandingPage).all()
     return content
 

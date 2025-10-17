@@ -89,17 +89,32 @@ def delete_user(
     )
 
 @router.get("/landing-page-content", response_model=List[LandingPageResponse])
-def get_landing_page_content(db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin_user)):
+def get_admin_landing_page_content(
+    db: Session = Depends(get_db), 
+    current_admin: User = Depends(get_current_admin_user)
+):
     content = db.query(LandingPage).all()
     return content
 
 @router.put("/landing-page-content/{item_id}", response_model=LandingPageResponse)
-def update_landing_page_content(item_id: int, content_update: LandingPageUpdate, db: Session = Depends(get_db), current_admin: User = Depends(get_current_admin_user)):
+def update_landing_page_content(
+    item_id: int, 
+    content_update: LandingPageUpdate, 
+    db: Session = Depends(get_db), 
+    current_admin: User = Depends(get_current_admin_user)
+):
+    # Find the database item by its ID
     db_item = db.query(LandingPage).filter(LandingPage.id == item_id).first()
     if not db_item:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Content item not found")
     
+    # Update the display_text (always provided in the schema)
     db_item.display_text = content_update.display_text
+    
+    # Conditionally update the title only if it was included in the request
+    if content_update.title is not None:
+        db_item.title = content_update.title
+        
     db.commit()
     db.refresh(db_item)
     return db_item

@@ -5,12 +5,14 @@ import "../styles/LandingPage.css";
 import logoImg from "../assets/logo.png";
 
 const LandingPage = () => {
-    // State for loading and dynamic page content
+    // State for loading and all dynamic page content
     const [loading, setLoading] = useState(true);
     const [pageContent, setPageContent] = useState({
         INTRODUCTION: [],
         FEATURE: [],
         HOW_IT_WORKS: [],
+        VIDEO: [],
+        PRICING: [],
     });
 
     // Fetch data from the public endpoint when the component loads
@@ -18,7 +20,7 @@ const LandingPage = () => {
         const fetchContent = async () => {
             try {
                 const response = await api.get('/landing-page-content');
-                // Group the content by type for easier rendering
+                // Group the content by type for easier rendering in the JSX
                 const groupedContent = response.data.reduce((acc, item) => {
                     const { display_type } = item;
                     if (!acc[display_type]) {
@@ -37,7 +39,7 @@ const LandingPage = () => {
         fetchContent();
     }, []);
 
-    // Smooth scroll function
+    // Smooth scroll function for navigation
     const scrollToSection = (id) => {
         const section = document.getElementById(id);
         if (section) {
@@ -46,8 +48,13 @@ const LandingPage = () => {
     };
 
     if (loading) {
-        return <div>Loading...</div>; // You can replace this with a styled spinner component
+        return <div className="loading-state">Loading Page...</div>;
     }
+
+    // Helper to get a single content item
+    const getContent = (type) => pageContent[type]?.[0] || {};
+    // Helper to get a list of content items
+    const getContentList = (type) => pageContent[type] || [];
 
     return (
         <div className="landing-page">
@@ -57,7 +64,6 @@ const LandingPage = () => {
                 <nav className="landing-nav">
                     <button onClick={() => scrollToSection("features")} className="landing-nav-link">Features</button>
                     <button onClick={() => scrollToSection("how-it-works")} className="landing-nav-link">How It Works</button>
-                    <button onClick={() => scrollToSection("testimonials")} className="landing-nav-link">Testimonials</button>
                     <button onClick={() => scrollToSection("pricing")} className="landing-nav-link">Pricing</button>
                     <div className="landing-auth-buttons">
                         <Link to="/register" className="landing-button landing-button-outline">Sign up</Link>
@@ -72,14 +78,25 @@ const LandingPage = () => {
                 <section className="landing-hero">
                     <div className="landing-hero-content">
                         <div className="landing-intro-box">
-                            <h1 className="landing-main-title">Perfect Books & Videos for Your Child, Instantly.</h1>
-                            {/* Render introduction from state */}
+                            <h1 className="landing-main-title">{getContent('INTRODUCTION').title || "Perfect Books & Videos for Your Child, Instantly."}</h1>
                             <p className="landing-intro-text">
-                                {pageContent.INTRODUCTION?.[0]?.display_text || "Default introduction text..."}
+                                {getContent('INTRODUCTION').display_text || "Loading introduction..."}
                             </p>
                         </div>
                         <div className="landing-video-box">
-                            <div className="landing-video-placeholder">Video Placeholder</div>
+                            <div className="landing-video-placeholder">
+                                {getContent('VIDEO').display_text ? (
+                                    <iframe
+                                        width="100%"
+                                        height="100%"
+                                        src={getContent('VIDEO').display_text}
+                                        title="YouTube video player"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowFullScreen
+                                    ></iframe>
+                                ) : "Video coming soon..."}
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -88,11 +105,9 @@ const LandingPage = () => {
                 <section id="features" className="landing-section">
                     <h2 className="landing-section-title">Our Features</h2>
                     <div className="landing-features-grid">
-                        {/* Render features from state using .map() */}
-                        {pageContent.FEATURE?.map((item, index) => (
+                        {getContentList('FEATURE').map(item => (
                             <div key={item.id} className="landing-feature-box">
-                                {/* You can add a 'title' field to your DB model for dynamic titles */}
-                                <h3>Feature {index + 1}</h3>
+                                <h3>{item.title}</h3>
                                 <p>{item.display_text}</p>
                             </div>
                         ))}
@@ -103,42 +118,28 @@ const LandingPage = () => {
                 <section id="how-it-works" className="landing-section alternate-bg">
                     <h2 className="landing-section-title">How It Works</h2>
                     <div className="landing-steps">
-                        {/* Render "How It Works" steps from state */}
-                        {pageContent.HOW_IT_WORKS?.map((item, index) => (
+                        {getContentList('HOW_IT_WORKS').map((item, index, arr) => (
                             <React.Fragment key={item.id}>
                                 <div className="landing-step-box">
-                                    <h3>Step {index + 1}</h3>
+                                    <h3>{item.title}</h3>
                                     <p>{item.display_text}</p>
                                 </div>
-                                {index < pageContent.HOW_IT_WORKS.length - 1 && <div className="landing-step-arrow">→</div>}
+                                {index < arr.length - 1 && <div className="landing-step-arrow">→</div>}
                             </React.Fragment>
                         ))}
                     </div>
                 </section>
 
-                {/* TESTIMONIALS (Static for now) */}
-                <section id="testimonials" className="landing-section">
-                    <h2 className="landing-section-title">Customer Reviews</h2>
-                    <div className="landing-testimonials-grid">
-                        <div className="landing-testimonial-box"><p>"A wonderful learning tool for my kids!" – Sarah</p><span>🌟🌟🌟🌟🌟</span></div>
-                        <div className="landing-testimonial-box"><p>"Great content and easy to use." – Daniel</p><span>🌟🌟🌟🌟</span></div>
-                        <div className="landing-testimonial-box"><p>"My children love the recommendations!" – Emily</p><span>🌟🌟🌟🌟🌟</span></div>
-                        <div className="landing-testimonial-box"><p>"Perfect for parents who care about learning." – John</p><span>🌟🌟🌟🌟</span></div>
-                    </div>
-                </section>
-
-                {/* PRICING (Static for now) */}
-                <section id="pricing" className="landing-section alternate-bg">
+                {/* PRICING */}
+                <section id="pricing" className="landing-section">
                     <h2 className="landing-section-title">Pricing Plans</h2>
                     <div className="landing-pricing-boxes">
                         <div className="landing-pricing-box">
                             <h3>Free Plan</h3>
                             <ul>
-                                <li>✅ Access to 500+ books</li>
-                                <li>✅ 200+ educational videos</li>
-                                <li>✅ 1 child profile</li>
-                                <li>✅ Basic AI recommendations</li>
-                                <li className="disabled">❌ No parental progress tracking</li>
+                                {getContentList('PRICING').filter(item => item.grouping_key === 'FREE_PLAN').map(item => (
+                                    <li key={item.id}>{item.display_text}</li>
+                                ))}
                             </ul>
                             <p className="landing-price">$0/month</p>
                             <Link to="/register" className="landing-button landing-button-outline">Choose Free</Link>
@@ -146,11 +147,9 @@ const LandingPage = () => {
                         <div className="landing-pricing-box landing-premium">
                             <h3>Premium Plan</h3>
                             <ul>
-                                <li>✅ Unlimited access to books & videos</li>
-                                <li>✅ Up to 5 child profiles</li>
-                                <li>✅ Advanced AI learning insights</li>
-                                <li>✅ Parental dashboard & analytics</li>
-                                <li>✅ Priority support</li>
+                                {getContentList('PRICING').filter(item => item.grouping_key === 'PRO_PLAN').map(item => (
+                                    <li key={item.id}>{item.display_text}</li>
+                                ))}
                             </ul>
                             <p className="landing-price">$9.99/month</p>
                             <Link to="/register" className="landing-button landing-button-filled">Choose Premium</Link>

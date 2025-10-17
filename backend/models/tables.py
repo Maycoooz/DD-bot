@@ -146,9 +146,17 @@ class User(Base):
 
 class LandingPage(Base):
     __tablename__ = "landingpage"
-   
+    
     id = Column(Integer, primary_key=True, autoincrement="auto") 
-    # Intro, Feature, How it work
+    
+    # INTRODUCTION', 'FEATURE', 'HOW_IT_WORKS', 'PRICING', 'VIDEO'
     display_type = Column(String(length=50), nullable=False)
-    # 1 + 6 + 3
-    display_text = Column(String(length=255), nullable=False)
+    
+    # Optional title for the content (eg. "Personalized Recommendations")
+    title = Column(String(length=100), nullable=True)
+    
+    # text content
+    display_text = Column(TEXT, nullable=False)
+    
+    # Key to group items,'FREE_PLAN' or 'PRO_PLAN'
+    grouping_key = Column(String(length=50), nullable=True)

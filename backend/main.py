@@ -33,7 +33,8 @@ origins = [
     "https://ddbot-ch6g-*vercel.app",
     "https://ddbot-ch6g-*.vercel.app",
     # 👇 Optional: allow all Vercel subdomains for your project
-    "https://*.vercel.app"
+    "https://*.vercel.app",
+    "https://www.youtube.com"
 ]
 
 
