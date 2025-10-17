@@ -8,6 +8,8 @@ import ParentHome from './ParentHome.jsx';
 import ParentProfile from './ParentProfile.jsx'; 
 import CreateChild from './ParentCreateChild.jsx';
 import ViewChildAccounts from './ParentViewChildAccounts.jsx'
+import ParentSearchBooks from './ParentSearchBooks.jsx';
+import ParentSearchVideos from './ParentSearchVideos.jsx';
 
 // --- Dashboard Menu Definition ---
 const menuItems = {
@@ -19,6 +21,10 @@ const menuItems = {
         { label: 'Create Child Account', component: 'createChild', key: 'createChild' },
         { label: 'View Child Accounts', component: 'viewChildren', key: 'viewChildren' },
         { label: 'Child Chat History', component: 'childChatHistory', key: 'childChatHistory' }
+    ],
+    Search: [
+        { label: 'Search Books', component: 'searchBooks', key: 'searchBooks' },
+        { label: 'Search Videos', component: 'searchVideos', key: 'searchVideos' },
     ],
     Review: [
         { label: 'Add Review', component: 'addReview', key: 'addReview' },
@@ -92,6 +98,10 @@ function ParentDashboard() {
                 return <ViewChildAccounts></ViewChildAccounts>;
             case 'childChatHistory':
                 return <div><h2>Child Chat History</h2><p>Chat logs coming soon...</p></div>;
+            case 'searchBooks':
+                return <ParentSearchBooks></ParentSearchBooks>;
+            case 'searchVideos':
+                return <ParentSearchVideos></ParentSearchVideos>;
             case 'addReview':
                 return <div><h2>Add Review</h2><p>Review form coming soon...</p></div>;
             case 'deleteReview':
