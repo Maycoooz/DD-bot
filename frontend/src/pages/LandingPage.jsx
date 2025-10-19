@@ -186,6 +186,9 @@ const LandingPage = () => {
             <footer className="landing-footer">
                 <p>Ready to get started?</p>
                 <Link to="/register" className="landing-button landing-button-primary">Create Your Account</Link>
+                <div className="landing-contact-info" style={{ marginTop: '20px', textAlign: 'center' }}>
+                    <p>Have questions? Email us at <a href="mailto:fypddbot@gmail.com" style={{ color: 'blue' }}>fypddbot@gmail.com</a></p>
+                </div>
             </footer>
         </div>
     );
