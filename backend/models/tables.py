@@ -86,6 +86,8 @@ class Review(Base):
     review = Column(TEXT, nullable=False)
     stars = Column(Integer, CheckConstraint('stars >= 1 AND stars <= 5'), nullable=False)
     
+    is_public_display_approved = Column(Boolean, default=False, nullable=False, index=True)
+    
     # Polymorphic relationship columns
     reviewable_id = Column(Integer, nullable=False)
     review_type = Column(
