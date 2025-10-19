@@ -27,6 +27,13 @@ function AddAppReview() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const MAX_CHARS = 50;
+
+    const handleTextChange = (e) => {
+        if (e.target.value.length <= MAX_CHARS) {
+            setReviewText(e.target.value)
+        }
+    }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -69,7 +76,11 @@ function AddAppReview() {
                         value={reviewText}
                         onChange={(e) => setReviewText(e.target.value)}
                         placeholder="Tell us what you think..."
+                        maxLength={MAX_CHARS}
                     />
+                    <div className="char-counter">
+                        {reviewText.length} / {MAX_CHARS}
+                    </div>
                 </div>
                 <button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? 'Submitting...' : 'Submit Review'}

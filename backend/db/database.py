@@ -223,47 +223,57 @@ def insert_default_librarians():
     finally:
         db.close()
 
-def insert_default_parent():
-    print("Inserting default parent account...")
+def insert_default_parents():
+    """
+    Inserts 6 default parent accounts (parent01 to parent06) into the database.
+    """
+    print("Inserting 6 default parent accounts...")
     
     DEFAULT_PARENT_PASSWORD = os.getenv("DEFAULT_ADMIN_PASSWORD")
     
     # Safety check for the missing password
     if not DEFAULT_PARENT_PASSWORD:
-        print("ERROR: DEFAULT_PARENT_PASSWORD environment variable not set. Cannot create parent.")
+        print("ERROR: DEFAULT_ADMIN_PASSWORD environment variable not set. Cannot create parents.")
         return
 
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
     password_hashed = pwd_context.hash(DEFAULT_PARENT_PASSWORD)
     
-    # Define the parent user's details
-    parent_user = User(
-        username="parent",
-        email="parent@example.com",
-        hashed_password=password_hashed,
-        first_name="Parent",
-        last_name="01",
-        country="Singapore",
-        gender="Male",
-        birthday=date(1985, 10, 15),
-        race="Chinese",
-        role_id=2,  # Assuming 2 is the PARENT role ID
-        is_verified=True,
-        tier="FREE"
-    )
-    
     db: Session = SessionLocal()
     
     try:
-        # Check if a user with this username already exists
-        exists = db.query(User).filter(User.username == parent_user.username).first()
+        # Loop to create 6 parent users
+        for i in range(1, 7):
+            username = f"parent{i:02d}" # Formats the number with a leading zero, e.g., 01, 02
+            email = f"parent{i:02d}@example.com"
+            
+            # Check if a user with this username already exists
+            exists = db.query(User).filter(User.username == username).first()
+            
+            if not exists:
+                # Define the parent user's details
+                parent_user = User(
+                    username=username,
+                    email=email,
+                    hashed_password=password_hashed,
+                    first_name="Parent",
+                    last_name=f"{i:02d}",
+                    country="Singapore",
+                    gender="Male",
+                    birthday=date(1985, 10, 15),
+                    race="Chinese",
+                    role_id=2,  # Assuming 2 is the PARENT role ID
+                    is_verified=True,
+                    tier="FREE"
+                )
+                db.add(parent_user)
+                print(f"Default parent user '{username}' added to session.")
+            else:
+                print(f"Default parent '{exists.username}' already exists in the database.")
         
-        if not exists:
-            db.add(parent_user)
-            db.commit()
-            print("Default parent user 'parent' created successfully.")
-        else:
-            print(f"Default parent '{exists.username}' already exists in the database.")
+        # Commit all the new users to the database in one transaction
+        db.commit()
+        print("\nSuccessfully committed new parent accounts to the database.")
         
     except Exception as e:
         db.rollback()
@@ -351,7 +361,7 @@ def create_tables_and_seed_it():
     insert_default_interests()
     insert_default_admin()
     insert_default_librarians()
-    insert_default_parent()
+    insert_default_parents()
     seed_landing_page()
     
 

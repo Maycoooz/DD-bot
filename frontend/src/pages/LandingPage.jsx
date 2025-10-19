@@ -5,7 +5,7 @@ import "../styles/LandingPage.css";
 import logoImg from "../assets/logo.png";
 
 const LandingPage = () => {
-    // State for loading and all dynamic page content
+    // State for loading, page content, and reviews
     const [loading, setLoading] = useState(true);
     const [pageContent, setPageContent] = useState({
         INTRODUCTION: [],
@@ -14,29 +14,37 @@ const LandingPage = () => {
         VIDEO: [],
         PRICING: [],
     });
+    const [reviews, setReviews] = useState([]); // State for the dynamic reviews
 
-    // Fetch data from the public endpoint when the component loads
+    // Fetch all data from public endpoints when the component loads
     useEffect(() => {
-        const fetchContent = async () => {
+        const fetchAllData = async () => {
             try {
-                const response = await api.get('/landing-page-content');
-                // Group the content by type for easier rendering in the JSX
-                const groupedContent = response.data.reduce((acc, item) => {
+                // Fetch both page content and latest reviews at the same time
+                const [contentResponse, reviewsResponse] = await Promise.all([
+                    api.get('/landing-page-content'),
+                    api.get('/reviews/app/latest') // API call to your reviews endpoint
+                ]);
+
+                // Process and set page content
+                const groupedContent = contentResponse.data.reduce((acc, item) => {
                     const { display_type } = item;
-                    if (!acc[display_type]) {
-                        acc[display_type] = [];
-                    }
+                    if (!acc[display_type]) acc[display_type] = [];
                     acc[display_type].push(item);
                     return acc;
                 }, {});
                 setPageContent(groupedContent);
+
+                // Set the reviews state
+                setReviews(reviewsResponse.data);
+
             } catch (error) {
-                console.error("Failed to load landing page content:", error);
+                console.error("Failed to load landing page data:", error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchContent();
+        fetchAllData();
     }, []);
 
     // Smooth scroll function for navigation
@@ -51,9 +59,8 @@ const LandingPage = () => {
         return <div className="loading-state">Loading Page...</div>;
     }
 
-    // Helper to get a single content item
+    // Helper functions to get content
     const getContent = (type) => pageContent[type]?.[0] || {};
-    // Helper to get a list of content items
     const getContentList = (type) => pageContent[type] || [];
 
     return (
@@ -64,6 +71,7 @@ const LandingPage = () => {
                 <nav className="landing-nav">
                     <button onClick={() => scrollToSection("features")} className="landing-nav-link">Features</button>
                     <button onClick={() => scrollToSection("how-it-works")} className="landing-nav-link">How It Works</button>
+                    <button onClick={() => scrollToSection("testimonials")} className="landing-nav-link">Testimonials</button>
                     <button onClick={() => scrollToSection("pricing")} className="landing-nav-link">Pricing</button>
                     <div className="landing-auth-buttons">
                         <Link to="/register" className="landing-button landing-button-outline">Sign up</Link>
@@ -127,6 +135,22 @@ const LandingPage = () => {
                                 {index < arr.length - 1 && <div className="landing-step-arrow">→</div>}
                             </React.Fragment>
                         ))}
+                    </div>
+                </section>
+
+                <section id="testimonials" className="landing-section">
+                    <h2 className="landing-section-title">CUSTOMER REVIEWS</h2>
+                    <div className="landing-testimonials-grid">
+                        {reviews.length > 0 ? (
+                            reviews.map(review => (
+                                <div key={review.id} className="landing-testimonial-box">
+                                    <p>"{review.review}" – {review.user.username}</p>
+                                    <span>{'🌟'.repeat(review.stars)}</span>
+                                </div>
+                            ))
+                        ) : (
+                            <p style={{ textAlign: 'center', gridColumn: '1 / -1' }}>No reviews yet. Be the first to share your thoughts!</p>
+                        )}
                     </div>
                 </section>
 

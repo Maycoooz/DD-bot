@@ -99,7 +99,25 @@
 
 /* --- Testimonials --- */
 .landing-testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; }
-.landing-testimonial-box span { display: block; margin-top: 10px; }
+.landing-testimonial-box {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 12px;
+    /* handle overflow */
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+.landing-testimonial-box p {
+    margin: 0;
+    /* forces long words to break if necessary */
+    word-break: break-word;
+}
+
+.landing-testimonial-box span {
+    display: block;
+    margin-top: 10px;
+}
 
 /* --- Pricing --- */
 .landing-pricing-boxes { display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap; }

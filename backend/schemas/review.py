@@ -4,7 +4,7 @@ from datetime import datetime
 
 # Schema for creating a new review
 class ReviewCreate(BaseModel):
-    review: str
+    review: str = Field(..., max_length=50)
     stars: int = Field(..., ge=1, le=5) # Ensures stars are between 1 and 5
 
 # Schema for displaying a user's existing review
@@ -15,4 +15,17 @@ class ReviewResponse(BaseModel):
     review_type: str
     created_at: datetime
 
+    model_config = ConfigDict(from_attributes=True)
+    
+class ReviewerResponse(BaseModel):
+    username: str
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+class PublicReviewResponse(BaseModel):
+    id: int
+    review: str
+    stars: int
+    user: ReviewerResponse
+    
     model_config = ConfigDict(from_attributes=True)

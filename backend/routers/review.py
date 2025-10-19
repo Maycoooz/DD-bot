@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List
 
 from db.database import get_db
 from models.tables import User, Review, ReviewType
-from schemas.review import ReviewCreate, ReviewResponse
+from schemas.review import ReviewCreate, ReviewResponse, PublicReviewResponse
 from schemas.auth import StatusMessage
 from auth.auth_handler import get_current_active_user
 
@@ -30,6 +30,32 @@ def create_app_review(
     db.add(new_review)
     db.commit()
     return StatusMessage(status="success", message="Your review has been submitted successfully.")
+
+@router.get("/app/latest", response_model=List[PublicReviewResponse])
+def get_latest_app_reviews(db: Session = Depends(get_db)):
+    candidate_reviews = (
+        db.query(Review)
+        .options(joinedload(Review.user)) # Eagerly load the user relationship
+        .filter(Review.review_type == ReviewType.APP, Review.stars == 5)
+        .order_by(Review.created_at.desc())
+        .limit(30) # Fetch up tp 30 users to find 6 unique ones
+        .all()
+    )
+    
+    # Process the reviews to get only one per user
+    unique_user_reviews = []
+    seen_user_ids = set()
+    
+    for review in candidate_reviews:
+        # If we haven't seen this user yet, add their review
+        if review.user_id not in seen_user_ids:
+            unique_user_reviews.append(review)
+            seen_user_ids.add(review.user_id)
+        
+        # Stop once we have collected 6 unique reviews
+        if len(unique_user_reviews) >= 6:
+            break
+    return unique_user_reviews
 
 # Endpoint to get all reviews for the currently logged-in user
 @router.get("/my-reviews", response_model=List[ReviewResponse])
