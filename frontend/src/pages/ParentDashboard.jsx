@@ -8,8 +8,8 @@ import ParentHome from './ParentHome.jsx';
 import ParentProfile from './ParentProfile.jsx'; 
 import CreateChild from './ParentCreateChild.jsx';
 import ViewChildAccounts from './ParentViewChildAccounts.jsx'
-import ParentSearchBooks from './ParentSearchBooks.jsx';
-import ParentSearchVideos from './ParentSearchVideos.jsx';
+import SearchBooks from './SearchBooks.jsx';
+import SearchVideos from './SearchVideos.jsx';
 import AddAppReview from './AddAppReview.jsx';
 import DeleteAppReview from './DeleteAppReview.jsx';
 
@@ -101,9 +101,9 @@ function ParentDashboard() {
             case 'childChatHistory':
                 return <div><h2>Child Chat History</h2><p>Chat logs coming soon...</p></div>;
             case 'searchBooks':
-                return <ParentSearchBooks></ParentSearchBooks>;
+                return <SearchBooks></SearchBooks>;
             case 'searchVideos':
-                return <ParentSearchVideos></ParentSearchVideos>;
+                return <SearchVideos></SearchVideos>;
             case 'addReview':
                 return <AddAppReview></AddAppReview>;
             case 'deleteReview':

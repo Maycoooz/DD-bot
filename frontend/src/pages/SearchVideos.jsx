@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axiosConfig';
-import '../styles/ParentSearchMedia.css'; 
-import ParentViewBookModal from './ParentViewBookModal';
+import '../styles/SearchMedia.css';
+import ParentViewVideoModal from './ParentViewVideoModal';
 
-// A debounce hook to prevent API calls on every keystroke
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -13,17 +12,18 @@ const useDebounce = (value, delay) => {
     return debouncedValue;
 };
 
-function ParentSearchBooks() {
-    const [books, setBooks] = useState([]);
+function SearchVideos() {
+    const [videos, setVideos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const debouncedSearchTerm = useDebounce(searchTerm, 500);
-    const [viewingBook, setViewingBook] = useState(null);
 
-    const fetchBooks = useCallback(async () => {
+    const [viewingVideo, setViewingVideo] = useState(null);
+
+    const fetchVideos = useCallback(async () => {
         setLoading(true);
         try {
             const params = {
@@ -31,72 +31,64 @@ function ParentSearchBooks() {
                 size: 10,
                 search: debouncedSearchTerm,
             };
-            const response = await api.get('/librarian/view-all-books', { params });
-            setBooks(response.data.items || []);
+            const response = await api.get('/librarian/view-all-videos', { params });
+            setVideos(response.data.items || []);
             setTotalPages(Math.ceil(response.data.total / params.size));
         } catch (err) {
-            setError('Could not load books.');
+            setError('Could not load videos.');
         } finally {
             setLoading(false);
         }
     }, [currentPage, debouncedSearchTerm]);
 
     useEffect(() => { setCurrentPage(1); }, [debouncedSearchTerm]);
-    useEffect(() => { fetchBooks(); }, [fetchBooks]);
+    useEffect(() => { fetchVideos(); }, [fetchVideos]);
 
     return (
         <div className="search-page-container">
-            <h2>Search for Books</h2>
+            <h2>Search for Videos</h2>
             <div className="search-bar-container">
                 <input
                     type="text"
-                    placeholder="Search by book title..."
+                    placeholder="Search by video title..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
 
-            {loading ? (
-                <div className="loading-state">Loading books...</div>
-            ) : error ? (
-                <div className="error-state">{error}</div>
-            ) : (
+            {loading ? ( <div className="loading-state">Loading videos...</div> ) : 
+             error ? ( <div className="error-state">{error}</div> ) : (
                 <>
                     <div className="search-table-container">
                         <table className="search-table">
                             <thead>
                                 <tr>
                                     <th>Title</th>
-                                    <th>Author</th>
+                                    <th>Creator</th>
                                     <th>Category</th>
-                                    <th>Age Group</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {books.length > 0 ? (
-                                    books.map(book => (
-                                        <tr key={book.id}>
-                                            <td>{book.title}</td>
-                                            <td>{book.author}</td>
-                                            <td>{book.category || 'N/A'}</td>
-                                            <td>{book.age_group || 'N/A'}</td>
+                                {videos.length > 0 ? (
+                                    videos.map(video => (
+                                        <tr key={video.id}>
+                                            <td>{video.title}</td>
+                                            <td>{video.creator}</td>
+                                            <td>{video.category || 'N/A'}</td>
                                             <td>
-                                                <button className="btn-view" onClick={() => setViewingBook(book)}>
+                                                <button className="btn-view" onClick={() => setViewingVideo(video)}>
                                                     View Details
                                                 </button>
                                             </td>
                                         </tr>
                                     ))
                                 ) : (
-                                    <tr>
-                                        <td colSpan="4" className="no-results">No books found.</td>
-                                    </tr>
+                                    <tr><td colSpan="4" className="no-results">No videos found.</td></tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
-
                     <div className="pagination-controls">
                         <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>
                             Previous
@@ -108,15 +100,15 @@ function ParentSearchBooks() {
                     </div>
                 </>
             )}
-
-            {viewingBook && (
-                <ParentViewBookModal 
-                    book={viewingBook}
-                    onClose={() => setViewingBook(null)}
+            
+            {viewingVideo && (
+                <ParentViewVideoModal 
+                    video={viewingVideo}
+                    onClose={() => setViewingVideo(null)}
                 />
             )}
         </div>
     );
 }
 
-export default ParentSearchBooks;
+export default SearchVideos;
