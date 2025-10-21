@@ -27,6 +27,7 @@ app = FastAPI(
 origins = [
     "http://localhost:8000",
     "http://localhost:5173",
+    "https://www.ddbot.site",
     "https://ddbot-ch6g.vercel.app",
     "https://www.ddbot-ch6g.vercel.app",
     # 👇 Allow all Vercel preview deployments
