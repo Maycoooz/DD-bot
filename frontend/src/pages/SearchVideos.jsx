@@ -66,6 +66,7 @@ function SearchVideos() {
                                     <th>Title</th>
                                     <th>Creator</th>
                                     <th>Category</th>
+                                    <th>Age Group</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -76,6 +77,7 @@ function SearchVideos() {
                                             <td>{video.title}</td>
                                             <td>{video.creator}</td>
                                             <td>{video.category || 'N/A'}</td>
+                                            <td>{video.age_group || 'N/A'}</td>
                                             <td>
                                                 <button className="btn-view" onClick={() => setViewingVideo(video)}>
                                                     View Details
