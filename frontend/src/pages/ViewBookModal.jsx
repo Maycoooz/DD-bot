@@ -1,7 +1,7 @@
 import React from 'react';
-import '../styles/ParentViewBookModal.css'; // We will create this CSS file next
+import '../styles/ViewBookModal.css'; // We will create this CSS file next
 
-function ParentViewBookModal({ book, onClose }) {
+function ViewBookModal({ book, onClose }) {
     return (
         <div className="modal-overlay">
             <div className="view-book-modal">
@@ -37,4 +37,4 @@ function ParentViewBookModal({ book, onClose }) {
     );
 }
 
-export default ParentViewBookModal;
+export default ViewBookModal;

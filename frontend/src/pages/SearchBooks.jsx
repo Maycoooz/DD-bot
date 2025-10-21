@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axiosConfig';
 import '../styles/SearchMedia.css'; 
-import ParentViewBookModal from './ParentViewBookModal';
+import ViewBookModal from './ViewBookModal';
 
 // A debounce hook to prevent API calls on every keystroke
 const useDebounce = (value, delay) => {
@@ -110,7 +110,7 @@ function SearchBooks() {
             )}
 
             {viewingBook && (
-                <ParentViewBookModal 
+                <ViewBookModal 
                     book={viewingBook}
                     onClose={() => setViewingBook(null)}
                 />

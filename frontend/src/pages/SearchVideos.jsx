@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axiosConfig';
 import '../styles/SearchMedia.css';
-import ParentViewVideoModal from './ParentViewVideoModal';
+import ViewVideoModal from './ViewVideoModal';
 
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -102,7 +102,7 @@ function SearchVideos() {
             )}
             
             {viewingVideo && (
-                <ParentViewVideoModal 
+                <ViewVideoModal 
                     video={viewingVideo}
                     onClose={() => setViewingVideo(null)}
                 />

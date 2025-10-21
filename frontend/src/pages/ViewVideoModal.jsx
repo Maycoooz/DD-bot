@@ -1,7 +1,7 @@
 import React from 'react';
-import '../styles/ParentViewVideoModal.css'; // We will create this CSS file next
+import '../styles/ViewVideoModal.css'; // We will create this CSS file next
 
-function ParentViewVideoModal({ video, onClose }) {
+function ViewVideoModal({ video, onClose }) {
     // Helper to create a clean embeddable YouTube URL
     const getEmbedUrl = (url) => {
         try {
@@ -58,4 +58,4 @@ function ParentViewVideoModal({ video, onClose }) {
     );
 }
 
-export default ParentViewVideoModal;
+export default ViewVideoModal;

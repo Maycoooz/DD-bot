@@ -2,6 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import '../styles/ChildrenDashboard.css';
 import logoImg from "../assets/logo.png";
 
+// Import the new components to be used in the modals
+import AddAppReview from './AddAppReview';
+import DeleteAppReview from './DeleteAppReview';
+import SearchBooks from "./SearchBooks";
+import SearchVideos from "./SearchVideos";
+
 /**
  * @typedef {"user" | "bot"} Sender
  */
@@ -33,17 +39,19 @@ const SUGGESTIONS = [
   "First day of school",
 ];
 
-
-
-
+// This constant is no longer used by the new AddAppReview component,
+// but is kept in case other parts of the app reference it.
 const REVIEW_TYPES = ["app", "book", "video", "chatbot", "others"];
 
 
 export default function ChildDashboard() {
+
+  const [currentView, setCurrentView] = useState('chat') // 'chat', 'searchBooks', 'searchVideos'
+
   // profile/session
   const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
   const userId = profile.id || "u1";
-  const username = profile.first_name + profile.last_name;
+  const username = profile.first_name;
 
   // chat
   const [chats, setChats] = useState([]);
@@ -57,12 +65,15 @@ export default function ChildDashboard() {
   const [favorites, setFavorites] = useState([]);
 
   // reviews
-  const [reviews, setReviews] = useState([]);
+  // This state is no longer used by the new DeleteAppReview modal,
+  // but is kept for now.
+  const [reviews, setReviews] = useState([]); 
   const [showInterestsModal, setShowInterestsModal] = useState(false);
   const [showAddReviewModal, setShowAddReviewModal] = useState(false);
   const [showDeleteReviewsModal, setShowDeleteReviewsModal] = useState(false);
 
-  // add review form
+  // add review form state
+  // These are no longer used by the new AddAppReview component.
   const [reviewType, setReviewType] = useState(REVIEW_TYPES[0]);
   const [reviewText, setReviewText] = useState("");
   const [reviewStars, setReviewStars] = useState(5);
@@ -81,8 +92,6 @@ export default function ChildDashboard() {
     fetchInterests();
     fetchUserInterests();
     fetchFavorites();
-    fetchReviews();
-    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
@@ -143,7 +152,7 @@ export default function ChildDashboard() {
       const data = await res.json();
 
       // Assuming you have userId or profile.id in localStorage
-      const child = Array.isArray(data) ? data.find(c => c.id === sessionId) : null;
+      const child = Array.isArray(data) ? data.find(c => c.id === userId) : null; // Changed from sessionId to userId
       const interests = child?.interests || [];
       setUserInterests(interests.map(i => i.name));
     } catch (err) {
@@ -167,6 +176,7 @@ export default function ChildDashboard() {
     }
   }
 
+  // This toggleInterest is for the *string name* from the API
   function toggleInterest(name) {
     setUserInterests(prev =>
       prev.includes(name)
@@ -180,6 +190,7 @@ export default function ChildDashboard() {
       fetchInterests();
       fetchUserInterests();
     }
+    // eslint-disable-next-line
   }, [showInterestsModal]);
 
   async function fetchFavorites() {
@@ -206,6 +217,11 @@ export default function ChildDashboard() {
       alert("Could not delete favorite.");
     }
   }
+
+  // --- Original Review Functions ---
+  // These functions (fetchReviews, submitReview, deleteReview)
+  // are no longer used by the new modals, which are self-contained.
+  // They are left here in case other parts of the app use them.
 
   async function fetchReviews() {
     try {
@@ -239,7 +255,7 @@ export default function ChildDashboard() {
       setReviewText("");
       setReviewStars(5);
       setShowAddReviewModal(false);
-      fetchReviews();
+      fetchReviews(); // Refresh review list
     } catch (err) {
       console.error("submitReview:", err);
       alert("Could not save review.");
@@ -258,7 +274,7 @@ export default function ChildDashboard() {
     }
   }
 
-  // --- Chat send (non-interactive for now; echo + backend bot call) ---
+  // --- Chat send ---
   async function sendMessage(text) {
     const msg = (text ?? input).trim();
     if (!msg) return;
@@ -273,7 +289,7 @@ export default function ChildDashboard() {
     setInput("");
     setLoading(true);
 
-    // POST to bot endpoint (example) and add response
+    // POST to bot endpoint
     try {
       const res = await fetch(`/api/chatbot`, {
         method: "POST",
@@ -297,11 +313,6 @@ export default function ChildDashboard() {
     } finally {
       setLoading(false);
     }
-  }
-
-  // --- Interest toggle handler used in modal ---
-  function toggleInterest(id) {
-    setUserInterests((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   }
 
   // logout
@@ -331,7 +342,7 @@ export default function ChildDashboard() {
             <button
               className="child-dashboard__btn child-dashboard__btn--primary child-dashboard__btn--full"
               onClick={() => {
-                // create new chat placeholder: actual creation should be via API
+                setCurrentView('chat'); 
                 const newChat = { id: `new-${Date.now()}`, title: "New chat", last_updated: new Date().toISOString() };
                 setChats((c) => [newChat, ...c]);
                 setSelectedChatId(newChat.id);
@@ -345,7 +356,7 @@ export default function ChildDashboard() {
               type="search"
               placeholder="Search chats..."
               onChange={(e) => {
-                // For now simple client filter (optional; you may want server search)
+                // For now simple client filter
                 const q = e.target.value.toLowerCase();
                 if (!q) {
                   fetchChats();
@@ -364,7 +375,10 @@ export default function ChildDashboard() {
                 <li
                   key={c.id}
                   className={`child-dashboard__chat-item ${selectedChatId === c.id ? "selected" : ""}`}
-                  onClick={() => setSelectedChatId(c.id)}
+                  onClick= {() =>{
+                    setSelectedChatId(c.id);
+                    setCurrentView('chat');
+                  }}
                 >
                   <div className="child-dashboard__chat-title">{c.title || `Chat ${c.id}`}</div>
                   <div className="child-dashboard__chat-meta">{new Date(c.last_updated || c.created_at || Date.now()).toLocaleString()}</div>
@@ -396,77 +410,118 @@ export default function ChildDashboard() {
             </div>
           </div>
 
+          {/* --- Library Section --- */}
+          <div className="child-dashboard__section child-dashboard__section--library">
+            <h4 className="child-dashboard__section-title">Library</h4>
+            <div className="child-dashboard__general-buttons">
+              <button 
+                className="child-dashboard__chip" 
+                // --- Update onClick to set state ---
+                onClick={() => setCurrentView('searchBooks')}
+              >
+                Search Books
+              </button>
+              <button 
+                className="child-dashboard__chip" 
+                // --- Update onClick to set state ---
+                onClick={() => setCurrentView('searchVideos')}
+              >
+                Search Videos
+              </button>
+            </div>
+          </div>
+          {/* --- End Section --- */}
+
+
           <div className="child-dashboard__section child-dashboard__section--reviews">
             <h4 className="child-dashboard__section-title">Reviews</h4>
             <div className="child-dashboard__review-controls">
               <button className="child-dashboard__btn child-dashboard__btn--small" onClick={() => setShowAddReviewModal(true)}>Add Review</button>
-              <button className="child-dashboard__btn child-dashboard__btn--small child-dashboard__btn--outline" onClick={() => setShowDeleteReviewsModal(true)}>Manage Reviews</button>
+              <button className="child-dashboard__btn child-dashboard__btn--small child-dashboard__btn--outline" onClick={() => setShowDeleteReviewsModal(true)}>Delete Reviews</button>
             </div>
           </div>
         </aside>
 
         {/* Chat area (right) */}
         <div className="child-dashboard__chat-panel">
-          <header className="child-dashboard__chat-header">
-            <div className="child-dashboard__chat-brand">
-              <img src={logoImg} alt="bot" className="child-dashboard__bot-icon" />
-              <div>
-                <div className="child-dashboard__bot-title">DD Bot</div>
-                <div className="child-dashboard__bot-sub">Your friendly reading buddy!</div>
-              </div>
-            </div>
-          </header>
-
-          <main className="child-dashboard__messages" role="log" aria-live="polite">
-            {chatLoading && <div className="child-dashboard__loading">Loading messages...</div>}
-            {!selectedChatId && <div className="child-dashboard__placeholder">Select a chat to start</div>}
-
-            <div className="child-dashboard__messages-list">
-              {messages.map((m) => (
-                <div key={m.id} className={`child-dashboard__message-row ${m.sender === "user" ? "user" : "bot"}`}>
-                  <div className="child-dashboard__message-avatar">{m.sender === "user" ? "🧑" : "🤖"}</div>
-                  <div className="child-dashboard__message-bubble">
-                    {m.text.split("\n").map((l, i) => <p key={i} className="child-dashboard__message-line">{l}</p>)}
-                    {/* optional items */}
-                    {m.items && m.items.length > 0 && (
-                      <div className="child-dashboard__message-cards">
-                        {m.items.map((b) => (
-                          <article key={b.id} className="child-dashboard__book-card">
-                            <div className="child-dashboard__book-title">{b.title}</div>
-                            <div className="child-dashboard__book-meta">Age {b.age_min}-{b.age_max}</div>
-                            <div className="child-dashboard__book-actions">
-                              {b.link && <a href={b.link} target="_blank" rel="noreferrer" className="child-dashboard__book-open">Open</a>}
-                              <button onClick={() => sendMessage(`similar to ${b.id}`)} className="child-dashboard__book-more">More like this</button>
-                            </div>
-                          </article>
-                        ))}
-                      </div>
-                    )}
+          {currentView === 'chat' && (
+            <>
+              <header className="child-dashboard__chat-header">
+                <div className="child-dashboard__chat-brand">
+                  <img src={logoImg} alt="bot" className="child-dashboard__bot-icon" />
+                  <div>
+                    <div className="child-dashboard__bot-title">DD Bot</div>
+                    <div className="child-dashboard__bot-sub">Your friendly reading buddy!</div>
                   </div>
                 </div>
-              ))}
-              <div ref={messagesEndRef} />
-            </div>
-          </main>
+              </header>
 
-          <footer className="child-dashboard__input-area">
-            <div className="child-dashboard__suggestions">
-              {SUGGESTIONS.map((s) => <button key={s} onClick={() => sendMessage(s)} className="child-dashboard__suggestion">{s}</button>)}
-            </div>
+              <main className="child-dashboard__messages" role="log" aria-live="polite">
+                {chatLoading && <div className="child-dashboard__loading">Loading messages...</div>}
+                {!selectedChatId && <div className="child-dashboard__placeholder">Select a chat to start</div>}
 
-            <div className="child-dashboard__input-row">
-              <input
-                className="child-dashboard__textinput"
-                placeholder="Ask for a story… e.g., “funny books for age 7”"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              />
-              <button className="child-dashboard__send-btn" onClick={() => sendMessage()} disabled={loading}>
-                {loading ? "..." : "Send"}
-              </button>
+                <div className="child-dashboard__messages-list">
+                  {messages.map((m) => (
+                    <div key={m.id} className={`child-dashboard__message-row ${m.sender === "user" ? "user" : "bot"}`}>
+                      <div className="child-dashboard__message-avatar">{m.sender === "user" ? "🧑" : "🤖"}</div>
+                      <div className="child-dashboard__message-bubble">
+                        {m.text.split("\n").map((l, i) => <p key={i} className="child-dashboard__message-line">{l}</p>)}
+                        {/* optional items */}
+                        {m.items && m.items.length > 0 && (
+                          <div className="child-dashboard__message-cards">
+                            {m.items.map((b) => (
+                              <article key={b.id} className="child-dashboard__book-card">
+                                <div className="child-dashboard__book-title">{b.title}</div>
+                                <div className="child-dashboard__book-meta">Age {b.age_min}-{b.age_max}</div>
+                                <div className="child-dashboard__book-actions">
+                                  {b.link && <a href={b.link} target="_blank" rel="noreferrer" className="child-dashboard__book-open">Open</a>}
+                                  <button onClick={() => sendMessage(`similar to ${b.id}`)} className="child-dashboard__book-more">More like this</button>
+                                </div>
+                              </article>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              </main>
+
+              <footer className="child-dashboard__input-area">
+                <div className="child-dashboard__suggestions">
+                  {SUGGESTIONS.map((s) => <button key={s} onClick={() => sendMessage(s)} className="child-dashboard__suggestion">{s}</button>)}
+                </div>
+
+                <div className="child-dashboard__input-row">
+                  <input
+                    className="child-dashboard__textinput"
+                    placeholder="Ask for a story… e.g., “funny books for age 7”"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  />
+                  <button className="child-dashboard__send-btn" onClick={() => sendMessage()} disabled={loading}>
+                    {loading ? "..." : "Send"}
+                  </button>
+                </div>
+              </footer>
+            </>
+          )}
+          {/* If view is 'searchBooks', render the SearchBooks component */}
+          {currentView === 'searchBooks' && (
+            // We add a simple wrapper so it fits in the panel
+            <div className="child-dashboard__search-wrapper">
+              <SearchBooks />
             </div>
-          </footer>
+          )}
+
+          {/* If view is 'searchVideos', render the SearchVideos component */}
+          {currentView === 'searchVideos' && (
+            <div className="child-dashboard__search-wrapper">
+              <SearchVideos />
+            </div>
+          )}
         </div>
       </div>
 
@@ -474,127 +529,108 @@ export default function ChildDashboard() {
 
       {/* Interests Modal */}
       {showInterestsModal && (
-  <div
-    className="child-dashboard__modal-overlay"
-    onClick={() => setShowInterestsModal(false)}
-  >
-    <div
-      className="child-dashboard__modal"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <h3>Edit Interests</h3>
-      <p className="child-dashboard__hint">
-        Select the topics you’re most interested in:
-      </p>
-
-      <div className="child-dashboard__interest-list">
-        {(allInterests.length ? allInterests : [
-          { name: "FICTION" },
-          { name: "NONFICTION" },
-          { name: "COMIC" },
-          { name: "ART" },
-          { name: "GEOGRAPHY" },
-          { name: "SCIENCE" },
-          { name: "ANIMALS" },
-          { name: "HISTORY" },
-          { name: "FANTASY" },
-          { name: "TECHNOLOGY" },
-          { name: "SPORTS" },
-          { name: "COOKING" },
-        ]).map((interest) => {
-          const checked = userInterests.includes(interest.name);
-          return (
-            <label
-              key={interest.name}
-              className="child-dashboard__interest-item"
+        <div
+            className="child-dashboard__modal-overlay"
+            onClick={() => setShowInterestsModal(false)}
+        >
+            <div
+            className="child-dashboard__modal"
+            onClick={(e) => e.stopPropagation()}
             >
-              <input
-                type="checkbox"
-                checked={checked}
-                onChange={() => toggleInterest(interest.name)}
-              />
-              <span>{interest.name}</span>
-            </label>
-          );
-        })}
-      </div>
+            <h3>Edit Interests</h3>
+            <p className="child-dashboard__hint">
+                Select the topics you’re most interested in:
+            </p>
 
-      <div className="child-dashboard__modal-actions">
-        <button
-          className="child-dashboard__btn child-dashboard__btn--primary"
-          onClick={saveUserInterests}
-        >
-          Save
-        </button>
-        <button
-          className="child-dashboard__btn child-dashboard__btn--outline"
-          onClick={() => setShowInterestsModal(false)}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+            <div className="child-dashboard__interest-list">
+                {(allInterests.length ? allInterests : [
+                { name: "FICTION" },
+                { name: "NONFICTION" },
+                { name: "COMIC" },
+                { name: "ART" },
+                { name: "GEOGRAPHY" },
+                { name: "SCIENCE" },
+                { name: "ANIMALS" },
+                { name: "HISTORY" },
+                { name: "FANTASY" },
+                { name: "TECHNOLOGY" },
+                { name: "SPORTS" },
+                { name: "COOKING" },
+                ]).map((interest) => {
+                const checked = userInterests.includes(interest.name);
+                return (
+                    <label
+                    key={interest.name}
+                    className="child-dashboard__interest-item"
+                    >
+                    <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => toggleInterest(interest.name)}
+                    />
+                    <span>{interest.name}</span>
+                    </label>
+                );
+                })}
+            </div>
 
-      {/* Add Review Modal */}
+            <div className="child-dashboard__modal-actions">
+                <button
+                className="child-dashboard__btn child-dashboard__btn--primary"
+                onClick={saveUserInterests}
+                >
+                Save
+                </button>
+                <button
+                className="child-dashboard__btn child-dashboard__btn--outline"
+                onClick={() => setShowInterestsModal(false)}
+                >
+                Cancel
+                </button>
+            </div>
+            </div>
+        </div>
+      )}
+
+      {/* --- UPDATED Add Review Modal --- */}
+      {/* This modal now renders the self-contained AddAppReview component. */}
       {showAddReviewModal && (
         <div className="child-dashboard__modal-overlay" onClick={() => setShowAddReviewModal(false)}>
           <div className="child-dashboard__modal child-dashboard__modal--wide" onClick={(e) => e.stopPropagation()}>
-            <h3>Add Review</h3>
-
-            <label className="child-dashboard__label">Type</label>
-            <select className="child-dashboard__select" value={reviewType} onChange={(e) => setReviewType(e.target.value)}>
-              {REVIEW_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-
-            <label className="child-dashboard__label">Your review</label>
-            <textarea className="child-dashboard__textarea" rows={6} value={reviewText} onChange={(e) => setReviewText(e.target.value)} />
-
-            <div className="child-dashboard__review-bottom">
-              <div className="child-dashboard__stars">
-                {Array.from({ length: 5 }).map((_, i) => {
-                  const starIndex = i + 1;
-                  return (
-                    <button key={i} className={`child-dashboard__star ${reviewStars >= starIndex ? "on" : ""}`} onClick={() => setReviewStars(starIndex)} aria-label={`${starIndex} stars`}>
-                      ★
-                    </button>
-                  );
-                })}
-              </div>
-
-              <div className="child-dashboard__modal-actions">
-                <button className="child-dashboard__btn child-dashboard__btn--primary" onClick={submitReview}>Submit Review</button>
-                <button className="child-dashboard__btn child-dashboard__btn--outline" onClick={() => setShowAddReviewModal(false)}>Cancel</button>
-              </div>
+            {/* AddAppReview is self-contained. It has its own state,
+              its own H2 title, and its own submit button.
+              We just provide a "Cancel" button for the modal.
+            */}
+            <AddAppReview />
+            <div className="child-dashboard__modal-actions" style={{ justifyContent: 'flex-end', paddingTop: '1rem', borderTop: '1px solid #eee', marginTop: '1rem' }}>
+                <button 
+                  className="child-dashboard__btn child-dashboard__btn--outline" 
+                  onClick={() => setShowAddReviewModal(false)}
+                >
+                  Cancel
+                </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Manage/Delete Reviews Modal */}
+      {/* --- UPDATED Manage/Delete Reviews Modal --- */}
+      {/* This modal now renders the self-contained DeleteAppReview component. */}
       {showDeleteReviewsModal && (
         <div className="child-dashboard__modal-overlay" onClick={() => setShowDeleteReviewsModal(false)}>
-          <div className="child-dashboard__modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Your Reviews</h3>
-            <div className="child-dashboard__reviews-list">
-              {reviews.length === 0 && <div className="child-dashboard__rev-empty">No reviews yet.</div>}
-              {reviews.map((r) => (
-                <div key={r.id} className="child-dashboard__rev-row">
-                  <div className="child-dashboard__rev-left">
-                    <div className="child-dashboard__rev-type">{r.type} · {new Date(r.created_at).toLocaleDateString()}</div>
-                    <div className="child-dashboard__rev-text">{r.text}</div>
-                    <div className="child-dashboard__rev-stars">{Array.from({ length: r.stars }).map((_, i) => "★").join("")}</div>
-                  </div>
-                  <div className="child-dashboard__rev-actions">
-                    <button className="child-dashboard__btn child-dashboard__btn--small child-dashboard__btn--danger" onClick={() => deleteReview(r.id)}>Delete</button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
+          <div className="child-dashboard__modal child-dashboard__modal--wide" onClick={(e) => e.stopPropagation()}>
+            {/* DeleteAppReview is self-contained. It fetches its own reviews
+              and handles its own delete logic.
+              We just provide a "Close" button for the modal.
+            */}
+            <DeleteAppReview />
             <div className="child-dashboard__modal-actions">
-              <button className="child-dashboard__btn child-dashboard__btn--outline" onClick={() => setShowDeleteReviewsModal(false)}>Close</button>
+              <button 
+                className="child-dashboard__btn child-dashboard__btn--outline" 
+                onClick={() => setShowDeleteReviewsModal(false)}
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
