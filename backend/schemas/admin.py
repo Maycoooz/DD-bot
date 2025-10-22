@@ -28,4 +28,33 @@ class ViewAllUserResponse(BaseModel):
     total_parents: int
     total_kids: int
     
+from pydantic import BaseModel, ConfigDict
+from typing import Optional, List
+from models.tables import ReviewType, UserRole
+from datetime import datetime
+
+class AdminReviewUserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    role_name: UserRole
+    parent_email: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class AdminReviewResponse(BaseModel):
+    id: int
+    review: str
+    stars: int
+    review_type: ReviewType
+    is_public_display_approved: bool
+    created_at: datetime
+    user: AdminReviewUserResponse  # Nested user data
+
+    model_config = ConfigDict(from_attributes=True)
+
+class PaginatedAdminReviewResponse(BaseModel):
+    total: int
+    items: List[AdminReviewResponse]
+    
     

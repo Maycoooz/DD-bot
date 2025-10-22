@@ -1,0 +1,158 @@
+.admin-view-all-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+    color: #374151;
+}
+
+.admin-view-all-container h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-top: 0;
+}
+
+/* --- Filter Bar --- */
+.admin-filters {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    background: #fff;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+.filter-group select {
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fdfdfd;
+    font-size: 1rem;
+}
+.filter-group select:focus {
+    outline: none;
+    border-color: #6d28d9;
+    box-shadow: 0 0 0 2px #f3e8ff;
+}
+
+
+/* --- Status Messages  --- */
+.admin-loading-state {
+    font-size: 1.2rem;
+    color: #555;
+    text-align: center;
+    padding: 2rem;
+}
+.admin-error-message {
+    background-color: #fbebee;
+    color: #c0392b;
+    border: 1px solid #e74c3c;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+.no-results {
+    text-align: center;
+    color: #888;
+    padding: 2rem;
+    font-style: italic;
+}
+
+/* --- Table Styles --- */
+.admin-table-container {
+    width: 100%;
+    overflow-x: auto; /* Allows table to be scrolled horizontally if needed */
+}
+
+.admin-reviews-table {
+    width: 100%;
+    border-collapse: collapse; 
+    background-color: #ffffff; 
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    overflow: hidden; 
+}
+
+.admin-reviews-table th, .admin-reviews-table td {
+    padding: 1rem 1.2rem;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0; 
+    color: #374151;
+    vertical-align: top;
+}
+
+.admin-reviews-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.admin-reviews-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-reviews-table tbody tr:hover {
+    background-color: #f3e8ff; /* Light purple on hover */
+}
+
+/* --- Special Cell Styles --- */
+.user-role-badge {
+    display: block;
+    font-size: 0.8rem;
+    color: #555;
+    font-weight: normal;
+    text-transform: capitalize;
+}
+
+.review-text-cell {
+    max-width: 300px;
+    min-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.review-text-cell:hover {
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: break-word;
+}
+
+/* --- Pagination --- */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+    color: #4B5563;
+}
+
+.pagination-controls button {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.pagination-controls button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+.pagination-controls button:hover:not(:disabled) {
+    background-color: #e0e0e0;
+}

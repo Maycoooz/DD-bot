@@ -1,6 +1,5 @@
-/* --- Global Styles --- */
 .admin-dashboard-container {
-    background-color: #f8f9fa;
+    background-color: #f0f2f5;
     min-height: 100vh;
     padding: 30px 50px;
     font-family: system-ui, sans-serif;
@@ -11,13 +10,23 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #dee2e6;
-    padding-bottom: 20px;
-    margin-bottom: 50px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px 30px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 .admin-header h1 { margin: 0; font-size: 2em; font-weight: 600; color: #212529; }
 .header-actions { display: flex; align-items: center; gap: 25px; }
-.logout-btn { padding: 10px 20px; border: 1px solid #ced4da; background-color: #ffffff; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.logout-btn { 
+    padding: 10px 20px; 
+    border: 1px solid #ced4da; 
+    background-color: #ffffff; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    font-weight: 600; 
+    transition: background-color 0.2s ease;
+}
 .logout-btn:hover { background-color: #f1f3f5; }
 
 /* --- Back Button in Header --- */
@@ -30,15 +39,15 @@
     font-weight: 600;
     font-size: 1em;
     color: #495057;
+    transition: background-color 0.2s ease;
 }
 .header-back-btn:hover { background-color: #f1f3f5; }
 
 /* --- Main Content Area --- */
 .admin-content-area {
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
 }
 
 /* --- Grid of Navigation Cards --- */
@@ -48,7 +57,7 @@
     gap: 35px;
     max-width: 1600px;
     margin: 0 auto;
-    background: none; /* Remove background from grid itself */
+    background: none;
     box-shadow: none;
     padding: 0;
     border-radius: 0;
@@ -61,11 +70,21 @@
     padding: 30px;
     border: 1px solid #e9ecef;
     border-radius: 12px;
-    background-color: #ffffff;
+    background-color: #ffffff; /* Cards are white */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
     text-align: center;
     cursor: pointer;
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
-.dashboard-card:hover { transform: translateY(-5px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); border-color: #0d6efd; }
-.admin-dashboard-container .dashboard-card h3 { margin: 0; font-size: 1.25em; font-weight: 600; color: #343a40; }
+.dashboard-card:hover { 
+    transform: translateY(-5px); 
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); 
+    /* Using a subtle purple from your other styles */
+    border-color: #1b0de0; 
+}
+.admin-dashboard-container .dashboard-card h3 { 
+    margin: 0; 
+    font-size: 1.25em; 
+    font-weight: 600; 
+    color: #343a40; 
+}

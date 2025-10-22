@@ -6,12 +6,15 @@ import AdminManageUsers from './AdminManageUsers';
 import AdminEditLandingPage from './AdminEditLandingPage';
 import AdminManageLibrarians from './AdminManageLibrarians';
 import AdminEditLandingPageReviews from './AdminEditLandingPageReviews';
+import AdminViewAllReviews from './AdminViewAllReviews';
 
 const dashboardItems = [
     { title: 'Manage Parents & Kids', view: 'manageUsers' },
     { title: 'Manage Librarians', view: 'manageLibrarians' },
     { title: 'Edit Landing Page Reviews', view: 'editReviews' },
     { title: 'Edit Landing Page', view: 'editLandingPage' },
+    { title: 'View All Reviews', view: 'viewAllReviews' },
+    
 ];
 
 function AdminDashboard() {
@@ -34,6 +37,8 @@ function AdminDashboard() {
                 return <AdminManageLibrarians />;
             case 'editReviews':
                 return <AdminEditLandingPageReviews />;
+            case 'viewAllReviews':
+                return <AdminViewAllReviews />;
             default:
                 // This renders the grid of buttons
                 return (
