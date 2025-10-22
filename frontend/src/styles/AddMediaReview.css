@@ -1,0 +1,96 @@
+/* Container inside the modal body */
+.add-review-container {
+  padding: 10px;
+}
+
+.add-review-container h2 {
+  margin-top: 0;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+/* narrow form width to keep it tidy */
+.review-form {
+  max-width: 600px;
+}
+
+/* Stars */
+.star-rating {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.star-rating .star {
+  font-size: 2.5em;
+  cursor: pointer;
+  color: #ccc;
+  user-select: none;
+  line-height: 1;
+}
+
+.star-rating .star.filled {
+  color: #ffc107;
+}
+
+/* Inputs */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.form-group textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.char-counter {
+  font-size: 14px;
+  color: #333;
+  margin: 6px 0 0 2px;
+}
+
+/* Buttons (re-using your modal footer layout) */
+.review-form button {
+  padding: 12px 25px;
+  border: none;
+  background: #0d6efd;
+  color: white;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.review-form button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* tiny helpers for messages */
+.success-state {
+  color: #065f46;
+  background: #ecfdf5;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.error-state {
+  color: #991b1b;
+  background: #fee2e2;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+}

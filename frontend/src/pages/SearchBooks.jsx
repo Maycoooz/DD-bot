@@ -3,6 +3,18 @@ import api from '../api/axiosConfig';
 import '../styles/SearchMedia.css'; 
 import ViewBookModal from './ViewBookModal';
 
+
+// Small star renderer for teh ratings
+const StarRating = ({ value }) => {
+  const v = typeof value === 'number' && !Number.isNaN(value) ? value : 0;
+  return (
+    <span className="star-chip" title={`${v.toFixed(1)} / 5`} aria-label={`${v.toFixed(1)} out of 5`}>
+      <span className="star-icon">⭐</span>
+      <span className="star-number">{v ? v.toFixed(1) : '—'}</span>
+    </span>
+  );
+};
+
 // A debounce hook to prevent API calls on every keystroke
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -70,6 +82,7 @@ function SearchBooks() {
                                     <th>Author</th>
                                     <th>Category</th>
                                     <th>Age Group</th>
+                                    <th>Rating</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -81,6 +94,7 @@ function SearchBooks() {
                                             <td>{book.author}</td>
                                             <td>{book.category || 'N/A'}</td>
                                             <td>{book.age_group || 'N/A'}</td>
+                                            <td><StarRating value={book.rating } /></td>
                                             <td>
                                                 <button className="btn-view" onClick={() => setViewingBook(book)}>
                                                     View Details

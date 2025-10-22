@@ -3,6 +3,17 @@ import api from '../api/axiosConfig';
 import '../styles/SearchMedia.css';
 import ViewVideoModal from './ViewVideoModal';
 
+// Small star renderer for ratings
+const StarRating = ({ value }) => {
+  const v = typeof value === 'number' && !Number.isNaN(value) ? value : 0;
+  return (
+    <span className="star-chip" title={`${v.toFixed(1)} / 5`} aria-label={`${v.toFixed(1)} out of 5`}>
+      <span className="star-icon">⭐</span>
+      <span className="star-number">{v ? v.toFixed(1) : '—'}</span>
+    </span>
+  );
+};
+
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -67,6 +78,7 @@ function SearchVideos() {
                                     <th>Creator</th>
                                     <th>Category</th>
                                     <th>Age Group</th>
+                                    <th>Rating</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -78,6 +90,7 @@ function SearchVideos() {
                                             <td>{video.creator}</td>
                                             <td>{video.category || 'N/A'}</td>
                                             <td>{video.age_group || 'N/A'}</td>
+                                            <td><StarRating value={video.rating } /></td>
                                             <td>
                                                 <button className="btn-view" onClick={() => setViewingVideo(video)}>
                                                     View Details

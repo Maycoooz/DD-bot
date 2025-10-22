@@ -3,10 +3,12 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List
 
 from db.database import get_db
-from models.tables import User, Review, ReviewType
+from models.tables import User, Review, ReviewType, Book, Video
 from schemas.review import ReviewCreate, ReviewResponse, PublicReviewResponse
 from schemas.auth import StatusMessage
 from auth.auth_handler import get_current_active_user
+
+from utils.ratings import recompute_book_rating, recompute_video_rating
 
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from better_profanity import profanity
@@ -124,3 +126,139 @@ def delete_review(
     db.commit()
     
     return StatusMessage(status="success", message="Review deleted successfully.")
+
+# Endpoint to create a new book review
+@router.post("/book/{book_id}", response_model=StatusMessage, status_code=status.HTTP_201_CREATED)
+def create_book_review(
+    book_id: int,
+    review_data: ReviewCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+        
+    # check if book in db
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if not book:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Book not found in database."
+        )
+    
+    # check if review of this book already exists by current user
+    existing_review = db.query(Review).filter(
+        Review.user_id == current_user.id,
+        Review.review_type == ReviewType.BOOK,
+        Review.reviewable_id == book_id
+    ).first()
+    
+    if existing_review:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You have already reviewd this book."
+        )
+    
+    review_text = review_data.review.strip()
+
+    # Profanity check
+    if profanity.contains_profanity(review_text):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Your review contains inappropriate language."
+        )
+    
+
+    # Sentiment check
+    sentiment_score = analyzer.polarity_scores(review_text)
+    # compound score: >0.05 positive, <-0.05 negative, else neutral
+    is_positive = sentiment_score['compound'] > 0.05
+
+    # Create Review 
+    new_review = Review(
+        user_id=current_user.id,
+        review=review_text,
+        stars=review_data.stars,
+        review_type=ReviewType.BOOK,
+        reviewable_id=book_id, 
+        is_public_display_approved=True # all reviews for a book will be shown even if its bad sentiment
+    )
+
+    db.add(new_review)
+    db.commit()
+    
+    recompute_book_rating(db, book_id)
+    
+    message = "Your review has been submitted successfully."
+    if not is_positive:
+        message += " If you did not enjoy this book, we apologize for and are working hard to curate better books for you!"
+    if is_positive:
+        message += " Thank you for your feedback!"
+
+    return StatusMessage(status="success", message=message)
+
+# Endpoint to create a new video review
+@router.post("/video/{video_id}", response_model=StatusMessage, status_code=status.HTTP_201_CREATED)
+def create_video_review(
+    video_id: int,
+    review_data: ReviewCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+        
+    # check if book in db
+    video = db.query(Video).filter(Video.id == video_id).first()
+    if not video:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Video not found in database."
+        )
+    
+    # check if review of this book already exists by current user
+    existing_review = db.query(Review).filter(
+        Review.user_id == current_user.id,
+        Review.review_type == ReviewType.VIDEO,
+        Review.reviewable_id == video_id
+    ).first()
+    
+    if existing_review:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="You have already reviewd this video."
+        )
+    
+    review_text = review_data.review.strip()
+
+    # Profanity check
+    if profanity.contains_profanity(review_text):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Your review contains inappropriate language."
+        )
+    
+
+    # Sentiment check
+    sentiment_score = analyzer.polarity_scores(review_text)
+    # compound score: >0.05 positive, <-0.05 negative, else neutral
+    is_positive = sentiment_score['compound'] > 0.05
+
+    # Create Review 
+    new_review = Review(
+        user_id=current_user.id,
+        review=review_text,
+        stars=review_data.stars,
+        review_type=ReviewType.VIDEO,
+        reviewable_id=video_id, 
+        is_public_display_approved=True # all reviews for a book will be shown even if its bad sentiment
+    )
+
+    db.add(new_review)
+    db.commit()
+    
+    recompute_video_rating(db, video_id)
+    
+    message = "Your review has been submitted successfully."
+    if not is_positive:
+        message += " If you did not enjoy this video, we apologize for and are working hard to curate better videos for you!"
+    if is_positive:
+        message += " Thank you for your feedback!"
+
+    return StatusMessage(status="success", message=message)

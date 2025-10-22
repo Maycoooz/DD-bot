@@ -1,7 +1,10 @@
-import React from 'react';
-import '../styles/ViewVideoModal.css'; // We will create this CSS file next
+import React, { useState } from 'react';
+import '../styles/ViewVideoModal.css'; 
+import ReviewVideoModal from './AddVideoReview';
 
 function ViewVideoModal({ video, onClose }) {
+    const [showReview, setShowReview] = useState(false);
+
     // Helper to create a clean embeddable YouTube URL
     const getEmbedUrl = (url) => {
         try {
@@ -52,9 +55,27 @@ function ViewVideoModal({ video, onClose }) {
                         <label>Description</label>
                         <p>{video.description || 'No description available.'}</p>
                     </div>
+
+                    <div className="modal-footer" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <button
+                        type="button"
+                        className="btn-secondary"
+                        onClick={() => setShowReview(true)}
+                        aria-haspopup="dialog"
+                        aria-expanded={showReview}
+                        >
+                        Review Video
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+            {showReview && (
+                <ReviewVideoModal
+                    video={video}
+                    onClose={() => setShowReview(false)}
+                />
+            )}
+        </div>    
     );
 }
 
