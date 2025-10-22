@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api/axiosConfig';
-import '../styles/AdminViewAllReviews.css'; // We'll create this new CSS file
+import '../styles/AdminViewAllReviews.css'; 
 
 function AdminViewAllReviews() {
     const [reviews, setReviews] = useState([]);
@@ -10,10 +10,11 @@ function AdminViewAllReviews() {
     // State for pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
+    const [totalReviews, setTotalReviews] = useState(0); 
     
     // State for filters
-    const [filterStars, setFilterStars] = useState(''); // '' means all
-    const [filterType, setFilterType] = useState(''); // '' means all
+    const [filterStars, setFilterStars] = useState(''); // '' set filter to all by default
+    const [filterType, setFilterType] = useState(''); 
 
     const fetchReviews = useCallback(async () => {
         setLoading(true);
@@ -29,11 +30,13 @@ function AdminViewAllReviews() {
             const response = await api.get('/admin/all-reviews', { params });
             
             setReviews(response.data.items || []);
+            setTotalReviews(response.data.total); 
             setTotalPages(Math.ceil(response.data.total / params.size));
             
         } catch (err) {
             console.error("Error fetching reviews:", err);
             setError('Failed to load reviews. Please try again.');
+            setTotalReviews(0); // reset total review to 0 on error
         } finally {
             setLoading(false);
         }
@@ -51,38 +54,50 @@ function AdminViewAllReviews() {
 
     return (
         <div className="admin-view-all-container">
-            <h2>Manage All Reviews</h2>
+            {/* --- Header --- */}
+            <div className="admin-reviews-header">
+                <h2>Manage All Reviews</h2>
+            </div>
 
             {/* --- Filter Controls --- */}
             <div className="admin-filters">
-                <div className="filter-group">
-                    <label htmlFor="star-filter">Filter by Stars</label>
-                    <select 
-                        id="star-filter"
-                        value={filterStars}
-                        onChange={(e) => setFilterStars(e.target.value)}
-                    >
-                        <option value="">All Star Ratings</option>
-                        <option value="5">5 Stars</option>
-                        <option value="4">4 Stars</option>
-                        <option value="3">3 Stars</option>
-                        <option value="2">2 Stars</option>
-                        <option value="1">1 Star</option>
-                    </select>
+                <div className="filter-controls-wrapper">
+                    <div className="filter-group">
+                        <label htmlFor="star-filter">Filter by Stars</label>
+                        <select 
+                            id="star-filter"
+                            value={filterStars}
+                            onChange={(e) => setFilterStars(e.target.value)}
+                        >
+                            <option value="">All Star Ratings</option>
+                            <option value="5">5 Stars</option>
+                            <option value="4">4 Stars</option>
+                            <option value="3">3 Stars</option>
+                            <option value="2">2 Stars</option>
+                            <option value="1">1 Star</option>
+                        </select>
+                    </div>
+                    <div className="filter-group">
+                        <label htmlFor="type-filter">Filter by Type</label>
+                        <select
+                            id="type-filter"
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                        >
+                            <option value="">All Types</option>
+                            <option value="APP">App</option>
+                            <option value="BOOK">Book</option>
+                            <option value="VIDEO">Video</option>
+                        </select>
+                    </div>
                 </div>
-                <div className="filter-group">
-                    <label htmlFor="type-filter">Filter by Type</label>
-                    <select
-                        id="type-filter"
-                        value={filterType}
-                        onChange={(e) => setFilterType(e.target.value)}
-                    >
-                        <option value="">All Types</option>
-                        <option value="APP">App</option>
-                        <option value="BOOK">Book</option>
-                        <option value="VIDEO">Video</option>
-                    </select>
-                </div>
+
+                {/*  Badge for total reviews stat inside filter controls div */}
+                {!loading && !error && totalReviews > 0 && (
+                    <span className="total-reviews-badge">
+                        {totalReviews} {totalReviews === 1 ? 'Review' : 'Reviews'} Found
+                    </span>
+                )}
             </div>
 
             {/* --- Status Messages --- */}

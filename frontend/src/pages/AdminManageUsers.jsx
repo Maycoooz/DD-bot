@@ -18,6 +18,7 @@ function AdminManageUsers() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
+                // get all the kids & parents users
                 const response = await api.get('/admin/view-all-users');
                 const { parent_and_kid_users, total_users, total_parents, total_kids } = response.data;
                 setAllUsers(parent_and_kid_users || []);
@@ -36,6 +37,7 @@ function AdminManageUsers() {
         fetchUsers();
     }, []);
 
+    // use memo to recompute previosuly computed users
     const filteredUsers = useMemo(() => {
         if (!searchTerm) {
             return allUsers;
@@ -45,6 +47,7 @@ function AdminManageUsers() {
         );
     }, [allUsers, searchTerm]);
 
+    // Calls the admin/delete-user endpoint 
     const handleDeleteUser = async (userToDelete) => {
         try {
             const response = await api.delete(`/admin/delete-user/${userToDelete.id}`);

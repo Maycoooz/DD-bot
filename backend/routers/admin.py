@@ -251,11 +251,9 @@ def revoke_review_approval(
         message="Review approval has been revoked and it will no longer appear on the landing page."
     )
     
-# admin view all reviews 
+# Admin-only endpoint to view all reviews with pagination and filtering.
+# Includes the reviewer's email and parent's email if the reviewer is a child.
 # can search by stars & latest
-# should be able to see the users email
-# if a child made the review, should show the parents email
-# reviews should be paginated if there are many of them
 @router.get("/all-reviews", response_model=PaginatedAdminReviewResponse)
 def admin_view_all_reviews(
     db: Session = Depends(get_db),
@@ -265,10 +263,6 @@ def admin_view_all_reviews(
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Items per page")
 ):
-    """
-    Admin-only endpoint to view all reviews with pagination and filtering.
-    Includes the reviewer's email and parent's email if the reviewer is a child.
-    """
     
     # Base query with joins
     # load the reviews n the user, that users role, and that users parent
