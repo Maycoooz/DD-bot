@@ -28,12 +28,9 @@ origins = [
     "http://localhost:8000",
     "http://localhost:5173",
     "https://www.ddbot.site",
+    "https://ddbot.site",
     "https://ddbot-ch6g.vercel.app",
-    "https://www.ddbot-ch6g.vercel.app",
-    # 👇 Allow all Vercel preview deployments
     "https://ddbot-ch6g-*vercel.app",
-    "https://ddbot-ch6g-*.vercel.app",
-    # 👇 Optional: allow all Vercel subdomains for your project
     "https://*.vercel.app",
     "https://www.youtube.com"
 ]
@@ -42,7 +39,7 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
