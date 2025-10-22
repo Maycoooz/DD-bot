@@ -101,7 +101,7 @@ def create_verification_token(data: dict, expires_delta: timedelta = timedelta(m
 
 # ------------------------------- SENDGRID EMAIL FUNCTION ------------------------------- #
 async def send_verification_email(email: str, token: str):
-    verification_url = f"https://ddbot-ch6g.vercel.app/verify-email?token={token}"
+    verification_url = f"https://www.ddbot.site/verify-email?token={token}"
 
     html_content = f"""
     <html>
