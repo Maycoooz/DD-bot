@@ -4,7 +4,7 @@ from datetime import datetime
 
 # Schema for creating a new review
 class ReviewCreate(BaseModel):
-    review: str = Field(..., max_length=50)
+    review: str = Field(..., max_length=80)
     stars: int = Field(..., ge=1, le=5) # Ensures stars are between 1 and 5
 
 # Schema for displaying a user's existing review

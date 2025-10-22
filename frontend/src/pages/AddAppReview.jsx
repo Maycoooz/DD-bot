@@ -27,7 +27,7 @@ function AddAppReview() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const MAX_CHARS = 50;
+    const MAX_CHARS = 80;
 
     const handleTextChange = (e) => {
         if (e.target.value.length <= MAX_CHARS) {

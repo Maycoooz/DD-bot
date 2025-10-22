@@ -145,7 +145,7 @@ const LandingPage = () => {
                             reviews.map(review => (
                                 <div key={review.id} className="landing-testimonial-box">
                                     <p>"{review.review}" – {review.user.username}</p>
-                                    <span>{'🌟'.repeat(review.stars)}</span>
+                                    <span>{'⭐'.repeat(review.stars)}</span>
                                 </div>
                             ))
                         ) : (

@@ -7,7 +7,7 @@ from schemas.auth import StatusMessage
 from schemas.admin import ViewAllUserResponse
 from schemas.librarian import LibrarianResponse
 from schemas.media import PaginatedBookResponse, PaginatedVideoResponse
-from models.tables import User, LandingPage, Book, Video
+from models.tables import User, LandingPage, Book, Video, Review
 from schemas.landing_page import LandingPageResponse, LandingPageUpdate, LandingPageCreate
 
 from typing import List
@@ -217,3 +217,34 @@ def approve_librarian(
     db.refresh(librarian)
     
     return librarian
+
+@router.put("/review/{review_id}/revoke-approval", response_model=StatusMessage)
+def revoke_review_approval(
+    review_id: int,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user)
+):
+    # Find the review
+    review = db.query(Review).filter(Review.id == review_id).first()
+    
+    if not review:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Review not found."
+        )
+        
+    # Check if it's already hidden
+    if not review.is_public_display_approved:
+        return StatusMessage(
+            status="info", 
+            message="This review is already hidden from the landing page."
+        )
+        
+    # Update the field and commit
+    review.is_public_display_approved = False
+    db.commit()
+    
+    return StatusMessage(
+        status="success", 
+        message="Review approval has been revoked and it will no longer appear on the landing page."
+    )
