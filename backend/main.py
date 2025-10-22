@@ -30,8 +30,6 @@ origins = [
     "https://www.ddbot.site",
     "https://ddbot.site",
     "https://ddbot-ch6g.vercel.app",
-    "https://ddbot-ch6g-*vercel.app",
-    "https://*.vercel.app",
     "https://www.youtube.com"
 ]
 
@@ -40,6 +38,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
     allow_origins=origins,
+    allow_origin_regex=r"https://ddbot-ch6g-[a-zA-Z0-9-]+\.vercel\.app",
     allow_methods=["*"],
     allow_headers=["*"],
 )
