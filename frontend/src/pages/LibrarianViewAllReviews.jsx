@@ -143,7 +143,6 @@ function LibrarianViewAllReviews() {
                   <th>Stars</th>
                   <th>Type</th>
                   <th>Title</th>
-                  <th>Publicly Approved</th>
                   <th>Date</th>
                 </tr>
               </thead>
@@ -165,7 +164,6 @@ function LibrarianViewAllReviews() {
                       <td className="media-title-cell" title={r.media_title || '—'}>
                         {r.media_title || '—'}
                       </td>
-                      <td>{r.is_public_display_approved ? 'Yes' : 'No'}</td>
                       <td>{new Date(r.created_at).toLocaleDateString()}</td>
                     </tr>
                   ))

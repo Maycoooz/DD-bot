@@ -101,7 +101,7 @@ function LibrarianDashboard() {
         {/* Row 3 — Full-width yellow review card */}
         <button
           onClick={() => setActiveView('viewReviews')}
-          className="dashboard-card card-review span-2"
+          className="dashboard-card card-review"
         >
           <h3>View All Reviews</h3>
           <p>See book & video reviews (no app reviews).</p>
