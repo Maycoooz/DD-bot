@@ -4,7 +4,7 @@ import '../styles/DeleteAppReview.css';
 import ConfirmationModal from './ConfirmationModal';
 
 const TABS = ['BOOK', 'VIDEO', 'APP'];
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 3;
 
 function DeleteAppReview() {
   const [reviews, setReviews] = useState([]);
@@ -98,20 +98,25 @@ function DeleteAppReview() {
 
       {/* Tabs */}
       <div className="reviews-tabs" role="tablist" aria-label="Review types">
-        {TABS.map((tab) => (
-          <button
-            key={tab}
-            role="tab"
-            aria-selected={activeTab === tab}
-            aria-controls={`panel-${tab}`}
-            id={`tab-${tab}`}
-            className={`reviews-tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {tab.charAt(0) + tab.slice(1).toLowerCase()}&nbsp;
-            <span className="tab-count">{totalForTab(tab)}</span>
-          </button>
-        ))}
+        {TABS.map((tab) => {
+          const isActive = activeTab === tab;
+          return (
+            <button
+              key={tab}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`panel-${tab}`}
+              id={`tab-${tab}`}
+              className={`reviews-tab ${isActive ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              <span className="tab-label">
+                {tab.charAt(0) + tab.slice(1).toLowerCase()}
+              </span>
+              <span className="tab-count">{totalForTab(tab)}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Panel */}
@@ -122,14 +127,14 @@ function DeleteAppReview() {
         className="reviews-panel"
       >
         {totalForTab(activeTab) === 0 ? (
-          <p>No {activeTab.toLowerCase()} reviews yet.</p>
+          <p className="no-items">No {activeTab.toLowerCase()} reviews yet.</p>
         ) : (
           <>
-            {/* --- NICER CARDS --- */}
             <div className="reviews-list pretty">
               {currentItems.map((review) => (
                 <article key={review.id} className="review-card">
-                  <header className="review-card-header">
+                  {/* Header row */}
+                  <header className="review-card-top">
                     <span className={`pill ${kindClass(review.review_type)}`}>
                       {review.review_type}
                     </span>
@@ -140,13 +145,16 @@ function DeleteAppReview() {
                     )}
                   </header>
 
+                  {/* Middle: stars + text */}
                   <div className="review-card-body">
                     <div className="review-stars" aria-label={`${review.stars} out of 5`}>
-                      {'★'.repeat(review.stars)}{'☆'.repeat(5 - review.stars)}
+                      {'★'.repeat(review.stars)}
+                      {'☆'.repeat(5 - review.stars)}
                     </div>
                     <p className="review-text">{review.review}</p>
                   </div>
 
+                  {/* Footer */}
                   <footer className="review-card-footer">
                     <span className="review-meta">
                       Reviewed on: {new Date(review.created_at).toLocaleString()}

@@ -1,28 +1,47 @@
-/* Tabs – nicer look */
+/* ===== Tabs (clear active highlight) ===== */
 .reviews-tabs {
   display: flex;
   gap: 10px;
   margin: 8px 0 16px;
   border-bottom: 1px solid #e5e7eb;
 }
+
 .reviews-tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 14px;
-  background: #f9fafb;
+  background: #f8fafc;            /* light */
+  color: #475569;                  /* slate-600 */
   border: 1px solid #e5e7eb;
   border-bottom: none;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
   cursor: pointer;
-  font-weight: 600;
-  color: #4b5563;
   transform: translateY(1px);
+  transition: background .15s ease, color .15s ease, box-shadow .15s ease;
 }
+
+.reviews-tab:hover {
+  background: #f1f5f9;
+}
+
 .reviews-tab.active {
   background: #ffffff;
   color: #111827;
   border-color: #d1d5db;
+  box-shadow: 0 2px 0 0 #0059ffbb inset; /* blue underline bar */
 }
-.reviews-tab:hover { background: #f3f4f6; }
+
+.reviews-tab .tab-label {
+  font-weight: 700;
+}
+
+.reviews-tab.active .tab-label {
+  color: #111827;
+}
+
 .tab-count {
   display: inline-flex;
   min-width: 22px;
@@ -32,74 +51,139 @@
   justify-content: center;
   font-size: 12px;
   border-radius: 999px;
-  color: #374151;
-  background: #eef2ff;
+  font-weight: 700;
+  color: #1e3a8a;
+  background: #eef2ff; /* indigo-50 */
 }
 
-/* Card layout */
-.reviews-list.pretty { display: grid; gap: 14px; }
+/* ===== Card list ===== */
+.reviews-list.pretty {
+  display: grid;
+  gap: 14px;
+}
+
 .review-card {
   border: 1px solid #e5e7eb;
   background: #ffffff;
-  border-radius: 12px;
-  padding: 14px;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.02);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.03);
 }
-.review-card-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+
+.review-card-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
 }
+
 .pill {
-  display: inline-flex; align-items: center; height: 24px; padding: 0 10px;
-  font-size: 12px; font-weight: 700; border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 800;
+  border-radius: 999px;
+  letter-spacing: .02em;
 }
+
 .badge-book  { background: #ecfdf5; color: #065f46; } /* green */
 .badge-video { background: #eff6ff; color: #1e40af; } /* blue */
 .badge-app   { background: #fef3c7; color: #92400e; } /* amber */
 
 .media-title {
-  margin: 0; font-size: 16px; font-weight: 600; color: #111827;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1 1 auto;
+  text-align: right;  /* keeps your current right-leaning look */
 }
 
-.review-card-body { display: grid; gap: 6px; }
-.review-stars { color: #f59e0b; letter-spacing: 1px; }
-.review-text  { margin: 0; color: #374151; font-style: italic; }
+.review-card-body {
+  display: grid;
+  gap: 6px;
+}
+
+.review-stars {
+  color: #f59e0b;           /* amber-500 */
+  letter-spacing: 1px;
+  font-size: 15px;
+}
+
+.review-text {
+  margin: 0;
+  color: #374151;
+  font-style: italic;
+}
 
 .review-card-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 10px; gap: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 10px;
 }
-.review-meta { font-size: 12px; color: #6b7280; }
 
-/* Buttons (keep your old .btn-delete but add outline variant) */
-.btn-delete.outline {
+.review-meta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* ===== Buttons ===== */
+.btn-delete {
   padding: 8px 14px;
+  border: none;
+  background-color: #dc3545;
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn-delete:hover { background-color: #bb2d3b; }
+
+.btn-delete.outline {
   background: #fff;
   color: #dc3545;
   border: 1px solid #f3b4bc;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
 }
+
 .btn-delete.outline:hover {
   background: #fff5f6;
   border-color: #dc3545;
 }
 
-/* Pagination */
+/* ===== Pagination ===== */
 .pagination-controls.cozy {
-  display: flex; align-items: center; gap: 10px;
-  justify-content: flex-end; margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 12px;
 }
+
 .pagination-controls.cozy button {
-  padding: 7px 12px;
-  border-radius: 8px;
+  padding: 8px 14px;
+  border-radius: 10px;
   border: 1px solid #d1d5db;
   background: #fff;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 700;
+  color: #374151;
 }
+
 .pagination-controls.cozy button:hover { background: #f9fafb; }
 .pagination-controls.cozy button:disabled {
-  opacity: 0.55; cursor: not-allowed;
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.no-items {
+  color: #6b7280;
+  margin: 10px 2px;
 }
