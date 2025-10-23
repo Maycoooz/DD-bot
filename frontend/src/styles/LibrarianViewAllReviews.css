@@ -1,0 +1,237 @@
+/* ------- Page shell ------- */
+.librarian-reviews-container {
+  padding: 20px;
+}
+
+.librarian-reviews-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.librarian-reviews-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: #0f172a; /* slate-900 */
+}
+
+/* ------- Filters bar ------- */
+.librarian-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+  margin-bottom: 16px;
+}
+
+.filter-controls-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+}
+
+.filter-group label {
+  font-size: 12px;
+  color: #475569; /* slate-600 */
+  letter-spacing: .2px;
+}
+
+.filter-group select,
+.filter-group input[type="text"] {
+  height: 38px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  outline: none;
+  background: #fff;
+  color: #0f172a;
+}
+
+.filter-group select:focus,
+.filter-group input[type="text"]:focus {
+  border-color: #6366f1;       /* indigo-500 */
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, .15);
+}
+
+.total-reviews-badge {
+  display: inline-block;
+  background: #f5f3ff; /* indigo-50 */
+  color: #4338ca;      /* indigo-700 */
+  border: 1px solid #e0e7ff;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* ------- States ------- */
+.librarian-loading-state,
+.librarian-error-message {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.librarian-loading-state {
+  background: #f8fafc;           /* slate-50 */
+  color: #334155;                /* slate-700 */
+  border: 1px solid #e5e7eb;
+}
+
+.librarian-error-message {
+  background: #fef2f2;           /* red-50 */
+  color: #b91c1c;                /* red-700 */
+  border: 1px solid #fecaca;     /* red-200 */
+}
+
+/* ------- Table ------- */
+.librarian-table-container {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+  overflow: hidden;
+}
+
+.librarian-reviews-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.librarian-reviews-table thead th {
+  text-align: left;
+  padding: 14px 16px;
+  font-size: 12px;
+  color: #475569;              /* slate-600 */
+  background: #f8fafc;         /* slate-50 */
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 700;
+}
+
+.librarian-reviews-table tbody td {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9; /* slate-100 */
+  vertical-align: top;
+  color: #0f172a;
+}
+
+.librarian-reviews-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* reviewer role pill */
+.user-role-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  font-size: 10px;
+  border-radius: 999px;
+  background: #eef2ff; /* indigo-100 */
+  color: #4338ca;      /* indigo-700 */
+  border: 1px solid #e0e7ff;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+/* Truncate long cells nicely */
+.review-text-cell,
+.media-title-cell {
+  max-width: 720px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Stars (they are characters, but give them color) */
+.librarian-reviews-table td[aria-label*="stars"],
+.librarian-reviews-table td:nth-child(3) {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  letter-spacing: 1px;
+  color: #0ea5e9; /* sky-500 for filled ★; the empty ☆ will read as lighter */
+}
+
+/* No results row */
+.no-results {
+  text-align: center;
+  color: #64748b; /* slate-500 */
+  padding: 28px 16px !important;
+}
+
+/* ------- Pagination ------- */
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.pagination-controls button {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #111827; /* gray-900 */
+  cursor: pointer;
+}
+
+.pagination-controls button:hover:not(:disabled) {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, .15);
+}
+
+.pagination-controls button:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.pagination-controls span {
+  font-size: 14px;
+  color: #334155; /* slate-700 */
+}
+
+/* ------- Responsive tweaks ------- */
+@media (max-width: 900px) {
+  .filter-controls-wrapper {
+    width: 100%;
+  }
+  .review-text-cell,
+  .media-title-cell {
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 640px) {
+  .librarian-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .total-reviews-badge {
+    align-self: flex-start;
+  }
+  .review-text-cell,
+  .media-title-cell {
+    max-width: 260px;
+  }
+}
