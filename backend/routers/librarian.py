@@ -206,3 +206,16 @@ def delete_video(
     db.delete(db_video)
     db.commit()
     return StatusMessage(status="success", message="Video deleted successfully.")
+
+
+
+# Router endpoints specifically for librarian search by source bar
+@router.get("/book-sources", response_model=List[str])
+def get_book_sources(db: Session = Depends(get_db)):
+    rows = db.query(tables.Book.source).distinct().all() 
+    return [s for (s,) in rows if s]
+
+@router.get("/video-sources", response_model=List[str])
+def get_video_sources(db: Session = Depends(get_db)):
+    rows = db.query(tables.Video.source).distinct().all()
+    return [s for (s,) in rows if s]
