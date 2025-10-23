@@ -96,7 +96,7 @@ def get_latest_app_reviews(db: Session = Depends(get_db)):
 @router.get("/my-reviews", response_model=List[ReviewResponse])
 def get_my_reviews(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_active_user)
+    current_user: User = Depends(get_current_active_user),
 ):
     reviews = (
         db.query(Review)
@@ -104,7 +104,31 @@ def get_my_reviews(
         .order_by(Review.created_at.desc())
         .all()
     )
-    return reviews
+
+    out: List[ReviewResponse] = []
+    for r in reviews:
+        title = None
+        media_id = None
+        if r.review_type == ReviewType.BOOK:
+            title = db.query(Book.title).filter(Book.id == r.reviewable_id).scalar()
+            media_id = r.reviewable_id
+        elif r.review_type == ReviewType.VIDEO:
+            title = db.query(Video.title).filter(Video.id == r.reviewable_id).scalar()
+            media_id = r.reviewable_id
+
+        out.append(
+            ReviewResponse(
+                id=r.id,
+                review=r.review,
+                stars=r.stars,
+                review_type=r.review_type.value,  # "BOOK" | "VIDEO" | "APP"
+                created_at=r.created_at,
+                media_title=title,
+                media_id=media_id,
+            )
+        )
+    return out
+
 
 # Endpoint to delete a specific review
 @router.delete("/{review_id}", response_model=StatusMessage)
