@@ -36,7 +36,7 @@ from datetime import datetime
 class AdminReviewUserResponse(BaseModel):
     id: int
     username: str
-    email: str
+    email: Optional[str] = None
     role_name: UserRole
     parent_email: Optional[str] = None
 

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_
+from sqlalchemy.orm import Session, joinedload, aliased
+from sqlalchemy import or_, select
 
 from auth.auth_handler import get_current_admin_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
@@ -251,6 +251,24 @@ def revoke_review_approval(
         message="Review approval has been revoked and it will no longer appear on the landing page."
     )
     
+
+def _extract_parent_email(user):
+    """
+    Works whether user.parent_user is a scalar or a collection.
+    Returns the first parent's email if it's a list, else the scalar's email.
+    """
+    parent_rel = getattr(user, "parent_user", None)
+    if parent_rel is None:
+        return None
+
+    # If it looks like a collection and doesn't itself have .email, take first
+    if hasattr(parent_rel, "__iter__") and not hasattr(parent_rel, "email"):
+        first_parent = next(iter(parent_rel), None)
+        return getattr(first_parent, "email", None) if first_parent is not None else None
+
+    # Scalar relationship
+    return getattr(parent_rel, "email", None)
+
 # Admin-only endpoint to view all reviews with pagination and filtering.
 # Includes the reviewer's email and parent's email if the reviewer is a child.
 # can search by stars & latest
@@ -258,73 +276,77 @@ def revoke_review_approval(
 def admin_view_all_reviews(
     db: Session = Depends(get_db),
     admin_user: User = Depends(get_current_admin_user),
-    stars: Optional[int] = Query(None, ge=1, le=5, description="Filter by star rating (1-5)"),
-    review_type: Optional[ReviewType] = Query(None, description="Filter by review type (APP, BOOK, VIDEO)"),
-    page: int = Query(1, ge=1, description="Page number"),
-    size: int = Query(10, ge=1, le=100, description="Items per page")
+    stars: Optional[int] = Query(None, ge=1, le=5),
+    review_type: Optional[ReviewType] = Query(None),
+    page: int = Query(1, ge=1),
+    size: int = Query(10, ge=1, le=100),
 ):
-    
-    # Base query with joins
-    # load the reviews n the user, that users role, and that users parent
-    base_query = (
+    # 1) base query + filters
+    base_q = (
         db.query(Review)
         .options(
-            joinedload(Review.user)
-            .joinedload(User.role),
-            joinedload(Review.user)
-            .joinedload(User.parent_user)
+            joinedload(Review.user).joinedload(User.role),      # keep role eager
+            # no need to eagerload parent_user anymore
         )
     )
-    
-    # 2. Apply filters
     if stars is not None:
-        base_query = base_query.filter(Review.stars == stars)
+        base_q = base_q.filter(Review.stars == stars)
     if review_type is not None:
-        base_query = base_query.filter(Review.review_type == review_type)
-        
-    # 3. Get total count before pagination
-    total = base_query.count()
-    
-    # 4. Apply sorting and pagination
+        base_q = base_q.filter(Review.review_type == review_type)
+
+    total = base_q.count()
+
     reviews = (
-        base_query
+        base_q
         .order_by(Review.created_at.desc())
         .offset((page - 1) * size)
         .limit(size)
         .all()
     )
-    
-    # 5. Manually format the response to include conditional parent email
-    response_items = []
-    for review in reviews:
+
+    # 2) collect all parent ids we need to resolve for this page
+    parent_ids = {
+        r.user.primary_parent_id
+        for r in reviews
+        if r.user is not None and r.user.primary_parent_id is not None
+    }
+    parent_email_map: dict[int, Optional[str]] = {}
+    if parent_ids:
+        # one compact query to fetch the emails
+        rows = db.execute(
+            select(User.id, User.email).where(User.id.in_(parent_ids))
+        ).all()
+        parent_email_map = {pid: email for pid, email in rows}
+
+    # 3) build response items
+    items: list[AdminReviewResponse] = []
+    for r in reviews:
+        if r.user is None:
+            continue
+
         parent_email = None
-        
-        # Check if user exists and has a role
-        if review.user and review.user.role:
-            # If the user is a child and has a parent linked, get the email
-            if review.user.role.name == UserRole.CHILD and review.user.parent_user:
-                parent_email = review.user.parent_user.email
-            
-            # Create the nested user response
-            user_response = AdminReviewUserResponse(
-                id=review.user.id,
-                username=review.user.username,
-                email=review.user.email,
-                role_name=review.user.role.name,
-                parent_email=parent_email
+        if r.user.primary_parent_id is not None:
+            parent_email = parent_email_map.get(r.user.primary_parent_id)
+
+        user_payload = AdminReviewUserResponse(
+            id=r.user.id,
+            username=r.user.username,
+            email=r.user.email,                           # Optional[str] in schema
+            role_name=r.user.role.name if r.user.role else None,
+            parent_email=parent_email                     # will show for CHILD rows
+        )
+
+        items.append(
+            AdminReviewResponse(
+                id=r.id,
+                review=r.review,
+                stars=r.stars,
+                review_type=r.review_type,
+                is_public_display_approved=r.is_public_display_approved,
+                created_at=r.created_at,
+                user=user_payload,
             )
-            
-            # Create the full review response
-            review_response = AdminReviewResponse(
-                id=review.id,
-                review=review.review,
-                stars=review.stars,
-                review_type=review.review_type,
-                is_public_display_approved=review.is_public_display_approved,
-                created_at=review.created_at,
-                user=user_response
-            )
-            response_items.append(review_response)
-    
-    # 6. Return the paginated response
-    return PaginatedAdminReviewResponse(total=total, items=response_items)
+        )
+
+    return PaginatedAdminReviewResponse(total=total, items=items)
+
