@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import distinct
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 from db.database import get_db
 from models import tables
@@ -46,37 +46,68 @@ def get_media_sources(db: Session = Depends(get_db)):
 def view_all_books(
     db: Session = Depends(get_db),
     search: Optional[str] = None,
-    source: Optional[str] = None, 
+    source: Optional[str] = None,
     page: int = 1,
-    size: int = 10
+    size: int = 10,
+    sort: Literal["id", "rating", "newest", "oldest"] = "id",
+    direction: Literal["asc", "desc"] = "desc",
 ):
-    query = db.query(tables.Book).order_by(tables.Book.id.desc())
+    q = db.query(tables.Book)
+
+    # filters
     if search:
-        query = query.filter(tables.Book.title.contains(search))
+        # case-insensitive contains
+        q = q.filter(tables.Book.title.ilike(f"%{search}%"))
     if source:
-        query = query.filter(tables.Book.source == source)
+        q = q.filter(tables.Book.source == source)
+        
+    if sort == "newest":
+        sort, direction = "id", "desc"
+    elif sort == "oldest":
+        sort, direction = "id", "asc"
 
-    total = query.count()
-    books = query.offset((page - 1) * size).limit(size).all()
-    return PaginatedBookResponse(total=total, items=books)
+    # ordering
+    order_col = tables.Book.rating if sort == "rating" else tables.Book.id
+    order_expr = order_col.desc() if direction == "desc" else order_col.asc()
+    q = q.order_by(order_expr)
 
+    total = q.count()
+    items = q.offset((page - 1) * size).limit(size).all()
+    return PaginatedBookResponse(total=total, items=items)
+
+
+# --- Videos ---
 @router.get("/view-all-videos", response_model=PaginatedVideoResponse)
 def view_all_videos(
     db: Session = Depends(get_db),
     search: Optional[str] = None,
-    source: Optional[str] = None, # New filter parameter
+    source: Optional[str] = None,
     page: int = 1,
-    size: int = 10
+    size: int = 10,
+    sort: Literal["id", "rating", "newest", "oldest"] = "id",
+    direction: Literal["asc", "desc"] = "desc",
 ):
-    query = db.query(tables.Video).order_by(tables.Video.id.desc())
-    if search:
-        query = query.filter(tables.Video.title.contains(search))
-    if source:
-        query = query.filter(tables.Video.source == source)
+    q = db.query(tables.Video)
 
-    total = query.count()
-    videos = query.offset((page - 1) * size).limit(size).all()
-    return PaginatedVideoResponse(total=total, items=videos)
+    # filters
+    if search:
+        q = q.filter(tables.Video.title.ilike(f"%{search}%"))
+    if source:
+        q = q.filter(tables.Video.source == source)
+        
+    if sort == "newest":
+        sort, direction = "id", "desc"
+    elif sort == "oldest":
+        sort, direction = "id", "asc"
+
+    # ordering
+    order_col = tables.Video.rating if sort == "rating" else tables.Video.id
+    order_expr = order_col.desc() if direction == "desc" else order_col.asc()
+    q = q.order_by(order_expr)
+
+    total = q.count()
+    items = q.offset((page - 1) * size).limit(size).all()
+    return PaginatedVideoResponse(total=total, items=items)
 
 # --- POST (Create) Routes - Librarian Only ---
 @router.post("/add-book", response_model=BookResponse, status_code=status.HTTP_201_CREATED)

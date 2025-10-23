@@ -85,3 +85,7 @@
 .pagination-controls span {
     font-weight: 500;
 }
+
+.star-chip { display: inline-flex; align-items: center; gap: 6px; }
+.star-icon { color: #ffc107; font-size: 16px; line-height: 1; }
+.star-number { font-size: 12px; color: #4b5563; }
