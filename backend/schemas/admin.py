@@ -58,3 +58,8 @@ class PaginatedAdminReviewResponse(BaseModel):
     items: List[AdminReviewResponse]
     
     
+class AdminUserStats(BaseModel):
+    total_users: int # exlclude admins
+    total_parents: int
+    total_kids: int
+    total_librarians: int

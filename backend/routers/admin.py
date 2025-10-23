@@ -4,10 +4,10 @@ from sqlalchemy import or_, select
 
 from auth.auth_handler import get_current_admin_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
-from schemas.admin import ViewAllUserResponse, AdminReviewResponse, AdminReviewUserResponse, PaginatedAdminReviewResponse
+from schemas.admin import ViewAllUserResponse, AdminReviewResponse, AdminReviewUserResponse, PaginatedAdminReviewResponse, AdminUserStats
 from schemas.librarian import LibrarianResponse
 from schemas.media import PaginatedBookResponse, PaginatedVideoResponse
-from models.tables import User, LandingPage, Book, Video, Review, UserRole, ReviewType
+from models.tables import User, LandingPage, Book, Video, Review, UserRole, ReviewType, Role
 from schemas.landing_page import LandingPageResponse, LandingPageUpdate, LandingPageCreate
 
 from typing import List, Optional
@@ -350,3 +350,23 @@ def admin_view_all_reviews(
 
     return PaginatedAdminReviewResponse(total=total, items=items)
 
+
+# Utitlity endpoint to see how many users in database excluding any admins
+@router.get("/user-stats", response_model=AdminUserStats)
+def admin_user_stats(
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user),
+):
+    # counts by role
+    total_parents = db.query(User).join(Role).filter(Role.name == UserRole.PARENT).count()
+    total_kids = db.query(User).join(Role).filter(Role.name == UserRole.CHILD).count()
+    total_librarians = db.query(User).join(Role).filter(Role.name == UserRole.LIBRARIAN).count()
+
+    total_users = total_parents + total_kids + total_librarians  # exclude admins
+
+    return AdminUserStats(
+        total_users=total_users,
+        total_parents=total_parents,
+        total_kids=total_kids,
+        total_librarians=total_librarians,
+    )

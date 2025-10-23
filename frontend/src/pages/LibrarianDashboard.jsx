@@ -64,20 +64,13 @@ function LibrarianDashboard() {
       </div>
 
       <main className="dashboard-grid">
+        {/* Row 1 — Add buttons */}
         <button
           onClick={() => setIsAddBookModalOpen(true)}
           className="dashboard-card card-add"
         >
           <h3>Add Book</h3>
           <p>Create a new book entry.</p>
-        </button>
-
-        <button
-          onClick={() => setActiveView('viewBooks')}
-          className="dashboard-card card-view"
-        >
-          <h3>View All Books</h3>
-          <p>Browse and manage books.</p>
         </button>
 
         <button
@@ -88,6 +81,15 @@ function LibrarianDashboard() {
           <p>Create a new video entry.</p>
         </button>
 
+        {/* Row 2 — View buttons */}
+        <button
+          onClick={() => setActiveView('viewBooks')}
+          className="dashboard-card card-view"
+        >
+          <h3>View All Books</h3>
+          <p>Browse and manage books.</p>
+        </button>
+
         <button
           onClick={() => setActiveView('viewVideos')}
           className="dashboard-card card-view"
@@ -96,15 +98,16 @@ function LibrarianDashboard() {
           <p>Browse and manage videos.</p>
         </button>
 
-        {/* NEW: View All Reviews */}
+        {/* Row 3 — Full-width yellow review card */}
         <button
           onClick={() => setActiveView('viewReviews')}
-          className="dashboard-card card-view"
+          className="dashboard-card card-review span-2"
         >
           <h3>View All Reviews</h3>
           <p>See book & video reviews (no app reviews).</p>
         </button>
       </main>
+
     </>
   );
 
