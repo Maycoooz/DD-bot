@@ -15,6 +15,9 @@ const LandingPage = () => {
         PRICING: [],
     });
     const [reviews, setReviews] = useState([]); // State for the dynamic reviews
+    const findPricingItem = (key) => (pageContent['PRICING'] || []).find((i) => i.grouping_key === key);
+    const freePrice = findPricingItem('FREE_PRICE')?.display_text ?? '0';
+    const proPrice  = findPricingItem('PRO_PRICE')?.display_text ?? '9.99';
 
     // Fetch all data from public endpoints when the component loads
     useEffect(() => {
@@ -165,17 +168,17 @@ const LandingPage = () => {
                                     <li key={item.id}>{item.display_text}</li>
                                 ))}
                             </ul>
-                            <p className="landing-price">$0/month</p>
+                            <p className="landing-price">${freePrice}/month</p>
                             <Link to="/register" className="landing-button landing-button-outline">Choose Free</Link>
                         </div>
                         <div className="landing-pricing-box landing-premium">
-                            <h3>Premium Plan</h3>
+                            <h3>Pro Plan</h3>
                             <ul>
                                 {getContentList('PRICING').filter(item => item.grouping_key === 'PRO_PLAN').map(item => (
                                     <li key={item.id}>{item.display_text}</li>
                                 ))}
                             </ul>
-                            <p className="landing-price">$9.99/month</p>
+                            <p className="landing-price">${proPrice}/month</p>
                             <Link to="/register" className="landing-button landing-button-filled">Choose Premium</Link>
                         </div>
                     </div>
