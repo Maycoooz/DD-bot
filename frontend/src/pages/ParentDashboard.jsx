@@ -24,7 +24,7 @@ const menuItems = {
         { label: 'View Child Accounts', component: 'viewChildren', key: 'viewChildren' },
         { label: 'Child Chat History', component: 'childChatHistory', key: 'childChatHistory' }
     ],
-    Search: [
+    Library: [
         { label: 'Search Books', component: 'searchBooks', key: 'searchBooks' },
         { label: 'Search Videos', component: 'searchVideos', key: 'searchVideos' },
     ],

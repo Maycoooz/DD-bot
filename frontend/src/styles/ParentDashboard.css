@@ -1,349 +1,202 @@
-/* --- 1. Global Layout Reset for Dashboard --- */
-.dashboard-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    background-color: #f4f7f9; /* Light background for the whole dashboard */
-    color: #333;
-    font-family: 'Inter', sans-serif;
+/* ====== Parent Dashboard – refreshed UI ====== */
+
+:root{
+  --slate-50:#f8fafc;
+  --slate-100:#f1f5f9;
+  --slate-200:#e2e8f0;
+  --slate-300:#cbd5e1;
+  --slate-400:#94a3b8;
+  --slate-600:#475569;
+  --slate-700:#334155;
+  --slate-800:#1f2937;
+  --blue-600:#2563eb;
+  --red-500:#e74c3c;
 }
 
-/* --- 2. Header Styles --- */
-.dashboard-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 30px;
-    background-color: #2c3e50; /* Darker primary color for header */
-    color: white;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+/* Layout */
+.dashboard-container{
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+  background:var(--slate-50);
+  color:#111827;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 
-.dashboard-header h1 {
-    font-size: 1.5rem;
-    margin: 0;
+/* ---------- Top bar (header) ---------- */
+.dashboard-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:16px 20px;
+  margin:20px 20px 16px;
+  background:linear-gradient(180deg,#ffffff 0%, #f7f7f9 100%);
+  border:1px solid var(--slate-200);
+  border-radius:14px;
+  box-shadow:0 4px 18px rgba(15,23,42,.06);
 }
 
-.user-info {
-    display: flex;
-    align-items: center;
+.dashboard-header h1{
+  margin:0;
+  font-size:1.45rem;
+  font-weight:800;
+  color:var(--blue-600);
+  letter-spacing:.2px;
 }
 
-.welcome-text {
-    margin-right: 20px;
-    font-size: 0.95rem;
+.user-info{display:flex; align-items:center; gap:14px;}
+.welcome-text{margin:0; color:var(--slate-700); font-weight:600;}
+.logout-button{
+  background:#fff;
+  color:#1f2937;
+  border:1px solid var(--slate-200);
+  padding:8px 14px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+  transition:background .18s ease, border-color .18s ease, box-shadow .18s ease, transform .12s ease;
+}
+.logout-button:hover{
+  background:var(--slate-100);
+  border-color:var(--slate-300);
+  box-shadow:0 2px 8px rgba(15,23,42,.08);
+}
+.logout-button:active{ transform:translateY(1px); }
+
+/* ---------- Main grid ---------- */
+.dashboard-main{
+  display:grid;
+  grid-template-columns: 280px 1fr;  /* wider sidebar */
+  gap:18px;
+  padding:0 20px 24px;
+  flex:1;
 }
 
-.logout-button {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s ease;
+/* ---------- Sidebar ---------- */
+.dashboard-sidebar{
+  position:sticky; top:20px;
+  align-self:start;
+  background:#f4f6f8;                   /* soft grey card */
+  border:1px solid var(--slate-200);
+  border-radius:14px;
+  box-shadow:0 4px 18px rgba(15,23,42,.05);
+  padding:14px 0;
 }
 
-.logout-button:hover {
-    background-color: #c0392b;
+.sidebar-section{
+  padding:8px 14px 14px;
+}
+.dashboard-sidebar h3{
+  margin:8px 8px 10px;
+  font-size:.9rem;
+  font-weight:800;
+  color:var(--slate-700);
+  letter-spacing:.04em;
+  text-transform:uppercase;
 }
 
-/* --- 3. Main Body Grid (Sidebar + Content) --- */
-.dashboard-main {
-    display: grid;
-    /* Defines two columns: Sidebar (250px) and Content (rest of space) */
-    grid-template-columns: 250px 1fr; 
-    flex-grow: 1;
+.dashboard-sidebar ul{ margin:0; padding:0; list-style:none; }
+.dashboard-sidebar li{ margin:6px 0; }
+
+.dashboard-sidebar button{
+  width:100%;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  background:transparent;
+  border:0;
+  color:#0f172a;
+  font-size:.95rem;
+  padding:10px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  position:relative;
+  transition:background .18s ease, color .18s ease, transform .12s ease;
 }
 
-/* --- 4. Sidebar Styles --- */
-.dashboard-sidebar {
-    background-color: #ecf0f1; /* Light gray sidebar background */
-    padding: 20px 0;
-    border-right: 1px solid #ddd;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+/* subtle left accent on hover/active */
+.dashboard-sidebar button::before{
+  content:"";
+  position:absolute;
+  left:6px; top:50%;
+  transform:translateY(-50%);
+  width:4px; height:60%;
+  border-radius:4px;
+  background:transparent;
+  transition:background .18s ease, height .18s ease;
 }
 
-.sidebar-section {
-    margin-bottom: 25px;
-    padding: 0 20px;
+.dashboard-sidebar button:hover{
+  background:#eef2f6;
+  color:#0f172a;
+}
+.dashboard-sidebar button:hover::before{ background:var(--blue-600); height:70%; }
+
+/* Active state */
+.dashboard-sidebar button.active{
+  background:#e9eefc;
+  color:#0f172a;
+  font-weight:800;
+  box-shadow: inset 0 0 0 1px rgba(37,99,235,.15);
+}
+.dashboard-sidebar button.active::before{ background:var(--blue-600); }
+
+/* ---------- Content ---------- */
+.dashboard-content{
+  background:#fff;
+  border:1px solid var(--slate-200);
+  border-radius:14px;
+  box-shadow:0 4px 18px rgba(15,23,42,.05);
+  padding:24px 26px;
+  overflow:auto;
 }
 
-.dashboard-sidebar h3 {
-    color: #34495e;
-    font-size: 1rem;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 5px;
+.dashboard-content h2{
+  margin:0 0 14px;
+  font-size:1.25rem;
+  color:#111827;
+  font-weight:800;
+  border-bottom:1px solid var(--slate-200);
+  padding-bottom:10px;
 }
 
-.dashboard-sidebar ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
+/* Loading & simple utility styles (unchanged) */
+.loading-state{ padding:50px; text-align:center; font-size:1.1rem; color:#64748b; }
 
-.dashboard-sidebar li {
-    margin-bottom: 5px;
-}
+/* Dropdowns, radios, actions, modal, messages — keep your existing definitions below as-is */
+.custom-dropdown{ position:relative; }
+.dropdown-button{ width:100%; padding:10px; border:1px solid #ccc; background:#fff; text-align:left; cursor:pointer; display:flex; justify-content:space-between; align-items:center; border-radius:6px; }
+.dropdown-panel{ position:absolute; top:100%; left:0; right:0; border:1px solid #ccc; background:#fff; z-index:1000; max-height:200px; overflow-y:auto; border-radius:6px; margin-top:4px; }
+.dropdown-item{ display:block; padding:10px; cursor:pointer; }
+.dropdown-item:hover{ background:#f0f0f0; }
+.dropdown-item input[type="checkbox"]{ margin-right:10px; }
 
-.dashboard-sidebar button {
-    width: 100%;
-    text-align: left;
-    background: none;
-    border: none;
-    padding: 8px 0;
-    color: #2980b9; /* Link color */
-    cursor: pointer;
-    font-size: 0.95rem;
-    transition: color 0.2s ease, background-color 0.2s ease;
-}
+.radio-button-group{ display:flex; gap:10px; margin-top:5px; }
+.radio-button-group input[type="radio"]{ display:none; }
+.radio-button-group span{ display:inline-block; padding:10px 20px; border:1px solid #ccc; border-radius:6px; background:#f9f9f9; cursor:pointer; transition:background .2s, border-color .2s; width:100%; text-align:center; }
+.radio-button-group input[type="radio"]:checked + span{ background:#2c3e50; color:#fff; border-color:#2c3e50; font-weight:700; }
+.radio-button-group input[type="radio"]:not(:checked) + span:hover{ background:#e9e9e9; border-color:#aaa; }
 
-.dashboard-sidebar button:hover {
-    color: #1a5276;
-    background-color: #e0e6e9;
-}
+.action-buttons{ display:flex; justify-content:flex-end; gap:12px; padding:16px 20px; background:#f9fafb; border-top:1px solid #e0e0e0; }
+.btn{ padding:8px 16px; border-radius:6px; border:1px solid transparent; cursor:pointer; font-weight:600; font-size:.9rem; transition:background .2s, color .2s, box-shadow .2s; }
+.edit-btn{ background:#3b82f6; color:#fff; } .edit-btn:hover{ background:#2563eb; }
+.password-btn{ background:#6b7280; color:#fff; } .password-btn:hover{ background:#4b5563; }
+.delete-btn{ background:#ef4444; color:#fff; } .delete-btn:hover{ background:#dc2626; }
+.save-btn{ background:#22c55e; color:#fff; } .save-btn:hover{ background:#16a34a; }
+.cancel-btn{ background:#a1a1aa; color:#fff; } .cancel-btn:hover{ background:#71717a; }
+.delete-btn-confirm{ background:#dc2626; color:#fff; } .delete-btn-confirm:hover{ background:#b91c1c; }
 
-/* Active sidebar item styling */
-.dashboard-sidebar button.active {
-    font-weight: bold;
-    color: #2c3e50; /* Darker color for active link */
-    background-color: #dce0e3;
-    border-radius: 4px;
-    padding-left: 10px;
-}
-
-/* --- 5. Main Content Area Styles --- */
-.dashboard-content {
-    padding: 30px;
-    overflow-y: auto; /* Allows scrolling if content is long */
-}
-
-.dashboard-content h2 {
-    color: #2c3e50;
-    margin-bottom: 20px;
-    border-bottom: 2px solid #bdc3c7;
-    padding-bottom: 10px;
-}
-
-/* Loading/Error State */
-.loading-state {
-    padding: 50px;
-    text-align: center;
-    font-size: 1.2rem;
-    color: #7f8c8d;
-}
-
-/* Styles for checkbox dropdown */
-.custom-dropdown {
-  position: relative;
-}
-
-.dropdown-button {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  background-color: #fff;
-  text-align: left;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-radius: 4px;
-}
-
-.dropdown-panel {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  border: 1px solid #ccc;
-  background-color: white;
-  z-index: 1000;
-  max-height: 200px;
-  overflow-y: auto;
-  border-radius: 4px;
-  margin-top: 4px;
-}
-
-.dropdown-item {
-  display: block;
-  padding: 10px;
-  cursor: pointer;
-}
-
-.dropdown-item:hover {
-  background-color: #f0f0f0;
-}
-
-.dropdown-item input[type="checkbox"] {
-  margin-right: 10px;
-}
-
-/* Styles for Custom Radio Buttons */
-
-.radio-button-group {
-    display: flex;
-    gap: 10px; /* Adds space between the buttons */
-    margin-top: 5px; /* Aligns with other inputs */
-}
-
-/* Hide the actual radio button circle */
-.radio-button-group input[type="radio"] {
-    display: none;
-}
-
-/* Style the text label to look like a button */
-.radio-button-group span {
-    display: inline-block;
-    padding: 10px 20px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    background-color: #f9f9f9;
-    cursor: pointer;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-    width: 100%; /* Make buttons fill the available space */
-    text-align: center;
-}
-
-/* Style for the button when the hidden radio is checked */
-.radio-button-group input[type="radio"]:checked + span {
-    background-color: #2c3e50; /* A dark color for selection */
-    color: white;
-    border-color: #2c3e50;
-    font-weight: bold;
-}
-
-/* Optional: Hover effect for non-selected buttons */
-.radio-button-group input[type="radio"]:not(:checked) + span:hover {
-    background-color: #e9e9e9;
-    border-color: #aaa;
-}
-
-/* --- Action Buttons --- */
-.action-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    padding: 16px 20px;
-    background-color: #f9fafb;
-    border-top: 1px solid #e0e0e0;
-}
-
-.btn {
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: 1px solid transparent;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
-}
-
-.edit-btn { background-color: #3b82f6; color: white; }
-.edit-btn:hover { background-color: #2563eb; }
-
-.password-btn { background-color: #6b7280; color: white; }
-.password-btn:hover { background-color: #4b5563; }
-
-.delete-btn { background-color: #ef4444; color: white; }
-.delete-btn:hover { background-color: #dc2626; }
-
-.save-btn { background-color: #22c55e; color: white; }
-.save-btn:hover { background-color: #16a34a; }
-
-.cancel-btn { background-color: #a1a1aa; color: white; }
-.cancel-btn:hover { background-color: #71717a; }
-
-.delete-btn-confirm { background-color: #dc2626; color: white; }
-.delete-btn-confirm:hover { background-color: #b91c1c; }
-
-
-/* --- MODAL STYLES --- */
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
-.modal-content {
-    background-color: white;
-    padding: 30px 40px;
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 450px;
-    text-align: center;
-}
-
-.modal-content h3 {
-    margin-top: 0;
-    margin-bottom: 8px;
-    color: #333;
-    font-size: 1.5rem;
-}
-
-.modal-content p {
-    margin-bottom: 25px;
-    color: #666;
-    line-height: 1.5;
-}
-
-.modal-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.modal-form .form-group {
-    text-align: left;
-}
-
-.modal-form input {
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 1rem;
-}
-
-.modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    margin-top: 30px;
-}
-
-/* --- MESSAGES (Error/Success) --- */
-.form-message {
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
-    margin: 0 0 20px 0;
-}
-.form-message.error {
-    background-color: #fee2e2;
-    color: #b91c1c;
-}
-.form-message.success {
-    background-color: #dcfce7;
-    color: #15803d;
-}
-
-/* Simple Dropdown Styles */
-.custom-dropdown .dropdown-button {
-    text-align: left;
-    background-color: white;
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    cursor: pointer;
-}
+.modal-overlay{ position:fixed; inset:0; background:rgba(0,0,0,.6); display:flex; justify-content:center; align-items:center; z-index:1000; }
+.modal-content{ background:#fff; padding:30px 40px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,.3); width:90%; max-width:450px; text-align:center; }
+.modal-content h3{ margin:0 0 8px; color:#333; font-size:1.5rem; }
+.modal-content p{ margin-bottom:25px; color:#666; line-height:1.5; }
+.modal-form{ display:flex; flex-direction:column; gap:15px; }
+.modal-form .form-group{ text-align:left; }
+.modal-form input{ padding:10px; border:1px solid #ccc; border-radius:6px; font-size:1rem; }
+.modal-actions{ display:flex; justify-content:flex-end; gap:15px; margin-top:30px; }
+.form-message{ padding:12px; border-radius:8px; text-align:center; margin:0 0 20px; }
+.form-message.error{ background:#fee2e2; color:#b91c1c; }
+.form-message.success{ background:#dcfce7; color:#15803d; }
+.custom-dropdown .dropdown-button{ text-align:left; background:#fff; width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; cursor:pointer; }
