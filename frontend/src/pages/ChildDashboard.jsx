@@ -78,6 +78,23 @@ export default function ChildDashboard() {
       console.error("fetchChats:", err);
     }
   }
+// ✅ Fetch all user's favorites (books + videos)
+const [userFavorites, setUserFavorites] = useState([]);
+
+async function fetchUserFavorites() {
+  if (!userId) return;
+  try {
+    const res = await api.get(`/favorite/${userId}`);
+    setUserFavorites(res.data);
+  } catch (err) {
+    console.error("Failed to fetch user favorites:", err.response || err);
+  }
+}
+
+useEffect(() => {
+  fetchUserFavorites();
+}, [userId]);
+
 
   useEffect(() => {
     async function fetchChildInterests() {
@@ -249,9 +266,11 @@ export default function ChildDashboard() {
     onClick={() => setShowFavoritesModal(false)}
   >
     <ChildSearchFavorite
-      userId={userId}
-      onClose={() => setShowFavoritesModal(false)}
-    />
+  userId={userId}
+  onClose={() => setShowFavoritesModal(false)}
+  refreshFavorites={fetchUserFavorites}
+/>
+
   </div>
 )}
       {/* Interests Modal */}
@@ -277,7 +296,12 @@ export default function ChildDashboard() {
             className="child-dashboard__modal child-dashboard__modal--wide"
             onClick={(e) => e.stopPropagation()}
           >
-            <ChildSearchBook />
+          <ChildSearchBook
+  userId={userId}
+  userFavorites={userFavorites}
+  refreshFavorites={fetchUserFavorites}
+/>
+
             <div className="child-dashboard__modal-actions">
               <button
                 className="child-dashboard__btn child-dashboard__btn--outline"
@@ -300,7 +324,12 @@ export default function ChildDashboard() {
             className="child-dashboard__modal child-dashboard__modal--wide"
             onClick={(e) => e.stopPropagation()}
           >
-            <ChildSearchVideo />
+            <ChildSearchVideo
+  userId={userId}
+  userFavorites={userFavorites}
+  refreshFavorites={fetchUserFavorites}
+/>
+
             <div className="child-dashboard__modal-actions">
               <button
                 className="child-dashboard__btn child-dashboard__btn--outline"

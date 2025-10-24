@@ -1,15 +1,19 @@
-//frontend/src/pages/ChildSearchVideo.jsx
-import React, { useState, useEffect, useCallback } from 'react';
-import api from '../api/axiosConfig';
-import '../styles/ChildrenDashboard.css';
-import ViewVideoModal from './ViewVideoModal';
+import React, { useState, useEffect, useCallback } from "react";
+import api from "../api/axiosConfig";
+import "../styles/ChildrenDashboard.css";
+import ViewVideoModal from "./ViewVideoModal";
+import SuccessPopup from "./SuccessPopup";
 
 const StarRating = ({ value }) => {
-  const v = typeof value === 'number' && !Number.isNaN(value) ? value : 0;
+  const v = typeof value === "number" && !Number.isNaN(value) ? value : 0;
   return (
-    <span className="star-chip" title={`${v.toFixed(1)} / 5`} aria-label={`${v.toFixed(1)} out of 5`}>
+    <span
+      className="star-chip"
+      title={`${v.toFixed(1)} / 5`}
+      aria-label={`${v.toFixed(1)} out of 5`}
+    >
       <span className="star-icon">★</span>
-      <span className="star-number">{v ? v.toFixed(1) : '—'}</span>
+      <span className="star-number">{v ? v.toFixed(1) : "—"}</span>
     </span>
   );
 };
@@ -23,17 +27,23 @@ const useDebounce = (value, delay) => {
   return debouncedValue;
 };
 
-export default function ChildSearchVideo() {
+export default function ChildSearchVideo({ userId, userFavorites = [], refreshFavorites }) {
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortMode, setSortMode] = useState('newest');
+  const [error, setError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortMode, setSortMode] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [viewingVideo, setViewingVideo] = useState(null);
-  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const [favoritedIds, setFavoritedIds] = useState([]);
+  const [popupMsg, setPopupMsg] = useState("");
 
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const userProfile = JSON.parse(localStorage.getItem("userProfile") || "{}");
+  const currentUserId = userProfile.id || userId; // ✅ safer fallback
+
+  // ✅ Fetch videos
   const fetchVideos = useCallback(async () => {
     setLoading(true);
     try {
@@ -43,33 +53,78 @@ export default function ChildSearchVideo() {
         search: debouncedSearchTerm,
       };
 
-      if (sortMode === 'rating') {
-        params.sort = 'rating';
-        params.direction = 'desc';
-      } else if (sortMode === 'oldest') {
-        params.sort = 'oldest';
+      if (sortMode === "rating") {
+        params.sort = "rating";
+        params.direction = "desc";
+      } else if (sortMode === "oldest") {
+        params.sort = "oldest";
       } else {
-        params.sort = 'newest';
+        params.sort = "newest";
       }
 
-      const response = await api.get('/librarian/view-all-videos', { params });
+      const response = await api.get("/librarian/view-all-videos", { params });
       let items = response.data.items || [];
 
-      if (sortMode === 'rating') {
+      if (sortMode === "rating") {
         items = [...items].sort((a, b) => (b.rating || 0) - (a.rating || 0));
       }
 
       setVideos(items);
       setTotalPages(Math.ceil(response.data.total / params.size));
     } catch (err) {
-      setError('Could not load videos.');
+      setError("Could not load videos.");
     } finally {
       setLoading(false);
     }
   }, [currentPage, debouncedSearchTerm, sortMode]);
 
   useEffect(() => setCurrentPage(1), [debouncedSearchTerm, sortMode]);
-  useEffect(() => { fetchVideos(); }, [fetchVideos]);
+  useEffect(() => {
+    fetchVideos();
+  }, [fetchVideos]);
+
+  // ✅ Fetch user favorites from database
+  useEffect(() => {
+    async function fetchUserFavorites() {
+      if (!currentUserId) return;
+      try {
+        const res = await api.get(`/favorite/${currentUserId}`);
+        const favoriteVideoIds = res.data
+          .filter((f) => f.type.toLowerCase() === "video")
+          .map((f) => f.id);
+        setFavoritedIds(favoriteVideoIds);
+      } catch (err) {
+        console.error("Failed to load favorites:", err.response || err);
+      }
+    }
+    fetchUserFavorites();
+  }, [currentUserId]);
+
+  // ✅ Update if parent passes userFavorites prop
+  useEffect(() => {
+    const favoriteVideoIds = userFavorites
+      .filter((f) => f.type.toLowerCase() === "video")
+      .map((f) => f.id);
+    setFavoritedIds(favoriteVideoIds);
+  }, [userFavorites]);
+
+  // ✅ Add to favorites
+  async function addToFavorite(videoId) {
+    if (!currentUserId) {
+      setPopupMsg("❌ User not logged in!");
+      return;
+    }
+
+    try {
+      await api.post(`/favorite/video/${currentUserId}/${videoId}`);
+      setFavoritedIds((prev) => [...prev, videoId]);
+      setPopupMsg("✅ Video added to favorites!");
+      if (refreshFavorites) refreshFavorites(); // optional refresh
+    } catch (err) {
+      console.error(err.response || err);
+      setPopupMsg("❌ Failed to add favorite.");
+    }
+  }
 
   return (
     <div className="child-search-modal">
@@ -117,24 +172,33 @@ export default function ChildSearchVideo() {
                   <tr key={v.id}>
                     <td>{v.title}</td>
                     <td>{v.creator}</td>
-                    <td>{v.category || 'N/A'}</td>
-                    <td>{v.age_group || 'N/A'}</td>
-                    <td><StarRating value={v.rating} /></td>
+                    <td>{v.category || "N/A"}</td>
+                    <td>{v.age_group || "N/A"}</td>
+                    <td>
+                      <StarRating value={v.rating} />
+                    </td>
                     <td className="child-dashboard__actions">
-  <button
-    className="child-dashboard__btn child-dashboard__btn--small"
-    onClick={() => setViewingVideo(v)}
-  >
-    View
-  </button>
-  <button
-    className="child-dashboard__btn child-dashboard__btn--small child-dashboard__btn--favorite"
-    onClick={() => addToFavorite(v.id)}
-  >
-    ❤️ Favorite
-  </button>
-</td>
+                      <button
+                        className="child-dashboard__btn child-dashboard__btn--small"
+                        onClick={() => setViewingVideo(v)}
+                      >
+                        View
+                      </button>
 
+                      <button
+                        className={`child-dashboard__btn child-dashboard__btn--small ${
+                          favoritedIds.includes(v.id)
+                            ? "child-dashboard__btn--favorited"
+                            : "child-dashboard__btn--favorite"
+                        }`}
+                        disabled={favoritedIds.includes(v.id)}
+                        onClick={() => addToFavorite(v.id)}
+                      >
+                        {favoritedIds.includes(v.id)
+                          ? "❤️ Added"
+                          : "❤️ Favorite"}
+                      </button>
+                    </td>
                   </tr>
                 ))
               ) : (
@@ -146,12 +210,19 @@ export default function ChildSearchVideo() {
           </table>
 
           <div className="pagination-controls">
-            <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+            >
               Previous
             </button>
-            <span>Page {currentPage} of {totalPages || 1}</span>
+            <span>
+              Page {currentPage} of {totalPages || 1}
+            </span>
             <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((p) => Math.min(p + 1, totalPages))
+              }
               disabled={currentPage === totalPages || totalPages === 0}
             >
               Next
@@ -160,24 +231,22 @@ export default function ChildSearchVideo() {
         </>
       )}
 
-      {viewingVideo && <ViewVideoModal video={viewingVideo} onClose={() => setViewingVideo(null)} />}
+      {viewingVideo && (
+        <ViewVideoModal video={viewingVideo} onClose={() => setViewingVideo(null)} />
+      )}
+
+      {popupMsg && <SuccessPopup message={popupMsg} onClose={() => setPopupMsg("")} />}
 
       <style>{`
+        .child-dashboard__btn--favorited {
+          background-color: #f06292;
+          color: white;
+          cursor: default;
+        }
         .star-chip { display: inline-flex; align-items: center; gap: 4px; }
         .star-icon { color: #ffc107; font-size: 16px; }
         .star-number { font-size: 12px; color: #555; }
       `}</style>
     </div>
   );
-}
-async function addToFavorite(videoId) {
-  try {
-    const res = await api.post(`/child/${userId}/favorites/videos`, {
-      video_id: videoId,
-    });
-    alert("✅ Video added to favorites!");
-  } catch (err) {
-    console.error(err);
-    alert("❌ Failed to add favorite.");
-  }
 }
