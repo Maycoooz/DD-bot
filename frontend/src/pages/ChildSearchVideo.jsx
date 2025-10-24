@@ -1,106 +1,183 @@
-// ChildSearchVideo.jsx
-import React, { useState } from "react";
-import api from "../api/axiosConfig";
+//frontend/src/pages/ChildSearchVideo.jsx
+import React, { useState, useEffect, useCallback } from 'react';
+import api from '../api/axiosConfig';
+import '../styles/ChildrenDashboard.css';
+import ViewVideoModal from './ViewVideoModal';
 
-/**
- * NOTE: Component function name kept as `SearchVideos`
- * so any code expecting that name won't be affected.
- */
-export default function SearchVideos() {
-  const [query, setQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState([]);
-  const [error, setError] = useState(null);
+const StarRating = ({ value }) => {
+  const v = typeof value === 'number' && !Number.isNaN(value) ? value : 0;
+  return (
+    <span className="star-chip" title={`${v.toFixed(1)} / 5`} aria-label={`${v.toFixed(1)} out of 5`}>
+      <span className="star-icon">★</span>
+      <span className="star-number">{v ? v.toFixed(1) : '—'}</span>
+    </span>
+  );
+};
 
-  async function fetchVideos(q) {
-    setIsLoading(true);
-    setError(null);
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debouncedValue;
+};
+
+export default function ChildSearchVideo() {
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortMode, setSortMode] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [viewingVideo, setViewingVideo] = useState(null);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  const fetchVideos = useCallback(async () => {
+    setLoading(true);
     try {
-      // Example API call - adjust endpoint/query params to match your backend
-      const res = await api.get("/videos/search", {
-        params: { q },
-      });
-      setResults(Array.isArray(res.data) ? res.data : []);
+      const params = {
+        page: currentPage,
+        size: 10,
+        search: debouncedSearchTerm,
+      };
+
+      if (sortMode === 'rating') {
+        params.sort = 'rating';
+        params.direction = 'desc';
+      } else if (sortMode === 'oldest') {
+        params.sort = 'oldest';
+      } else {
+        params.sort = 'newest';
+      }
+
+      const response = await api.get('/librarian/view-all-videos', { params });
+      let items = response.data.items || [];
+
+      if (sortMode === 'rating') {
+        items = [...items].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      }
+
+      setVideos(items);
+      setTotalPages(Math.ceil(response.data.total / params.size));
     } catch (err) {
-      console.error("fetchVideos error:", err);
-      setError("Failed to search videos");
-      setResults([]);
+      setError('Could not load videos.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }
+  }, [currentPage, debouncedSearchTerm, sortMode]);
 
-  function handleSearchChange(e) {
-    setQuery(e.target.value);
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    const q = (query || "").trim();
-    if (!q) {
-      setResults([]);
-      return;
-    }
-    fetchVideos(q);
-  }
-
-  function handlePlayVideo(video) {
-    // Placeholder: wire this into your video player or open in new tab
-    console.log("Play video:", video);
-    if (video.link) window.open(video.link, "_blank", "noreferrer");
-  }
+  useEffect(() => setCurrentPage(1), [debouncedSearchTerm, sortMode]);
+  useEffect(() => { fetchVideos(); }, [fetchVideos]);
 
   return (
     <div className="child-search-modal">
       <h3>Search Videos</h3>
 
-      <form onSubmit={handleSubmit} className="child-search-form">
+      <div className="child-search-bar">
         <input
-          type="search"
+          type="text"
+          placeholder="Search by title..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="child-dashboard__search"
-          placeholder="Search videos..."
-          value={query}
-          onChange={handleSearchChange}
         />
-        <button
-          type="submit"
-          className="child-dashboard__btn child-dashboard__btn--small"
-          disabled={isLoading}
+        <select
+          value={sortMode}
+          onChange={(e) => setSortMode(e.target.value)}
+          className="child-dashboard__select"
         >
-          Search
-        </button>
-      </form>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+          <option value="rating">Highest Rated</option>
+        </select>
+      </div>
 
-      {isLoading && <p>Searching videos…</p>}
-      {error && <p className="error">{error}</p>}
+      {loading ? (
+        <p>Loading videos...</p>
+      ) : error ? (
+        <p className="error">{error}</p>
+      ) : (
+        <>
+          <table className="child-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Creator</th>
+                <th>Category</th>
+                <th>Age Group</th>
+                <th>Rating</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {videos.length > 0 ? (
+                videos.map((v) => (
+                  <tr key={v.id}>
+                    <td>{v.title}</td>
+                    <td>{v.creator}</td>
+                    <td>{v.category || 'N/A'}</td>
+                    <td>{v.age_group || 'N/A'}</td>
+                    <td><StarRating value={v.rating} /></td>
+                    <td className="child-dashboard__actions">
+  <button
+    className="child-dashboard__btn child-dashboard__btn--small"
+    onClick={() => setViewingVideo(v)}
+  >
+    View
+  </button>
+  <button
+    className="child-dashboard__btn child-dashboard__btn--small child-dashboard__btn--favorite"
+    onClick={() => addToFavorite(v.id)}
+  >
+    ❤️ Favorite
+  </button>
+</td>
 
-      <ul className="child-search-results" role="list">
-        {results.length === 0 && !isLoading && <li>No videos found</li>}
-        {results.map((v) => (
-          <li key={v.id || v.link || Math.random()} className="child-search-item">
-            <div className="child-search-item-title">{v.title || "Untitled"}</div>
-            {v.duration && <div className="child-search-item-meta">Duration: {v.duration}</div>}
-            <div className="child-search-item-actions">
-              <button
-                className="child-dashboard__btn child-dashboard__btn--small"
-                onClick={() => handlePlayVideo(v)}
-              >
-                Play
-              </button>
-              {v.link && (
-                <a
-                  className="child-dashboard__chip"
-                  href={v.link}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  More
-                </a>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6">No videos found.</td>
+                </tr>
               )}
-            </div>
-          </li>
-        ))}
-      </ul>
+            </tbody>
+          </table>
+
+          <div className="pagination-controls">
+            <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+              Previous
+            </button>
+            <span>Page {currentPage} of {totalPages || 1}</span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages === 0}
+            >
+              Next
+            </button>
+          </div>
+        </>
+      )}
+
+      {viewingVideo && <ViewVideoModal video={viewingVideo} onClose={() => setViewingVideo(null)} />}
+
+      <style>{`
+        .star-chip { display: inline-flex; align-items: center; gap: 4px; }
+        .star-icon { color: #ffc107; font-size: 16px; }
+        .star-number { font-size: 12px; color: #555; }
+      `}</style>
     </div>
   );
+}
+async function addToFavorite(videoId) {
+  try {
+    const res = await api.post(`/child/${userId}/favorites/videos`, {
+      video_id: videoId,
+    });
+    alert("✅ Video added to favorites!");
+  } catch (err) {
+    console.error(err);
+    alert("❌ Failed to add favorite.");
+  }
 }

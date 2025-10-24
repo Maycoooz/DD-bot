@@ -1,107 +1,185 @@
-// ChildSearchBook.jsx
-import React, { useState } from "react";
-import api from "../api/axiosConfig";
+//frontend/src/pages/ChildSearchBook.jsx
+import React, { useState, useEffect, useCallback } from 'react';
+import api from '../api/axiosConfig';
+import '../styles/ChildrenDashboard.css';
+import ViewBookModal from './ViewBookModal';
 
-/**
- * NOTE: Component function name kept as `SearchBooks`
- * so any code expecting that name won't be affected.
- */
-export default function SearchBooks() {
-  const [query, setQuery] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState([]);
-  const [error, setError] = useState(null);
+// --- Star rating display ---
+const StarRating = ({ value }) => {
+  const v = typeof value === 'number' && !Number.isNaN(value) ? value : 0;
+  return (
+    <span className="star-chip" title={`${v.toFixed(1)} / 5`} aria-label={`${v.toFixed(1)} out of 5`}>
+      <span className="star-icon">★</span>
+      <span className="star-number">{v ? v.toFixed(1) : '—'}</span>
+    </span>
+  );
+};
 
-  // Fetch books from your backend (adapt endpoint as needed)
-  async function fetchBooks(q) {
-    setIsLoading(true);
-    setError(null);
+// --- Debounce hook ---
+const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedValue(value), delay);
+    return () => clearTimeout(t);
+  }, [value, delay]);
+  return debouncedValue;
+};
+
+export default function ChildSearchBook() {
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortMode, setSortMode] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [viewingBook, setViewingBook] = useState(null);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+  const fetchBooks = useCallback(async () => {
+    setLoading(true);
     try {
-      // Example API call - adjust endpoint/query params to match your backend
-      const res = await api.get("/books/search", {
-        params: { q },
-      });
-      setResults(Array.isArray(res.data) ? res.data : []);
+      const params = {
+        page: currentPage,
+        size: 10,
+        search: debouncedSearchTerm,
+      };
+
+      if (sortMode === 'rating') {
+        params.sort = 'rating';
+        params.direction = 'desc';
+      } else if (sortMode === 'oldest') {
+        params.sort = 'oldest';
+      } else {
+        params.sort = 'newest';
+      }
+
+      const response = await api.get('/librarian/view-all-books', { params });
+      let items = response.data.items || [];
+
+      if (sortMode === 'rating') {
+        items = [...items].sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      }
+
+      setBooks(items);
+      setTotalPages(Math.ceil(response.data.total / params.size));
     } catch (err) {
-      console.error("fetchBooks error:", err);
-      setError("Failed to search books");
-      setResults([]);
+      setError('Could not load books.');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }
+  }, [currentPage, debouncedSearchTerm, sortMode]);
 
-  function handleSearchChange(e) {
-    setQuery(e.target.value);
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    const q = (query || "").trim();
-    if (!q) {
-      setResults([]);
-      return;
-    }
-    fetchBooks(q);
-  }
-
-  function handleSelectBook(book) {
-    // Placeholder: user can wire this to add to favorites, open detail modal, etc.
-    // Do not modify function name if other parts rely on it.
-    console.log("Selected book:", book);
-  }
+  useEffect(() => setCurrentPage(1), [debouncedSearchTerm, sortMode]);
+  useEffect(() => { fetchBooks(); }, [fetchBooks]);
 
   return (
     <div className="child-search-modal">
       <h3>Search Books</h3>
 
-      <form onSubmit={handleSubmit} className="child-search-form">
+      <div className="child-search-bar">
         <input
-          type="search"
+          type="text"
+          placeholder="Search by title..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           className="child-dashboard__search"
-          placeholder="Search books..."
-          value={query}
-          onChange={handleSearchChange}
         />
-        <button
-          type="submit"
-          className="child-dashboard__btn child-dashboard__btn--small"
-          disabled={isLoading}
+        <select
+          value={sortMode}
+          onChange={(e) => setSortMode(e.target.value)}
+          className="child-dashboard__select"
         >
-          Search
-        </button>
-      </form>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
+          <option value="rating">Highest Rated</option>
+        </select>
+      </div>
 
-      {isLoading && <p>Searching books…</p>}
-      {error && <p className="error">{error}</p>}
+      {loading ? (
+        <p>Loading books...</p>
+      ) : error ? (
+        <p className="error">{error}</p>
+      ) : (
+        <>
+          <table className="child-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Category</th>
+                <th>Age Group</th>
+                <th>Rating</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {books.length > 0 ? (
+                books.map((book) => (
+                  <tr key={book.id}>
+                    <td>{book.title}</td>
+                    <td>{book.author}</td>
+                    <td>{book.category || 'N/A'}</td>
+                    <td>{book.age_group || 'N/A'}</td>
+                    <td><StarRating value={book.rating} /></td>
+                    <td className="child-dashboard__actions">
+  <button
+    className="child-dashboard__btn child-dashboard__btn--small"
+    onClick={() => setViewingBook(book)}
+  >
+    View
+  </button>
+  <button
+    className="child-dashboard__btn child-dashboard__btn--small child-dashboard__btn--favorite"
+    onClick={() => addToFavorite(book.id)}
+  >
+    ❤️ Favorite
+  </button>
+</td>
 
-      <ul className="child-search-results" role="list">
-        {results.length === 0 && !isLoading && <li>No books found</li>}
-        {results.map((b) => (
-          <li key={b.id || b.link || Math.random()} className="child-search-item">
-            <div className="child-search-item-title">{b.title || "Untitled"}</div>
-            {b.authors && <div className="child-search-item-meta">By {b.authors}</div>}
-            <div className="child-search-item-actions">
-              <button
-                className="child-dashboard__btn child-dashboard__btn--small"
-                onClick={() => handleSelectBook(b)}
-              >
-                Select
-              </button>
-              {b.link && (
-                <a
-                  className="child-dashboard__chip"
-                  href={b.link}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  More
-                </a>
+
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6">No books found.</td>
+                </tr>
               )}
-            </div>
-          </li>
-        ))}
-      </ul>
+            </tbody>
+          </table>
+
+          <div className="pagination-controls">
+            <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+              Previous
+            </button>
+            <span>Page {currentPage} of {totalPages || 1}</span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages || totalPages === 0}
+            >
+              Next
+            </button>
+          </div>
+        </>
+      )}
+
+      {viewingBook && <ViewBookModal book={viewingBook} onClose={() => setViewingBook(null)} />}
+
+      <style>{`
+        .star-chip { display: inline-flex; align-items: center; gap: 4px; }
+        .star-icon { color: #ffc107; font-size: 16px; }
+        .star-number { font-size: 12px; color: #555; }
+      `}</style>
     </div>
   );
 }
+async function addToFavorite(bookId) {
+  try {
+    const res = await api.post(`/child/${userId}/favorites/books`, { book_id: bookId });
+    alert("✅ Book added to favorites!");
+  } catch (err) {
+    console.error(err);
+    alert("❌ Failed to add favorite.");
+  }
+}
+

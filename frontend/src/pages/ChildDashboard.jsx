@@ -57,6 +57,8 @@ export default function ChildDashboard() {
 
   const [childInterests, setChildInterests] = useState([]);
 
+  const [showFavoritesModal, setShowFavoritesModal] = useState(false);
+
   const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
   const userId = profile.id;
   const username = profile.first_name || "Guest";
@@ -194,7 +196,7 @@ export default function ChildDashboard() {
             </button>
             <button
               className="child-dashboard__chip"
-              onClick={() => setCurrentView("favorites")}
+                onClick={() => setShowFavoritesModal(true)}
             >
               Favorites
             </button>
@@ -238,12 +240,20 @@ export default function ChildDashboard() {
           {currentView === "chat" && (
             <ChildSearchChat userId={userId} selectedChatId={selectedChatId} />
           )}
-          {currentView === "favorites" && (
-            <ChildSearchFavorite userId={userId} />
-          )}
         </div>
       </div>
-
+       {/* Favorites Modal */}
+{showFavoritesModal && (
+  <div
+    className="child-dashboard__modal-overlay"
+    onClick={() => setShowFavoritesModal(false)}
+  >
+    <ChildSearchFavorite
+      userId={userId}
+      onClose={() => setShowFavoritesModal(false)}
+    />
+  </div>
+)}
       {/* Interests Modal */}
       {showInterestsModal && (
         <ChildEditInterest

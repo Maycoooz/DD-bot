@@ -315,3 +315,47 @@
   .child-dashboard__content { flex-direction: column; }
   .child-dashboard__chat-panel { height: calc(100vh - 64px); }
 }
+/* --- Favorite button next to View --- */
+.child-dashboard__actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.child-dashboard__btn--favorite {
+  background: #fff0f6;
+  border: 1px solid #ffd6e7;
+  color: #ff5c9f;
+  transition: all 0.2s ease;
+}
+
+.child-dashboard__btn--favorite:hover {
+  background: #ffb6cf;
+  color: white;
+  transform: scale(1.05);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.favorite-card {
+  background: #f9f9f9;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 10px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.delete-btn {
+  align-self: flex-end;
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}

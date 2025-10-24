@@ -162,3 +162,25 @@ class LandingPage(Base):
     
     # Key to group items,'FREE_PLAN' or 'PRO_PLAN'
     grouping_key = Column(String(length=50), nullable=True)
+
+# --- Child Favorites ---
+class ChildFavoriteBook(Base):
+    __tablename__ = "child_favorite_book"
+
+    id = Column(Integer, primary_key=True, autoincrement="auto")
+    child_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    book_id = Column(Integer, ForeignKey("book.id", ondelete="CASCADE"), nullable=False)
+
+    child = relationship("User", backref="favorite_books")
+    book = relationship("Book", backref="favorited_by_children")
+
+
+class ChildFavoriteVideo(Base):
+    __tablename__ = "child_favorite_video"
+
+    id = Column(Integer, primary_key=True, autoincrement="auto")
+    child_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    video_id = Column(Integer, ForeignKey("video.id", ondelete="CASCADE"), nullable=False)
+
+    child = relationship("User", backref="favorite_videos")
+    video = relationship("Video", backref="favorited_by_children")
