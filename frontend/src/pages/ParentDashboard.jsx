@@ -12,6 +12,7 @@ import SearchBooks from './SearchBooks.jsx';
 import SearchVideos from './SearchVideos.jsx';
 import AddAppReview from './AddAppReview.jsx';
 import DeleteAppReview from './DeleteAppReview.jsx';
+import ParentChildFavorite from './ParentChildFavorite.jsx';
 
 // --- Dashboard Menu Definition ---
 const menuItems = {
@@ -22,7 +23,9 @@ const menuItems = {
     'Child Overview': [
         { label: 'Create Child Account', component: 'createChild', key: 'createChild' },
         { label: 'View Child Accounts', component: 'viewChildren', key: 'viewChildren' },
-        { label: 'Child Chat History', component: 'childChatHistory', key: 'childChatHistory' }
+        { label: 'Child Chat History', component: 'childChatHistory', key: 'childChatHistory' },
+        { label: 'Child Favorites', component: 'childFavorites', key: 'childFavorites'}
+
     ],
     Library: [
         { label: 'Search Books', component: 'searchBooks', key: 'searchBooks' },
@@ -100,6 +103,8 @@ function ParentDashboard() {
                 return <ViewChildAccounts></ViewChildAccounts>;
             case 'childChatHistory':
                 return <div><h2>Child Chat History</h2><p>Chat logs coming soon...</p></div>;
+            case 'childFavorites':
+                return <ParentChildFavorite  parentId={userProfile.id}  />;
             case 'searchBooks':
                 return <SearchBooks></SearchBooks>;
             case 'searchVideos':
