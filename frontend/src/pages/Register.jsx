@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../api/axiosConfig'; // Use the custom API instance
+import api from '../api/axiosConfig'; 
 import { useNavigate, Link } from 'react-router-dom'; 
 import '../styles/Register.css';
 
@@ -14,8 +14,7 @@ function Register() {
         last_name: '',
         country: '',
         gender: '',
-        // Note: For birthday, you'll typically use a string 'YYYY-MM-DD'
-        birthday: '', 
+        birthday: '', // 'YYYY-MM-DD'
         race: '',
     });
     const [error, setError] = useState('');
@@ -89,9 +88,9 @@ function Register() {
     
     return (
         <div className="auth-container">
-            {/* Added 'register' class for two-column grid layout */}
+            {/* 'register' class for two-column grid layout */}
             <form onSubmit={handleSubmit} className="auth-form register">
-                <h2>Register New Parent Account</h2>
+                <h2>Register Parent Account</h2>
                 
                 {/* Error/Success Messages spanning full width */}
                 {error && <p className="form-message error">{error}</p>}
@@ -162,7 +161,7 @@ function Register() {
 
                 <div className="form-group">
                     <label htmlFor="birthday">Birthday (YYYY-MM-DD)</label>
-                    {/* Using type="date" ensures YYYY-MM-DD format */}
+                    {/*  type="date" ensure YYYY-MM-DD format */}
                     <input type="date" id="birthday" name="birthday" value={formData.birthday} onChange={handleChange} />
                 </div>
 
@@ -171,7 +170,6 @@ function Register() {
                     <input type="text" id="race" name="race" value={formData.race} onChange={handleChange} />
                 </div>
 
-                {/* Button and Link span full width */}
                 <button type="submit">Register</button>
                 
                 <p className="link-text">

@@ -3,7 +3,7 @@ import api from '../api/axiosConfig';
 import '../styles/SearchMedia.css';
 import ViewBookModal from './ViewBookModal';
 
-// One-star + number (already in your table)
+// One-star + number
 const StarRating = ({ value }) => {
   const v = typeof value === 'number' && !Number.isNaN(value) ? value : 0;
   return (

@@ -4,7 +4,12 @@ from sqlalchemy import or_, select
 
 from auth.auth_handler import get_current_admin_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
-from schemas.admin import ViewAllUserResponse, AdminReviewResponse, AdminReviewUserResponse, PaginatedAdminReviewResponse, AdminUserStats
+from schemas.admin import (
+    ViewAllUserResponse, AdminReviewResponse, AdminReviewUserResponse, 
+    PaginatedAdminReviewResponse, AdminUserStats,
+    PaginatedLibrarianListResponse, LibrarianListItem
+    
+    )
 from schemas.librarian import LibrarianResponse
 from schemas.media import PaginatedBookResponse, PaginatedVideoResponse
 from models.tables import User, LandingPage, Book, Video, Review, UserRole, ReviewType, Role
@@ -370,3 +375,138 @@ def admin_user_stats(
         total_kids=total_kids,
         total_librarians=total_librarians,
     )
+
+
+# New view librarian paginated
+@router.get(
+    "/librarians",
+    response_model=PaginatedLibrarianListResponse,
+    summary="List librarians (paginated)",
+)
+def list_librarians(
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user),
+    page: int = Query(1, ge=1, description="Page number"),
+    size: int = Query(10, ge=1, le=100, description="Items per page"),
+    search: Optional[str] = Query(
+        None,
+        description="Optional search by username / name / email"
+    ),
+):
+    """
+    Returns ONLY users whose role is LIBRARIAN.
+    Supports pagination + optional search.
+    """
+
+    # base query: only librarians
+    base_q = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(User.role.has(Role.name == UserRole.LIBRARIAN))
+    )
+
+    # optional search
+    if search:
+        like_val = f"%{search}%"
+        base_q = base_q.filter(
+            or_(
+                User.username.ilike(like_val),
+                User.first_name.ilike(like_val),
+                User.last_name.ilike(like_val),
+                User.email.ilike(like_val),
+            )
+        )
+
+    total = base_q.count()
+
+    rows = (
+        base_q
+        .order_by(User.id.desc())
+        .offset((page - 1) * size)
+        .limit(size)
+        .all()
+    )
+
+    items = [
+        LibrarianListItem(
+            id=u.id,
+            username=u.username,
+            email=u.email,
+            first_name=u.first_name,
+            last_name=u.last_name,
+            is_verified=u.is_verified,
+            librarian_verified=u.librarian_verified,
+            role_name=u.role.name if u.role else None,
+        )
+        for u in rows
+    ]
+
+    return PaginatedLibrarianListResponse(total=total, items=items)
+
+@router.patch(
+    "/librarians/{librarian_id}/verify",
+    response_model=LibrarianListItem,
+    summary="Approve/unapprove a librarian"
+)
+def toggle_librarian_verification(
+    librarian_id: int,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user),
+):
+    """
+    Flip librarian_verified for this librarian.
+    """
+    librarian = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(
+            User.id == librarian_id,
+            User.role.has(Role.name == UserRole.LIBRARIAN),
+        )
+        .first()
+    )
+    if librarian is None:
+        raise HTTPException(status_code=404, detail="Librarian not found")
+
+    librarian.librarian_verified = not librarian.librarian_verified
+    db.commit()
+    db.refresh(librarian)
+
+    return LibrarianListItem(
+        id=librarian.id,
+        username=librarian.username,
+        email=librarian.email,
+        first_name=librarian.first_name,
+        last_name=librarian.last_name,
+        is_verified=librarian.is_verified,
+        librarian_verified=librarian.librarian_verified,
+        role_name=librarian.role.name if librarian.role else None,
+    )
+
+
+@router.delete(
+    "/librarians/{librarian_id}",
+    summary="Delete a librarian account"
+)
+def delete_librarian(
+    librarian_id: int,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(get_current_admin_user),
+):
+    """
+    Hard-delete librarian user.
+    """
+    librarian = (
+        db.query(User)
+        .filter(User.id == librarian_id)
+        .join(Role)
+        .filter(Role.name == UserRole.LIBRARIAN)
+        .first()
+    )
+    if librarian is None:
+        raise HTTPException(status_code=404, detail="Librarian not found")
+
+    db.delete(librarian)
+    db.commit()
+
+    return {"message": "Librarian deleted successfully."}

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import api from '../api/axiosConfig';
 import { useNavigate, Link } from 'react-router-dom';
-import '../styles/LibrarianRegister.css'; // Using the two-column register styles
+import '../styles/LibrarianRegister.css';
 
 function RegisterLibrarian() {
     const navigate = useNavigate();
@@ -57,7 +57,7 @@ function RegisterLibrarian() {
     return (
         <div className="auth-container">
             <form onSubmit={handleSubmit} className="auth-form register">
-                <h2>Register as a Librarian</h2>
+                <h2>Register Librarian Account</h2>
                 
                 {error && <p className="form-message error">{error}</p>}
                 {success && <p className="form-message success">{success}</p>}

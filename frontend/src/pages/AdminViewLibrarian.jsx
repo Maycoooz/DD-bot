@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import '../styles/AdminViewLibrarian.css';
-import ConfirmationModal from './ConfirmationModal';
 
 // A reusable component for paginated media tables
 const PaginatedMediaTable = ({ title, fetchFunction }) => {
@@ -114,31 +113,9 @@ function ViewLibrarianModal({ librarian, onClose, onDelete, onApprove }) {
                             fetchFunction={(page, size) => api.get(`/admin/librarian/${librarian.id}/videos`, { params: { page, size } })}
                         />
                     </div>
-                    <div className="modal-footer">
-                        {!librarian.librarian_verified && (
-                            <button onClick={() => setIsConfirmingApprove(true)} className="btn-approve">Approve Librarian</button>
-                        )}
-                        <button onClick={() => setIsConfirmingDelete(true)} className="btn-delete">Delete Librarian</button>
-                    </div>
                 </div>
             </div>
 
-            {isConfirmingDelete && (
-                <ConfirmationModal
-                    message={`Are you sure you want to delete librarian '${librarian.username}' and all their contributions?`}
-                    onConfirm={handleConfirmDelete}
-                    onCancel={() => setIsConfirmingDelete(false)}
-                />
-            )}
-
-            {isConfirmingApprove && (
-                <ConfirmationModal
-                    message={`Are you sure you want to approve librarian '${librarian.username}'?`}
-                    onConfirm={handleConfirmApprove}
-                    onCancel={() => setIsConfirmingApprove(false)}
-                    confirmButtonClass="btn-approve"
-                />
-            )}
         </>
     );
 }

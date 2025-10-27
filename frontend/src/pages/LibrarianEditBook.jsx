@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../api/axiosConfig';
-import '../styles/LibrarianEditMedia.css'; // shared CSS file
+import '../styles/LibrarianEditMedia.css';
 
 function EditBookModal({ book, onClose, onUpdate, onDelete }) {
     const [formData, setFormData] = useState({

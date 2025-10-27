@@ -63,3 +63,20 @@ class AdminUserStats(BaseModel):
     total_parents: int
     total_kids: int
     total_librarians: int
+    
+    
+class LibrarianListItem(BaseModel):
+    id: int
+    username: str
+    email: Optional[str] = None
+    first_name: str
+    last_name: str
+    is_verified: bool
+    librarian_verified: bool
+    role_name: Optional[str] = None
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+class PaginatedLibrarianListResponse(BaseModel):
+    total: int
+    items: List[LibrarianListItem]

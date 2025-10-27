@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import api from '../api/axiosConfig';
-import '../styles/LibrarianViewAllReviews.css'; // create or reuse your admin table styles
+import '../styles/LibrarianViewAllReviews.css';
 
-// Small debounce hook so we don't hit the API on every keystroke
+// Small debounce hook so it doesnt hit the API on every keystroke
 const useDebounce = (value, delay = 400) => {
   const [v, setV] = useState(value);
   useEffect(() => {

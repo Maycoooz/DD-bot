@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import api from '../api/axiosConfig'; // Use the custom API instance
+import api from '../api/axiosConfig';
 import { useNavigate, Link } from 'react-router-dom'; 
 import '../styles/Login.css'; 
 
