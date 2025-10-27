@@ -1,3 +1,4 @@
+#tables.py
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, TEXT, CheckConstraint, FLOAT, Enum, and_, DATE
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -184,3 +185,31 @@ class ChildFavoriteVideo(Base):
 
     child = relationship("User", backref="favorite_videos")
     video = relationship("Video", backref="favorited_by_children")
+
+#chat history
+class ChatConversation(Base):
+    __tablename__ = "chat_conversation"
+
+    id = Column(Integer, primary_key=True, autoincrement="auto")
+    child_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(length=255), nullable=True)  # Optional: e.g., “Homework Help”
+    started_at = Column(DateTime, server_default=func.now())
+    last_updated = Column(DateTime, onupdate=func.now(), default=func.now())
+
+    # Relationship
+    child = relationship("User", backref="chat_conversations")
+    messages = relationship("ChatMessage", back_populates="conversation", cascade="all, delete-orphan")
+
+class ChatMessage(Base):
+    __tablename__ = "chat_message"
+
+    id = Column(Integer, primary_key=True, autoincrement="auto")
+    conversation_id = Column(Integer, ForeignKey("chat_conversation.id", ondelete="CASCADE"), nullable=False)
+    sender_type = Column(Enum("CHILD", "ASSISTANT", name="sender_type_enum"), nullable=False)
+    message_text = Column(TEXT, nullable=False)
+    timestamp = Column(DateTime, server_default=func.now())
+    model_used = Column(String(length=50), nullable=True)
+    meta_data = Column(TEXT, nullable=True)  # Could store JSON string (like token count, etc.)
+
+    # Relationships
+    conversation = relationship("ChatConversation", back_populates="messages")

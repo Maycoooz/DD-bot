@@ -50,7 +50,7 @@ export default function ChildDashboard() {
   const [showBooksModal, setShowBooksModal] = useState(false);
   const [showVideosModal, setShowVideosModal] = useState(false);
 
-  const [chats, setChats] = useState([]);
+  const [chat, setChats] = useState([]);
   const [filteredChats, setFilteredChats] = useState([]);
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -63,21 +63,40 @@ export default function ChildDashboard() {
   const userId = profile.id;
   const username = profile.first_name || "Guest";
 
-  useEffect(() => {
-    fetchChats();
-  }, []);
 
-  async function fetchChats() {
-    try {
-      const res = await fetch(`/api/user/${userId}/chats`);
-      if (!res.ok) throw new Error("Failed to fetch chats");
-      const data = await res.json();
-      setChats(data);
-      setFilteredChats(data);
-    } catch (err) {
-      console.error("fetchChats:", err);
-    }
+async function handleNewChat() {
+  if (!userId) return;
+
+  try {
+    const res = await api.post(`/child/${userId}/chat`);
+    const data =  res.data;
+
+    // Update React state
+    setChats((prev) => [data, ...prev]);
+    setFilteredChats((prev) => [data, ...prev]);
+    setSelectedChatId(data.id);
+    setCurrentView("chat");
+  } catch (err) {
+    console.error("Failed to create new chat:", err);
+    alert("Could not create a new chat. Try again.");
   }
+}
+
+  useEffect(() => {
+  fetchChatHistory();
+}, []);
+
+async function fetchChatHistory() {
+  try {
+    const res = await api.get(`/child/${userId}/chat`);
+    const data = res.data;
+    setChats(data);
+    setFilteredChats(data);
+  } catch (err) {
+    console.error("Failed to fetch chat history:", err);
+  }
+}
+
 // ✅ Fetch all user's favorites (books + videos)
 const [userFavorites, setUserFavorites] = useState([]);
 
@@ -116,10 +135,10 @@ useEffect(() => {
     const q = e.target.value.toLowerCase();
     setSearchTerm(q);
     if (!q.trim()) {
-      setFilteredChats(chats);
+      setFilteredChats(chat);
     } else {
       setFilteredChats(
-        chats.filter((chat) => (chat.title || "").toLowerCase().includes(q))
+        chat.filter((chat) => (chat.title || "").toLowerCase().includes(q))
       );
     }
   }
@@ -151,17 +170,8 @@ useEffect(() => {
           <div className="child-dashboard__controls">
             <button
               className="child-dashboard__btn child-dashboard__btn--primary child-dashboard__btn--full"
-              onClick={() => {
-                setCurrentView("chat");
-                const newChat = {
-                  id: `new-${Date.now()}`,
-                  title: "New chat",
-                  last_updated: new Date().toISOString(),
-                };
-                setChats((prev) => [newChat, ...prev]);
-                setFilteredChats((prev) => [newChat, ...prev]);
-                setSelectedChatId(newChat.id);
-              }}
+              onClick={handleNewChat}
+
             >
               ＋ New Chat
             </button>
@@ -255,7 +265,11 @@ useEffect(() => {
         {/* Main Chat Panel */}
         <div className="child-dashboard__chat-panel">
           {currentView === "chat" && (
-            <ChildSearchChat userId={userId} selectedChatId={selectedChatId} />
+            <ChildSearchChat userId={userId} 
+            selectedChatId={selectedChatId}
+            setSelectedChatId={setSelectedChatId}
+            fetchChatHistory={fetchChatHistory}
+            />
           )}
         </div>
       </div>
