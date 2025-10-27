@@ -1,13 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload, aliased
-from sqlalchemy import or_, select
+from sqlalchemy import or_, select, func
 
 from auth.auth_handler import get_current_admin_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
 from schemas.admin import (
     ViewAllUserResponse, AdminReviewResponse, AdminReviewUserResponse, 
     PaginatedAdminReviewResponse, AdminUserStats,
-    PaginatedLibrarianListResponse, LibrarianListItem
+    PaginatedLibrarianListResponse, LibrarianListItem,
+    AdminUserListItem, PaginatedUserListResponse
     
     )
 from schemas.librarian import LibrarianResponse
@@ -16,6 +17,7 @@ from models.tables import User, LandingPage, Book, Video, Review, UserRole, Revi
 from schemas.landing_page import LandingPageResponse, LandingPageUpdate, LandingPageCreate
 
 from typing import List, Optional
+import math
 
 import os
 from dotenv import load_dotenv
@@ -27,30 +29,133 @@ router = APIRouter(
 )
 
 # view parent & kids 
-@router.get("/view-all-users", response_model=ViewAllUserResponse)
+@router.get(
+    "/view-all-users",
+    response_model=PaginatedUserListResponse,
+    summary="Paginated list of all parents & kids with global counts",
+)
 def view_all_users(
-    db: Session = Depends(get_db), 
-    current_admin: User = Depends(get_current_admin_user)
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user),
+    page: int = Query(1, ge=1, description="Page number (1-indexed)"),
+    size: int = Query(10, ge=1, le=100, description="Page size"),
+    search: Optional[str] = Query(
+        None,
+        description="Search username / first_name / last_name / email"
+    ),
 ):
-    # Fetch all users (parents and kids)
-    parents_and_kids_query = (
+    """
+    Returns a paginated list of PARENT + CHILD accounts.
+    Also returns global totals for parents, kids, and combined.
+    """
+
+    # 1. Build base query of just parents + kids
+    base_q = (
         db.query(User)
         .options(joinedload(User.role))
-        .filter(User.role_id.in_([2, 3]))
+        .join(Role)
+        .filter(Role.name.in_([UserRole.PARENT, UserRole.CHILD]))
+    )
+
+    # 2. Apply search if provided
+    if search:
+        like_val = f"%{search}%"
+        base_q = base_q.filter(
+            or_(
+                User.username.ilike(like_val),
+                User.first_name.ilike(like_val),
+                User.last_name.ilike(like_val),
+                User.email.ilike(like_val),
+            )
+        )
+
+    # 3. Count how many match the current filter (for pagination UI)
+    filtered_total = base_q.count()
+
+    # 4. Pagination slice for this page
+    rows = (
+        base_q
+        .order_by(User.id.asc())
+        .offset((page - 1) * size)
+        .limit(size)
         .all()
     )
-    
-    # Calculate the counts
-    total_users = len(parents_and_kids_query)
-    total_parents = sum(1 for user in parents_and_kids_query if user.role_id == 2)
-    total_kids = sum(1 for user in parents_and_kids_query if user.role_id == 3)
-    
-    # Build and return the final response object
-    return ViewAllUserResponse(
-        parent_and_kid_users=parents_and_kids_query,
-        total_users=total_users,
-        total_parents=total_parents,
-        total_kids=total_kids
+
+    # 5. Build a map of parent_id -> parent_email so we can show parent email for CHILD rows
+    parent_ids_needed = {
+        u.primary_parent_id
+        for u in rows
+        if u.primary_parent_id is not None
+    }
+    parent_email_map = {}
+    if parent_ids_needed:
+        parent_email_rows = (
+            db.query(User.id, User.email)
+            .filter(User.id.in_(parent_ids_needed))
+            .all()
+        )
+        parent_email_map = {pid: pemail for (pid, pemail) in parent_email_rows}
+
+    # 6. Build response items for this page
+    items: List[AdminUserListItem] = []
+    for u in rows:
+        # role string (PARENT / CHILD). If Role.name is Enum (UserRole), it might already be the right string.
+        role_name_str = u.role.name if u.role else "UNKNOWN"
+
+        # subscription tier (e.g. "FREE", "PREMIUM")
+        tier_val = u.tier or "FREE"
+
+        # Email verification comes directly from user.is_verified
+        is_verified_val = bool(u.is_verified)
+
+        # For CHILD, show parent's email in the table; otherwise None
+        parent_email_val = None
+        if role_name_str == UserRole.CHILD:
+            parent_email_val = parent_email_map.get(u.primary_parent_id)
+
+        items.append(
+            AdminUserListItem(
+                id=u.id,
+                username=u.username,
+                first_name=u.first_name,
+                last_name=u.last_name,
+                email=u.email,
+                role_name=role_name_str,
+                subscription_tier=tier_val,
+                is_verified=is_verified_val,        # <-- spelled correctly
+                parent_email=parent_email_val,
+            )
+        )
+
+    # 7. Global totals (not filtered, all parents/kids in DB)
+    total_parents_global = (
+        db.query(func.count(User.id))
+        .join(Role)
+        .filter(Role.name == UserRole.PARENT)
+        .scalar()
+    )
+
+    total_kids_global = (
+        db.query(func.count(User.id))
+        .join(Role)
+        .filter(Role.name == UserRole.CHILD)
+        .scalar()
+    )
+
+    total_accounts_global = (total_parents_global or 0) + (total_kids_global or 0)
+
+    # 8. total pages for current filtered query (at least 1)
+    total_pages = max(1, math.ceil(filtered_total / size)) if filtered_total else 1
+
+    # 9. Return final payload
+    return PaginatedUserListResponse(
+        items=items,
+        total_accounts=total_accounts_global,
+        total_parents=total_parents_global or 0,
+        total_kids=total_kids_global or 0,
+        page=page,
+        size=size,
+        total_pages=total_pages,
     )
 
 # delete parent or kid 
