@@ -7,14 +7,20 @@ function AdminViewAllReviews() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     
-    // State for pagination
+    // pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
     const [totalReviews, setTotalReviews] = useState(0); 
     
-    // State for filters
-    const [filterStars, setFilterStars] = useState(''); // '' set filter to all by default
-    const [filterType, setFilterType] = useState(''); 
+    // filters
+    const [filterStars, setFilterStars] = useState('');
+    const [filterType, setFilterType] = useState('');
+
+    // helper: turn number into "★★★☆☆"
+    const starsToIcons = useCallback((n) => {
+        const s = Math.max(0, Math.min(5, Number(n) || 0));
+        return '★'.repeat(s) + '☆'.repeat(5 - s);
+    }, []);
 
     const fetchReviews = useCallback(async () => {
         setLoading(true);
@@ -23,31 +29,32 @@ function AdminViewAllReviews() {
             const params = {
                 page: currentPage,
                 size: 10,
-                stars: filterStars || null, // Send null if filter is empty
-                review_type: filterType || null, // Send null if filter is empty
+                stars: filterStars || null,
+                review_type: filterType || null,
             };
             
             const response = await api.get('/admin/all-reviews', { params });
             
             setReviews(response.data.items || []);
-            setTotalReviews(response.data.total); 
-            setTotalPages(Math.ceil(response.data.total / params.size));
-            
+            const total = response.data.total ?? 0;
+            setTotalReviews(total);
+            setTotalPages(Math.max(1, Math.ceil(total / (params.size || 10))));
         } catch (err) {
             console.error("Error fetching reviews:", err);
             setError('Failed to load reviews. Please try again.');
-            setTotalReviews(0); // reset total review to 0 on error
+            setReviews([]);
+            setTotalReviews(0);
+            setTotalPages(1);
         } finally {
             setLoading(false);
         }
     }, [currentPage, filterStars, filterType]);
 
-    // Fetch reviews when component mounts or dependencies change
     useEffect(() => {
         fetchReviews();
     }, [fetchReviews]);
 
-    // Reset to page 1 when filters change
+    // whenever filters change, reset back to page 1
     useEffect(() => {
         setCurrentPage(1);
     }, [filterStars, filterType]);
@@ -56,7 +63,7 @@ function AdminViewAllReviews() {
         <div className="admin-view-all-container">
             {/* --- Header --- */}
             <div className="admin-reviews-header">
-                <h2>Manage All Reviews</h2>
+                <h2>View All Reviews</h2>
             </div>
 
             {/* --- Filter Controls --- */}
@@ -92,7 +99,7 @@ function AdminViewAllReviews() {
                     </div>
                 </div>
 
-                {/*  Badge for total reviews stat inside filter controls div */}
+                {/* total reviews badge */}
                 {!loading && !error && totalReviews > 0 && (
                     <span className="total-reviews-badge">
                         {totalReviews} {totalReviews === 1 ? 'Review' : 'Reviews'} Found
@@ -127,22 +134,48 @@ function AdminViewAllReviews() {
                                         <tr key={review.id}>
                                             <td>
                                                 <strong>{review.user.username}</strong>
-                                                <span className="user-role-badge">{review.user.role_name}</span>
+                                                {review.user.role_name && (
+                                                    <span className="user-role-badge">
+                                                        {review.user.role_name}
+                                                    </span>
+                                                )}
                                             </td>
+
                                             <td>{review.user.email}</td>
+
                                             <td>{review.user.parent_email || 'N/A'}</td>
-                                            <td className="review-text-cell" title={review.review}>
+
+                                            <td
+                                                className="review-text-cell"
+                                                title={review.review}
+                                            >
                                                 {review.review}
                                             </td>
-                                            <td>{'★'.repeat(review.stars)}</td>
+
+                                            {/* ⭐ BLUE STARS HERE ⭐ */}
+                                            <td
+                                                className="stars-col"
+                                                aria-label={`${review.stars} stars`}
+                                            >
+                                                {starsToIcons(review.stars)}
+                                            </td>
+
                                             <td>{review.review_type}</td>
-                                            <td>{review.is_public_display_approved ? 'Yes' : 'No'}</td>
-                                            <td>{new Date(review.created_at).toLocaleDateString()}</td>
+
+                                            <td>
+                                                {review.is_public_display_approved ? 'Yes' : 'No'}
+                                            </td>
+
+                                            <td>
+                                                {new Date(review.created_at).toLocaleDateString()}
+                                            </td>
                                         </tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="8" className="no-results">No reviews found matching your filters.</td>
+                                        <td colSpan="8" className="no-results">
+                                            No reviews found matching your filters.
+                                        </td>
                                     </tr>
                                 )}
                             </tbody>
@@ -151,12 +184,29 @@ function AdminViewAllReviews() {
 
                     {/* --- Pagination Controls --- */}
                     {totalPages > 1 && (
-                         <div className="pagination-controls">
-                            <button onClick={() => setCurrentPage(p => Math.max(p - 1, 1))} disabled={currentPage === 1}>
+                        <div className="pagination-controls">
+                            <button
+                                onClick={() =>
+                                    setCurrentPage((p) => Math.max(p - 1, 1))
+                                }
+                                disabled={currentPage === 1}
+                            >
                                 Previous
                             </button>
-                            <span>Page {currentPage} of {totalPages || 1}</span>
-                            <button onClick={() => setCurrentPage(p => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}>
+                            <span>
+                                Page {currentPage} of {totalPages || 1}
+                            </span>
+                            <button
+                                onClick={() =>
+                                    setCurrentPage((p) =>
+                                        Math.min(p + 1, totalPages)
+                                    )
+                                }
+                                disabled={
+                                    currentPage === totalPages ||
+                                    totalPages === 0
+                                }
+                            >
                                 Next
                             </button>
                         </div>

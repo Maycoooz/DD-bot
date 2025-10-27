@@ -264,7 +264,7 @@ def insert_default_parents():
                     race="Chinese",
                     role_id=2,  # Assuming 2 is the PARENT role ID
                     is_verified=True,
-                    tier="FREE"
+                    tier="PRO"
                 )
                 db.add(parent_user)
                 print(f"Default parent user '{username}' added to session.")

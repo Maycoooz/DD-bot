@@ -5,10 +5,11 @@ from sqlalchemy import or_, select, func
 from auth.auth_handler import get_current_admin_user, get_db, verify_password, get_password_hash
 from schemas.auth import StatusMessage
 from schemas.admin import (
-    ViewAllUserResponse, AdminReviewResponse, AdminReviewUserResponse, 
+    AdminReviewResponse, AdminReviewUserResponse, 
     PaginatedAdminReviewResponse, AdminUserStats,
     PaginatedLibrarianListResponse, LibrarianListItem,
-    AdminUserListItem, PaginatedUserListResponse
+    AdminUserListItem, PaginatedUserListResponse,
+    ChildAccountListItem
     
     )
 from schemas.librarian import LibrarianResponse
@@ -122,12 +123,12 @@ def view_all_users(
                 email=u.email,
                 role_name=role_name_str,
                 subscription_tier=tier_val,
-                is_verified=is_verified_val,        # <-- spelled correctly
+                is_verified=is_verified_val,
                 parent_email=parent_email_val,
             )
         )
 
-    # 7. Global totals (not filtered, all parents/kids in DB)
+    # 7. Global totals (all parents/kids in DB)
     total_parents_global = (
         db.query(func.count(User.id))
         .join(Role)
@@ -395,8 +396,7 @@ def admin_view_all_reviews(
     base_q = (
         db.query(Review)
         .options(
-            joinedload(Review.user).joinedload(User.role),      # keep role eager
-            # no need to eagerload parent_user anymore
+            joinedload(Review.user).joinedload(User.role),
         )
     )
     if stars is not None:
@@ -615,3 +615,62 @@ def delete_librarian(
     db.commit()
 
     return {"message": "Librarian deleted successfully."}
+
+@router.get(
+    "/parents/{parent_id}/children",
+    response_model=list[ChildAccountListItem],
+    summary="Get all child accounts for a given parent",
+)
+def get_parent_children(
+    parent_id: int,
+    db: Session = Depends(get_db),
+    current_admin: User = Depends(get_current_admin_user),
+):
+    """
+    Returns all CHILD users whose primary_parent_id == parent_id.
+    Visible to admins only.
+    """
+
+    # 1. Validate that this parent actually exists AND is a parent
+    parent = (
+        db.query(User)
+        .join(Role)
+        .filter(
+            User.id == parent_id,
+            Role.name == UserRole.PARENT
+        )
+        .first()
+    )
+    if parent is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Parent not found or not a PARENT role.",
+        )
+
+    # 2. Fetch all children tied to that parent
+    children = (
+        db.query(User)
+        .join(Role)
+        .filter(
+            Role.name == UserRole.CHILD,
+            User.primary_parent_id == parent_id
+        )
+        .order_by(User.id.asc())
+        .all()
+    )
+
+    # 3. Shape into response
+    result: list[ChildAccountListItem] = []
+    for c in children:
+        result.append(
+            ChildAccountListItem(
+                id=c.id,
+                username=c.username,
+                first_name=c.first_name,
+                last_name=c.last_name,
+                email=c.email,
+                is_verified=bool(c.is_verified),
+            )
+        )
+
+    return result

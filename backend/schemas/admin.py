@@ -100,3 +100,15 @@ class PaginatedUserListResponse(BaseModel):
     page: int
     size: int
     total_pages: int
+    
+class ChildAccountListItem(BaseModel):
+    id: int
+    username: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    is_verified: bool
+    created_at: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
