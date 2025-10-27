@@ -1,13 +1,12 @@
 from pydantic import BaseModel, ConfigDict
-from datetime import date
 from typing import Optional, List
+from models.tables import ReviewType, UserRole
+from datetime import datetime
 
 class RoleResponse(BaseModel):
     name: str
     
     model_config = ConfigDict(from_attributes=True)
-
-# In schemas/users.py
 
 class ViewAllUser(BaseModel):
     id: int  # Ensure ID is included
@@ -28,11 +27,7 @@ class ViewAllUserResponse(BaseModel):
     total_parents: int
     total_kids: int
     
-from pydantic import BaseModel, ConfigDict
-from typing import Optional, List
-from models.tables import ReviewType, UserRole
-from datetime import datetime
-
+# Admin view reviews
 class AdminReviewUserResponse(BaseModel):
     id: int
     username: str
@@ -57,14 +52,14 @@ class PaginatedAdminReviewResponse(BaseModel):
     total: int
     items: List[AdminReviewResponse]
     
-    
+# Dashboard stats   
 class AdminUserStats(BaseModel):
     total_users: int # exlclude admins
     total_parents: int
     total_kids: int
     total_librarians: int
     
-    
+#Admin view librarians 
 class LibrarianListItem(BaseModel):
     id: int
     username: str
@@ -79,4 +74,29 @@ class LibrarianListItem(BaseModel):
     
 class PaginatedLibrarianListResponse(BaseModel):
     total: int
-    items: List[LibrarianListItem]
+    items: List
+    
+# new view all parent / kid schema
+class AdminUserListItem(BaseModel):
+    id: int
+    username: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    email: Optional[str] = None
+    role_name: str                     # "PARENT" or "CHILD"
+    subscription_tier: Optional[str] = None  # "FREE", "PREMIUM", etc.
+    is_verified: bool
+    parent_email: Optional[str] = None       # only for CHILD rows
+
+class PaginatedUserListResponse(BaseModel):
+    items: List[AdminUserListItem]
+
+    # GLOBAL totals (not page totals)
+    total_accounts: int
+    total_parents: int
+    total_kids: int
+
+    # Pagination info for the current filtered query
+    page: int
+    size: int
+    total_pages: int

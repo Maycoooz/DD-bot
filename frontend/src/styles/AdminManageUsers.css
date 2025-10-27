@@ -1,136 +1,319 @@
-/* --- MAIN CONTAINER & LAYOUT --- */
-.manage-users-container {
-    padding: 30px 50px;
-    background-color: #f8f9fa;
-    min-height: 100vh;
-    font-family: system-ui, sans-serif;
+/* ===========================
+   AdminManageUsers.css
+   =========================== */
+
+/* Page wrapper */
+.manage-users-wrapper {
+  padding: 20px 40px;
+  background-color: #f8fafc; /* slate-50 */
+  min-height: 100vh;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji", "Segoe UI Symbol";
+  color: #0f172a; /* slate-900 */
 }
 
-/* --- HEADER --- */
-.manage-users-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+/* Card body */
+.manage-users-card {
+  background: #fff;
+  border: 1px solid #e2e8f0; /* slate-200 */
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.06);
+  padding: 20px 24px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.manage-users-header h1 {
-    margin: 0;
-    font-size: 2.2em;
-    color: #343a40;
+/* Header row: title + search on the right */
+.card-header-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  row-gap: 12px;
+  margin-bottom: 16px;
 }
 
-.btn-back, .btn-logout {
-    padding: 10px 20px;
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    background-color: #fff;
-    cursor: pointer;
-    font-weight: 600;
-    transition: background-color 0.2s;
+.card-title {
+  margin: 0;
+  color: #0f172a; /* slate-900 */
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
-.btn-back:hover, .btn-logout:hover {
-    background-color: #e9ecef;
+/* Search */
+.search-wrapper {
+  min-width: 240px;
 }
 
-/* --- STATS & SEARCH BAR --- */
-.stats-and-search {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 25px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+.search-input {
+  width: 100%;
+  background: #fff;
+  border: 1px solid #cbd5e1; /* slate-300 */
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  color: #0f172a;
+  outline: none;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
-.stats-summary {
-    display: flex;
-    gap: 30px;
-    font-size: 1.1em;
-    color: #495057;
-    font-weight: 500;
+.search-input:focus {
+  border-color: #2563eb; /* blue-600 */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
-.search-bar input {
-    padding: 12px 15px;
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    width: 300px;
-    font-size: 1em;
+/* Stats row under header */
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 16px;
 }
 
-/* --- USERS TABLE --- */
-.users-table-container {
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    overflow-x: auto;
-
-    max-height: 60vh; /* e.g., 60% of the viewport height */
-    overflow-y: auto;
-    position: relative; /* Required for sticky headers */
+.stat-chip {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0; /* slate-200 */
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: #334155; /* slate-700 */
+  padding: 6px 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
+/* Banners */
+.error-banner {
+  background-color: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.success-banner {
+  background-color: #dcfce7;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* Loading state / empty state */
+.loading-state,
+.no-results {
+  text-align: center;
+  padding: 20px 0;
+  color: #64748b; /* slate-500 */
+  font-size: 0.9rem;
+}
+
+/* Scroll wrapper around table */
+.table-scroll-wrapper {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0; /* slate-200 */
+  border-radius: 8px;
+}
+
+/* Table Styling */
 .users-table {
-    width: 100%;
-    border-collapse: collapse;
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #0f172a;
 }
 
-.users-table th, .users-table td {
-    padding: 16px 20px;
-    text-align: left;
-    border-bottom: 1px solid #dee2e6;
+/* Header */
+.users-table thead tr {
+  background-color: #f8fafc; /* slate-50 */
 }
 
 .users-table th {
-    background-color: #f8f9fa;
-    font-size: 0.9em;
-    text-transform: uppercase;
-    color: #6c757d;
-
-    position: sticky;
-    top: 0;
-    z-index: 1; /* Ensures headers stay above the scrolling content */
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #475569; /* slate-600 */
+  font-weight: 700;
+  border-bottom: 1px solid #e2e8f0; /* slate-200 */
+  white-space: nowrap;
 }
 
-.users-table tbody tr:last-child td {
-    border-bottom: none;
+/* Body rows */
+.users-table tbody tr {
+  border-bottom: 1px solid #e2e8f0; /* slate-200 */
 }
 
-.users-table tbody tr:hover {
-    background-color: #f1f3f5;
+.users-table tbody tr:last-child {
+  border-bottom: none;
 }
 
-/* --- ACTION BUTTONS & STATUS TAGS --- */
+.users-table td {
+  vertical-align: top;
+  padding: 14px 16px;
+  color: #0f172a;
+  line-height: 1.4;
+}
+
+/* Username / Email cell */
+.user-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-username {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #0f172a;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.user-email {
+  font-size: 0.8rem;
+  color: #475569; /* slate-600 */
+  word-break: break-word;
+  margin-top: 2px;
+}
+
+/* Role badge */
+.role-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  line-height: 1;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background-color: #eef2ff; /* slate-100-ish w/ indigo hint */
+  color: #1e1e50;
+  border: 1px solid #c7d2fe;
+}
+
+/* tweak colors by role if you want */
+.role-badge.role-parent {
+  /* same base style for now */
+}
+.role-badge.role-child {
+  /* same base style for now */
+}
+
+/* Tier cell */
+.tier-cell {
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: #0f172a;
+}
+
+/* Status chip styles */
+.status-chip {
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.2;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 9999px;
+  border: 1px solid transparent;
+}
+
+/* Active = green */
+.status-active {
+  background-color: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+/* Pending = gray-ish */
+.status-pending {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+/* Actions cell */
+.actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Buttons */
+.btn-view,
+.btn-delete {
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 8px 12px;
+  line-height: 1.2;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.18s ease, box-shadow 0.18s ease;
+  min-width: 60px;
+  text-align: center;
+  color: #fff;
+}
+
+/* Blue "View" */
 .btn-view {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 6px;
-    background-color: #0d6efd;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.2s;
+  background-color: #1d4ed8; /* blue-700 */
+  border-color: #1d4ed8;
 }
 
 .btn-view:hover {
-    background-color: #0b5ed7;
+  background-color: #1e40af; /* blue-800 */
+  border-color: #1e40af;
+  box-shadow: 0 2px 6px rgba(29, 78, 216, 0.4);
 }
 
-.role-parent {
-    font-weight: bold;
+/* Red "Delete" */
+.btn-delete {
+  background-color: #dc2626; /* red-600 */
+  border-color: #dc2626;
 }
 
-.role-child {
-    font-weight: bold;
+.btn-delete:hover {
+  background-color: #b91c1c; /* red-700 */
+  border-color: #b91c1c;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
 }
 
-/* --- UTILITY & RESPONSIVE --- */
-.loading-state, .error-state {
-    text-align: center;
-    padding: 50px;
-    font-size: 1.5em;
-    color: #6c757d;
+/* Small screen tweaks */
+@media (max-width: 640px) {
+  .card-header-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-wrapper {
+    width: 100%;
+  }
+
+  .stats-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions-cell {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .btn-view,
+  .btn-delete {
+    width: 100%;
+  }
 }
