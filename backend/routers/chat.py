@@ -7,7 +7,7 @@ from datetime import datetime
 
 router = APIRouter()
 
-# ✅ Get all chat conversations for a child
+# Get all chat conversations for a child
 @router.get("/child/{userId}/chat")
 def get_user_chats(userId: int, db: Session = Depends(get_db)):
     chat = (
@@ -53,7 +53,7 @@ def create_new_chat(userId: int, db: Session = Depends(get_db)):
 
 
 
-# ✅ Get all messages in a chat
+# Get all messages in a chat
 @router.get("/chat/{chat_id}/message")
 def get_chat_messages(chat_id: int, db: Session = Depends(get_db)):
     chat = db.query(ChatConversation).filter_by(id=chat_id).first()
@@ -71,7 +71,7 @@ def get_chat_messages(chat_id: int, db: Session = Depends(get_db)):
     ]
 
 
-# ✅ Send message to chatbot (and save to DB)
+# Send message to chatbot (and save to DataBase)
 @router.post("/chatbot")
 def send_message(payload: dict, db: Session = Depends(get_db)):
     userId = payload.get("userId")
@@ -81,7 +81,7 @@ def send_message(payload: dict, db: Session = Depends(get_db)):
     if not userId or not message_text:
         raise HTTPException(status_code=400, detail="Missing required fields")
 
-    # ✅ Create conversation if needed
+    # Create conversation if needed
     convo = db.query(ChatConversation).filter_by(id=chat_id).first() if chat_id else None
     new_chat_created = False
 
@@ -98,7 +98,7 @@ def send_message(payload: dict, db: Session = Depends(get_db)):
         chat_id = convo.id
         new_chat_created = True
 
-    # ✅ Save user's message
+    # Save user's message
     user_msg = ChatMessage(
         conversation_id=chat_id,
         sender_type="CHILD",
@@ -108,13 +108,13 @@ def send_message(payload: dict, db: Session = Depends(get_db)):
     db.add(user_msg)
     db.commit()
 
-    # ✅ Generate bot reply (placeholder - integrate with ANN model)
+    # Generate bot reply (placeholder - integrate with ANN model)
     reply_text = (
         "I'm here to help! This is a placeholder response. "
         "The ANN model integration is in app.py."
     )
 
-    # ✅ Save bot reply
+    # Save bot reply
     bot_msg = ChatMessage(
         conversation_id=chat_id,
         sender_type="ASSISTANT",
@@ -124,11 +124,11 @@ def send_message(payload: dict, db: Session = Depends(get_db)):
     )
     db.add(bot_msg)
 
-    # ✅ Update conversation timestamp
+    # Update conversation timestamp
     convo.last_updated = datetime.utcnow()
     db.commit()
 
-    # ✅ Return both reply and chat metadata (important!)
+    # Return both reply and chat metadata (important!)
     return {
         "reply": reply_text,
         "chat_id": chat_id,
@@ -137,6 +137,19 @@ def send_message(payload: dict, db: Session = Depends(get_db)):
         "started_at": convo.started_at,
         "last_updated": convo.last_updated,
     }
+# Delete a chat conversation
+@router.delete("/chat/{chat_id}")
+def delete_chat(chat_id: int, db: Session = Depends(get_db)):
+    chat = db.query(ChatConversation).filter_by(id=chat_id).first()
+    if not chat:
+        raise HTTPException(status_code=404, detail="Chat not found")
+    
+    # Also delete messages in this conversation if needed
+    db.query(ChatMessage).filter_by(conversation_id=chat_id).delete()
+    
+    db.delete(chat)
+    db.commit()
+    return {"detail": f"Chat {chat_id} deleted successfully"}
 
 
 

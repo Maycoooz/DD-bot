@@ -143,7 +143,7 @@ export default function ChildSearchChat({ userId, selectedChatId, setSelectedCha
 
       <main className="child-dashboard__messages">
         {chatLoading && <div className="child-dashboard__loading">Loading messages...</div>}
-        {!activeChatId && <div className="child-dashboard__placeholder">Select a chat to start</div>}
+        {!activeChatId && <div className="child-dashboard__placeholder">Key in something to start a chat with DD Bot</div>}
 
         <div className="child-dashboard__messages-list">
           {messages.map((m) => (

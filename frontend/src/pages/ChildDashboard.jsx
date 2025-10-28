@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import '../styles/ChildrenDashboard.css';
 import logoImg from "../assets/logo.png";
+import deleteImg from "../assets/delete.png";
 import api from "../api/axiosConfig";
 
 // Import the new components to be used in the modals
@@ -54,6 +55,7 @@ export default function ChildDashboard() {
   const [filteredChats, setFilteredChats] = useState([]);
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [chatToDelete, setChatToDelete] = useState(null);
 
   const [childInterests, setChildInterests] = useState([]);
 
@@ -184,7 +186,7 @@ useEffect(() => {
               onChange={handleSearchChange}
             />
           </div>
-
+        {/* Chat History */}
           <div className="child-dashboard__section">
             <h4 className="child-dashboard__section-title">Chat History</h4>
             <ul className="child-dashboard__chat-list">
@@ -208,10 +210,67 @@ useEffect(() => {
                       chat.last_updated || chat.created_at || Date.now()
                     ).toLocaleString()}
                   </div>
+                  <img
+                    src={deleteImg}
+                    alt="Delete chat"
+                    style={{ cursor: "pointer", float: "right", width: "20px", height: "26px" }}
+                    onClick={(e) => {
+                    e.stopPropagation();
+                    setChatToDelete(chat);
+                    }}
+                    />
                 </li>
               ))}
             </ul>
           </div>
+{/* Delete Chat Modal */}
+    {chatToDelete && (
+      <div
+        className="child-dashboard__modal-overlay"
+        onClick={() => setChatToDelete(null)}
+      >
+        <div
+          className="child-dashboard__modal"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3>Delete Chat</h3>
+          <p>
+            Are you sure you want to delete "
+            {chatToDelete.title || `Chat ${chatToDelete.id}`}?
+          </p>
+          <div className="child-dashboard__modal-actions">
+            <button
+              className="child-dashboard__btn child-dashboard__btn--small child-dashboard__btn--outline"
+              onClick={() => setChatToDelete(null)}
+            >
+              Cancel
+            </button>
+            <button
+              className="child-dashboard__btn child-dashboard__btn--small child-dashboard__btn--danger"
+              onClick={async () => {
+                try {
+                  await api.delete(`/chat/${chatToDelete.id}`);
+                  setChats((prev) =>
+                    prev.filter((c) => c.id !== chatToDelete.id)
+                  );
+                  setFilteredChats((prev) =>
+                    prev.filter((c) => c.id !== chatToDelete.id)
+                  );
+                  if (selectedChatId === chatToDelete.id)
+                    setSelectedChatId(null);
+                  setChatToDelete(null);
+                } catch (err) {
+                  console.error("Failed to delete chat:", err);
+                  alert("Failed to delete chat.");
+                }
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
 
           <div className="child-dashboard__section">
             <h4 className="child-dashboard__section-title">General</h4>
