@@ -13,6 +13,7 @@ import SearchVideos from './SearchVideos.jsx';
 import AddAppReview from './AddAppReview.jsx';
 import DeleteAppReview from './DeleteAppReview.jsx';
 import ParentChildFavorite from './ParentChildFavorite.jsx';
+import ParentChildChatHistory from './ParentChildChatHistory.jsx';
 
 // --- Dashboard Menu Definition ---
 const menuItems = {
@@ -102,7 +103,7 @@ function ParentDashboard() {
             case 'viewChildren':
                 return <ViewChildAccounts></ViewChildAccounts>;
             case 'childChatHistory':
-                return <div><h2>Child Chat History</h2><p>Chat logs coming soon...</p></div>;
+                return <ParentChildChatHistory parentId={userProfile.id} />;
             case 'childFavorites':
                 return <ParentChildFavorite  parentId={userProfile.id}  />;
             case 'searchBooks':
