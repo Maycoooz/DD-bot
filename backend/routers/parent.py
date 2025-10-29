@@ -184,27 +184,57 @@ async def create_child_account(
     db: Session = Depends(get_db),
     current_parent_user: User = Depends(get_current_active_user),
 ):
-    # Must be a parent to create a child
+    # 1. Must be a parent
     if not current_parent_user.role or current_parent_user.role.name.value != "PARENT":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only parents can create child accounts.",
         )
 
-    # Check if username already exists
+    # 2. Enforce FREE plan limit
+    parent_tier_str = (
+        current_parent_user.tier.value
+        if hasattr(current_parent_user.tier, "value")
+        else (current_parent_user.tier or "FREE")
+    ).upper()
+
+    if parent_tier_str == "FREE":
+        # Count ACTIVE children for this parent
+        active_child_count = (
+            db.query(User)
+            .join(Role)
+            .filter(
+                User.primary_parent_id == current_parent_user.id,
+                Role.name == UserRole.CHILD,
+                User.is_active == True,
+            )
+            .count()
+        )
+
+        if active_child_count >= FREE_CHILD_LIMIT:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=(
+                    "You are on the FREE plan, which allows only 1 active child "
+                    "account. Upgrade to PRO to add more children."
+                ),
+            )
+
+    # 3. Username must be unique
     if get_user(db, child_data.username):
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered.",
         )
 
-    # Pull Interest objects
-    interests_from_db = (
+    # 4. Resolve interests into real Interest rows
+    interests_from_db: List[Interest] = (
         db.query(Interest)
         .filter(Interest.name.in_(child_data.interests))
         .all()
     )
 
+    # 5. Create the new child
     hashed_password = get_password_hash(child_data.password)
 
     new_child = User(
@@ -220,6 +250,7 @@ async def create_child_account(
         role_id=3,  # Child role PK in your DB
         primary_parent_id=current_parent_user.id,
         is_verified=1,
+        is_active=True,  # new kid starts active
         tier=current_parent_user.tier or "FREE",
     )
     new_child.interests = interests_from_db

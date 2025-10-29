@@ -110,5 +110,4 @@ class ChildAccountListItem(BaseModel):
     is_verified: bool
     created_at: Optional[datetime] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

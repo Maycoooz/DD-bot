@@ -104,8 +104,7 @@ class ParentMeResponse(BaseModel):
     role_name: Optional[str] = None
     children: List[ChildSummary] = []
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class TierChangePreviewResponse(BaseModel):
