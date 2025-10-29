@@ -1,9 +1,13 @@
-/* --- Core Layout & Page Container --- */
+/* ================================
+   PAGE LAYOUT
+=================================== */
 .page-container {
     width: 100%;
-    max-width: 900px;
+    max-width: 1000px;
     margin: 2rem auto;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    padding: 0 1rem;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Helvetica, Arial, sans-serif;
 }
 
 .page-header {
@@ -16,33 +20,120 @@
 .page-header h2 {
     margin: 0;
     font-size: 1.75rem;
-    color: #333;
+    color: #1f2937;
+    font-weight: 600;
 }
 
-/* --- Child Account Card --- */
+/* Loading / empty states */
+.loading-state,
+.no-children-message {
+    text-align: center;
+    color: #4b5563;
+    font-size: 1rem;
+    margin-top: 2rem;
+}
+
+/* ================================
+   CHILD ACCOUNT CARD
+=================================== */
 .child-account-card {
     border: 1px solid #e0e0e0;
     border-radius: 10px;
     margin-bottom: 24px;
     background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    overflow: hidden; /* Ensures child elements respect the border radius */
+    overflow: hidden;
 }
 
-.child-account-card h3 {
-    margin: 0;
+/* Extra styling if the account is deactivated */
+.card-deactivated {
+    border-color: #f87171;
+    background-color: #fff7f7;
+}
+
+/* Header row inside each child card */
+.child-card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     padding: 16px 20px;
-    font-size: 1.25rem;
     background-color: #f9fafb;
     border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+    gap: 0.75rem;
 }
 
-/* --- Profile Details Grid --- */
+.child-card-name {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Deactivated banner below header */
+.deactivated-note {
+    background-color: #fff1f2;
+    border-top: 1px solid #fecaca;
+    border-bottom: 1px solid #fecaca;
+    color: #b91c1c;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    padding: 12px 20px;
+}
+
+/* ================================
+   STATUS BADGES
+=================================== */
+.status-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    border-radius: 6px;
+    padding: 6px 10px;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+
+/* ACTIVE – FREE */
+.status-free {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-color: #6ee7b7;
+}
+
+/* ACTIVE – PRO */
+.status-pro {
+    background-color: #eff6ff;
+    color: #1e40af;
+    border-color: #93c5fd;
+}
+
+/* DEACTIVATED */
+.status-deactivated {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    border-color: #d1d5db;
+}
+
+/* ================================
+   PROFILE DETAILS GRID
+=================================== */
 .profile-details {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
     gap: 20px;
     padding: 20px;
+}
+
+/* When editing, inputs go white */
+.profile-details.editing .form-group input {
+    background-color: #ffffff;
+}
+
+/* Standard (read-only) inputs */
+.profile-details .form-group input[readonly] {
+    background-color: #f8f9fa;
+    color: #1f2937;
 }
 
 .form-group {
@@ -56,37 +147,57 @@
 
 .form-group label {
     margin-bottom: 6px;
-    font-size: 0.875rem;
-    color: #555;
+    font-size: 0.8rem;
+    color: #4b5563;
     font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 .form-group input[type="text"],
-.form-group input[type="date"] {
+.form-group input[type="date"],
+.form-group input[type="password"] {
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #cbd5e1;
     border-radius: 6px;
     font-size: 1rem;
-    background-color: #f8f9fa; /* Read-only background */
+    color: #1f2937;
+    background-color: #f8f9fa;
+    min-height: 40px;
+    box-sizing: border-box;
 }
 
-/* Specific style for inputs in edit mode */
-.profile-details.editing .form-group input {
+.profile-details.editing .form-group input[type="text"],
+.profile-details.editing .form-group input[type="date"] {
     background-color: #ffffff;
 }
 
+.form-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+/* Interests read-only chip-like block */
 .interests-display {
     padding: 10px;
     background-color: #f8f9fa;
     border-radius: 6px;
-    min-height: 40px; /* Match input height */
+    min-height: 40px;
     font-size: 0.95rem;
-    color: #333;
+    color: #1f2937;
+    border: 1px solid #cbd5e1;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
 }
 
-/* --- Action Buttons --- */
+/* ================================
+   ACTION BUTTONS BAR
+=================================== */
 .action-buttons {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
     gap: 12px;
     padding: 16px 20px;
@@ -101,65 +212,181 @@
     cursor: pointer;
     font-weight: 600;
     font-size: 0.9rem;
-    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    line-height: 1.2;
+    transition: background-color 0.18s, color 0.18s, box-shadow 0.18s;
+    min-width: 120px;
+    text-align: center;
 }
 
-.edit-btn { background-color: #3b82f6; color: white; }
-.edit-btn:hover { background-color: #2563eb; }
+/* Active buttons */
+.edit-btn {
+    background-color: #3b82f6;
+    color: white;
+}
+.edit-btn:hover {
+    background-color: #2563eb;
+}
 
-.password-btn { background-color: #6b7280; color: white; }
-.password-btn:hover { background-color: #4b5563; }
+.password-btn {
+    background-color: #6b7280;
+    color: white;
+}
+.password-btn:hover {
+    background-color: #4b5563;
+}
 
-.delete-btn { background-color: #ef4444; color: white; }
-.delete-btn:hover { background-color: #dc2626; }
+.delete-btn {
+    background-color: #ef4444;
+    color: white;
+}
+.delete-btn:hover {
+    background-color: #dc2626;
+}
 
-.save-btn { background-color: #22c55e; color: white; }
-.save-btn:hover { background-color: #16a34a; }
+.save-btn {
+    background-color: #22c55e;
+    color: white;
+}
+.save-btn:hover {
+    background-color: #16a34a;
+}
 
-.cancel-btn { background-color: #a1a1aa; color: white; }
-.cancel-btn:hover { background-color: #71717a; }
+.cancel-btn {
+    background-color: #a1a1aa;
+    color: white;
+}
+.cancel-btn:hover {
+    background-color: #71717a;
+}
 
-.delete-btn-confirm { background-color: #dc2626; color: white; }
-.delete-btn-confirm:hover { background-color: #b91c1c; }
+.delete-btn-confirm {
+    background-color: #dc2626;
+    color: white;
+}
+.delete-btn-confirm:hover {
+    background-color: #b91c1c;
+}
 
+/* Disabled / inactive state for deactivated kids */
+.btn-disabled,
+.btn:disabled {
+    background-color: #d1d5db !important;
+    color: #6b7280 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
 
-/* --- MODAL STYLES --- */
-.modal-overlay {
-    position: fixed;
-    top: 0;
+/* ================================
+   DROPDOWN (INTERESTS MULTISELECT)
+=================================== */
+.custom-dropdown {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.dropdown-button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff;
+    width: 100%;
+    min-height: 40px;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.dropdown-arrow {
+    margin-left: 8px;
+    font-size: 0.8rem;
+    color: #6b7280;
+}
+
+.dropdown-button:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+.dropdown-panel {
+    position: absolute;
+    z-index: 50;
+    top: calc(100% + 4px);
     left: 0;
     right: 0;
-    bottom: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    padding: 8px 0;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    color: #1f2937;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background-color: #f3f4f6;
+}
+
+.dropdown-item input[type="checkbox"] {
+    cursor: pointer;
+}
+
+/* ================================
+   MODAL (DELETE / CHANGE PASSWORD)
+=================================== */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
     background-color: rgba(0, 0, 0, 0.6);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    padding: 1rem;
 }
 
 .modal-content {
-    background-color: white;
-    padding: 30px 40px;
+    background-color: #ffffff;
+    padding: 30px 32px;
     border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    width: 90%;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    width: 100%;
     max-width: 450px;
-    text-align: center;
+    text-align: left;
 }
 
 .modal-content h3 {
     margin-top: 0;
     margin-bottom: 8px;
-    color: #333;
-    font-size: 1.5rem;
+    color: #1f2937;
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
 .modal-content p {
-    margin-bottom: 25px;
-    color: #666;
+    margin: 0 0 20px 0;
+    color: #4b5563;
     line-height: 1.5;
+    font-size: 0.95rem;
 }
 
+/* Password form layout inside modal */
 .modal-form {
     display: flex;
     flex-direction: column;
@@ -170,43 +397,80 @@
     text-align: left;
 }
 
-.modal-form input {
+.modal-form .form-group label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #4b5563;
+    margin-bottom: 6px;
+}
+
+.modal-form .form-group input {
+    width: 100%;
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid #cbd5e1;
     border-radius: 6px;
     font-size: 1rem;
+    color: #1f2937;
+    background-color: #ffffff;
 }
 
+.modal-form .form-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+/* modal footer buttons */
 .modal-actions {
     display: flex;
+    flex-wrap: wrap;
     justify-content: flex-end;
-    gap: 15px;
-    margin-top: 30px;
+    gap: 12px;
+    margin-top: 24px;
 }
 
-/* --- MESSAGES (Error/Success) --- */
+/* ================================
+   GLOBAL MESSAGES
+=================================== */
 .form-message {
-    padding: 12px;
+    padding: 12px 16px;
     border-radius: 8px;
     text-align: center;
     margin: 0 0 20px 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
 }
+
 .form-message.error {
     background-color: #fee2e2;
     color: #b91c1c;
+    border: 1px solid #fecaca;
 }
+
 .form-message.success {
     background-color: #dcfce7;
     color: #15803d;
+    border: 1px solid #86efac;
 }
 
-/* Simple Dropdown Styles */
-.custom-dropdown .dropdown-button {
-    text-align: left;
-    background-color: white;
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    cursor: pointer;
+/* ================================
+   RESPONSIVE TWEAKS
+=================================== */
+
+@media (max-width: 500px) {
+    .child-card-header-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn {
+        min-width: 100px;
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    .modal-content {
+        padding: 24px 20px;
+    }
 }

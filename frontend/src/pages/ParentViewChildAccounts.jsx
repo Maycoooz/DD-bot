@@ -26,6 +26,7 @@ function ViewChildAccounts() {
     });
     const [passwordError, setPasswordError] = useState('');
 
+    // Interests
     const [availableInterests, setAvailableInterests] = useState([]);
 
     // --- DATA FETCHING ---
@@ -55,13 +56,53 @@ function ViewChildAccounts() {
         setPasswordError('');
     };
 
-    // --- EVENT HANDLERS for Profile Editing ---
+    // ---------------------------
+    // Helpers for UI state/status
+    // ---------------------------
+    const childIsDeactivated = (child) => {
+        // treat as deactivated if tier is DEACTIVATED OR backend marked not active
+        if (String(child.tier).toUpperCase() === 'DEACTIVATED') return true;
+        if (child.is_active === false) return true;
+        return false;
+    };
+
+    const renderStatusBadge = (child) => {
+    // If backend tells us they're inactive OR explicitly DEACTIVATED
+        if (!child.is_active || child.tier === 'DEACTIVATED') {
+            return (
+                <span className="status-badge status-deactivated">
+                    DEACTIVATED
+                </span>
+            );
+        }
+
+        // Otherwise they're active. Show which plan they're on.
+        const plan = (child.tier || 'FREE').toUpperCase(); // "PRO" / "FREE" / etc.
+        return (
+            <span
+                className={`status-badge ${
+                    plan === 'PRO' ? 'status-pro' : 'status-free'
+                }`}
+            >
+                ACTIVE – {plan}
+            </span>
+        );
+    };
+
+
+    // --- EVENT HANDLERS: Profile Editing ---
     const handleEditClick = (child) => {
         clearMessages();
+
+        if (childIsDeactivated(child)) {
+            setError('This child account is deactivated. Reactivate by upgrading to PRO.');
+            return;
+        }
+
         setEditingChildId(child.id);
         setEditFormData({
             ...child,
-            interests: child.interests.map(interest => interest.name)
+            interests: (child.interests || []).map((interest) => interest.name)
         });
     };
 
@@ -79,6 +120,7 @@ function ViewChildAccounts() {
         const newInterests = currentInterests.includes(interestName)
             ? currentInterests.filter((item) => item !== interestName)
             : [...currentInterests, interestName];
+
         setEditFormData({ ...editFormData, interests: newInterests });
     };
 
@@ -87,10 +129,12 @@ function ViewChildAccounts() {
         try {
             const childId = editFormData.id;
             const response = await api.patch(`/parent/update-child/${childId}`, editFormData);
+
             const updatedChildren = children.map((child) =>
                 child.id === childId ? response.data : child
             );
             setChildren(updatedChildren);
+
             setEditingChildId(null);
             setIsDropdownOpen(false);
             setSuccess("Profile updated successfully!");
@@ -100,7 +144,7 @@ function ViewChildAccounts() {
         }
     };
 
-    // --- EVENT HANDLERS for Deleting Account ---
+    // --- EVENT HANDLERS: Deleting Account ---
     const handleDeleteClick = (child) => {
         clearMessages();
         setChildToDelete(child);
@@ -110,7 +154,7 @@ function ViewChildAccounts() {
         if (!childToDelete) return;
         try {
             await api.delete(`/parent/delete-child/${childToDelete.id}`);
-            setChildren(children.filter(child => child.id !== childToDelete.id));
+            setChildren(children.filter((child) => child.id !== childToDelete.id));
             setChildToDelete(null);
             setSuccess("Account deleted successfully.");
         } catch (err) {
@@ -124,9 +168,15 @@ function ViewChildAccounts() {
         setChildToDelete(null);
     };
 
-    // --- EVENT HANDLERS for Changing Password ---
+    // --- EVENT HANDLERS: Changing Password ---
     const handlePasswordModalOpen = (child) => {
         clearMessages();
+
+        if (childIsDeactivated(child)) {
+            setError('This child account is deactivated. Reactivate by upgrading to PRO before changing password.');
+            return;
+        }
+
         setChildForPasswordChange(child);
     };
 
@@ -138,7 +188,11 @@ function ViewChildAccounts() {
     const handleConfirmChangePassword = async () => {
         if (passwordData.new_password !== passwordData.confirm_new_password) {
             setPasswordError("New passwords do not match.");
-            setPasswordData({ current_password: '', new_password: '', confirm_new_password: ''});
+            setPasswordData({
+                current_password: '',
+                new_password: '',
+                confirm_new_password: ''
+            });
             return;
         }
         if (!passwordData.current_password || !passwordData.new_password) {
@@ -155,24 +209,36 @@ function ViewChildAccounts() {
             
             await api.patch(`/parent/change-kid-password/${childId}`, dataToSend);
             
-            setSuccess(`Password for ${childForPasswordChange.first_name} ${childForPasswordChange.last_name} has been changed successfully!`);
+            setSuccess(
+                `Password for ${childForPasswordChange.first_name} ${childForPasswordChange.last_name} has been changed successfully!`
+            );
             handleCancelChangePassword();
         } catch (err) {
             console.error("Failed to change password:", err);
             const detail = err.response?.data?.detail || "An unexpected error occurred. Please try again.";
             setPasswordError(detail);
-            setPasswordData({ current_password: '', new_password: '', confirm_new_password: ''});
+            setPasswordData({
+                current_password: '',
+                new_password: '',
+                confirm_new_password: ''
+            });
         }
     };
 
     const handleCancelChangePassword = () => {
         setChildForPasswordChange(null);
-        setPasswordData({ current_password: '', new_password: '', confirm_new_password: '' });
+        setPasswordData({
+            current_password: '',
+            new_password: '',
+            confirm_new_password: ''
+        });
         setPasswordError('');
     };
 
     // --- RENDER LOGIC ---
-    if (loading) return <div className="loading-state">Loading child accounts...</div>;
+    if (loading) {
+        return <div className="loading-state">Loading child accounts...</div>;
+    }
 
     return (
         <div className="page-container">
@@ -184,124 +250,414 @@ function ViewChildAccounts() {
             {success && <p className="form-message success">{success}</p>}
 
             <main>
-                {/* Check if the children array is empty */}
                 {children.length === 0 ? (
                     <div className="no-children-message">
                         <p>You have not created any child accounts yet.</p>
                     </div>
                 ) : (
-                    children.map((child) => (
-                        <div key={child.id} className="child-account-card">
-                            <h3>{editingChildId === child.id ? 'Editing Profile' : `${child.first_name} ${child.last_name}`}</h3>
-                            
-                            {editingChildId === child.id ? (
-                                // --- EDITING VIEW ---
-                                <div className="profile-details editing">
-                                    <div className="form-group"><label>Username</label><input type="text" name="username" value={editFormData.username} onChange={handleEditFormChange} /></div>
-                                    <div className="form-group"><label>First Name</label><input type="text" name="first_name" value={editFormData.first_name} onChange={handleEditFormChange} /></div>
-                                    <div className="form-group"><label>Last Name</label><input type="text" name="last_name" value={editFormData.last_name} onChange={handleEditFormChange} /></div>
-                                    <div className="form-group"><label>Birthday</label><input type="date" name="birthday" value={editFormData.birthday || ''} onChange={handleEditFormChange} /></div>
-                                    <div className="form-group"><label>Country</label><input type="text" name="country" value={editFormData.country || ''} onChange={handleEditFormChange} /></div>
-                                    <div className="form-group"><label>Gender</label><input type="text" name="gender" value={editFormData.gender || ''} onChange={handleEditFormChange} /></div>
-                                    <div className="form-group"><label>Race</label><input type="text" name="race" value={editFormData.race || ''} onChange={handleEditFormChange} /></div>
-                                    <div className="form-group full-width">
-                                        <label>Interests</label>
-                                        <div className="custom-dropdown">
-                                            <button type="button" onClick={() => setIsDropdownOpen(prev => !prev)} className="dropdown-button">
-                                                {(editFormData.interests || []).length} selected
-                                                <span className="dropdown-arrow">{isDropdownOpen ? '▲' : '▼'}</span>
-                                            </button>
-                                            {isDropdownOpen && (
-                                                <div className="dropdown-panel">
-                                                    {availableInterests.map((interest) => (
-                                                        <label key={interest.name} className="dropdown-item">
-                                                            <input type="checkbox" checked={(editFormData.interests || []).includes(interest.name)} onChange={() => handleEditInterestsChange(interest.name)} />
-                                                            {interest.name}
-                                                        </label>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                // --- DISPLAY VIEW ---
-                                <div className="profile-details">
-                                    <div className="form-group"><label>Username</label><input type="text" value={child.username} readOnly /></div>
-                                    <div className="form-group"><label>First Name</label><input type="text" value={child.first_name} readOnly /></div>
-                                    <div className="form-group"><label>Last Name</label><input type="text" value={child.last_name} readOnly /></div>
-                                    <div className="form-group"><label>Birthday</label><input type="text" value={child.birthday || 'N/A'} readOnly /></div>
-                                    <div className="form-group"><label>Country</label><input type="text" value={child.country || 'N/A'} readOnly /></div>
-                                    <div className="form-group"><label>Gender</label><input type="text" value={child.gender || 'N/A'} readOnly /></div>
-                                    <div className="form-group"><label>Race</label><input type="text" value={child.race || 'N/A'} readOnly /></div>
-                                    <div className="form-group full-width">
-                                        <label>Interests</label>
-                                        <div className="interests-display">
-                                            {child.interests && child.interests.length > 0 ? child.interests.map(i => i.name).join(', ') : 'No interests specified'}
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
+                    children.map((child) => {
+                        const isEditingThisChild = editingChildId === child.id;
+                        const isDeactivated = childIsDeactivated(child);
 
-                            <div className="action-buttons">
-                                {editingChildId === child.id ? (
-                                    <>
-                                        <button className="btn save-btn" onClick={handleSaveClick}>Save Changes</button>
-                                        <button className="btn cancel-btn" onClick={handleCancelClick}>Cancel</button>
-                                    </>
-                                ) : (
-                                    <>
-                                        <button className="btn edit-btn" onClick={() => handleEditClick(child)}>Edit Profile</button>
-                                        <button className="btn password-btn" onClick={() => handlePasswordModalOpen(child)}>Change Password</button>
-                                        <button className="btn delete-btn" onClick={() => handleDeleteClick(child)}>Delete Account</button>
-                                    </>
+                        return (
+                            <div
+                                key={child.id}
+                                className={`child-account-card ${isDeactivated ? 'card-deactivated' : ''}`}
+                            >
+                                <div className="child-card-header-row">
+                                    <h3 className="child-card-name">
+                                        {isEditingThisChild
+                                            ? 'Editing Profile'
+                                            : `${child.first_name || ''} ${child.last_name || ''}`.trim() ||
+                                              child.username}
+                                    </h3>
+                                    {renderStatusBadge(child)}
+                                </div>
+
+                                {isDeactivated && (
+                                    <div className="deactivated-note">
+                                        This account is currently deactivated.
+                                        Your child cannot log in. Reactivate
+                                        by upgrading to PRO.
+                                    </div>
                                 )}
+
+                                {isEditingThisChild ? (
+                                    // --- EDITING VIEW ---
+                                    <div className="profile-details editing">
+                                        <div className="form-group">
+                                            <label>Username</label>
+                                            <input
+                                                type="text"
+                                                name="username"
+                                                value={editFormData.username || ''}
+                                                onChange={handleEditFormChange}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>First Name</label>
+                                            <input
+                                                type="text"
+                                                name="first_name"
+                                                value={editFormData.first_name || ''}
+                                                onChange={handleEditFormChange}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Last Name</label>
+                                            <input
+                                                type="text"
+                                                name="last_name"
+                                                value={editFormData.last_name || ''}
+                                                onChange={handleEditFormChange}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Birthday</label>
+                                            <input
+                                                type="date"
+                                                name="birthday"
+                                                value={editFormData.birthday || ''}
+                                                onChange={handleEditFormChange}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Country</label>
+                                            <input
+                                                type="text"
+                                                name="country"
+                                                value={editFormData.country || ''}
+                                                onChange={handleEditFormChange}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Gender</label>
+                                            <input
+                                                type="text"
+                                                name="gender"
+                                                value={editFormData.gender || ''}
+                                                onChange={handleEditFormChange}
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Race</label>
+                                            <input
+                                                type="text"
+                                                name="race"
+                                                value={editFormData.race || ''}
+                                                onChange={handleEditFormChange}
+                                            />
+                                        </div>
+
+                                        <div className="form-group full-width">
+                                            <label>Interests</label>
+                                            <div className="custom-dropdown">
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setIsDropdownOpen((prev) => !prev)
+                                                    }
+                                                    className="dropdown-button"
+                                                >
+                                                    {(editFormData.interests || []).length}{' '}
+                                                    selected
+                                                    <span className="dropdown-arrow">
+                                                        {isDropdownOpen ? '▲' : '▼'}
+                                                    </span>
+                                                </button>
+
+                                                {isDropdownOpen && (
+                                                    <div className="dropdown-panel">
+                                                        {availableInterests.map(
+                                                            (interest) => (
+                                                                <label
+                                                                    key={interest.name}
+                                                                    className="dropdown-item"
+                                                                >
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={(
+                                                                            editFormData.interests ||
+                                                                            []
+                                                                        ).includes(
+                                                                            interest.name
+                                                                        )}
+                                                                        onChange={() =>
+                                                                            handleEditInterestsChange(
+                                                                                interest.name
+                                                                            )
+                                                                        }
+                                                                    />
+                                                                    {interest.name}
+                                                                </label>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    // --- READ-ONLY VIEW ---
+                                    <div className="profile-details">
+                                        <div className="form-group">
+                                            <label>Username</label>
+                                            <input
+                                                type="text"
+                                                value={child.username || 'N/A'}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>First Name</label>
+                                            <input
+                                                type="text"
+                                                value={child.first_name || 'N/A'}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Last Name</label>
+                                            <input
+                                                type="text"
+                                                value={child.last_name || 'N/A'}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Birthday</label>
+                                            <input
+                                                type="text"
+                                                value={child.birthday || 'N/A'}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Country</label>
+                                            <input
+                                                type="text"
+                                                value={child.country || 'N/A'}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Gender</label>
+                                            <input
+                                                type="text"
+                                                value={child.gender || 'N/A'}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className="form-group">
+                                            <label>Race</label>
+                                            <input
+                                                type="text"
+                                                value={child.race || 'N/A'}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div className="form-group full-width">
+                                            <label>Interests</label>
+                                            <div className="interests-display">
+                                                {child.interests &&
+                                                child.interests.length > 0
+                                                    ? child.interests
+                                                          .map((i) => i.name)
+                                                          .join(', ')
+                                                    : 'No interests specified'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* ACTION BUTTONS */}
+                                <div className="action-buttons">
+                                    {isEditingThisChild ? (
+                                        <>
+                                            <button
+                                                className="btn save-btn"
+                                                onClick={handleSaveClick}
+                                            >
+                                                Save Changes
+                                            </button>
+                                            <button
+                                                className="btn cancel-btn"
+                                                onClick={handleCancelClick}
+                                            >
+                                                Cancel
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button
+                                                className={`btn edit-btn ${
+                                                    isDeactivated
+                                                        ? 'btn-disabled'
+                                                        : ''
+                                                }`}
+                                                onClick={() =>
+                                                    handleEditClick(child)
+                                                }
+                                                disabled={isDeactivated}
+                                            >
+                                                Edit Profile
+                                            </button>
+
+                                            <button
+                                                className={`btn password-btn ${
+                                                    isDeactivated
+                                                        ? 'btn-disabled'
+                                                        : ''
+                                                }`}
+                                                onClick={() =>
+                                                    handlePasswordModalOpen(child)
+                                                }
+                                                disabled={isDeactivated}
+                                            >
+                                                Change Password
+                                            </button>
+
+                                            <button
+                                                className="btn delete-btn"
+                                                onClick={() =>
+                                                    handleDeleteClick(child)
+                                                }
+                                            >
+                                                Delete Account
+                                            </button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
             </main>
 
-            {/* --- MODAL for Deleting Account --- */}
+            {/* DELETE MODAL */}
             {childToDelete && (
                 <div className="modal-overlay">
                     <div className="modal-content">
                         <h3>Confirm Deletion</h3>
-                        <p>Are you sure you want to permanently delete the account for <strong>{childToDelete.username}</strong>?</p>
+                        <p>
+                            Are you sure you want to permanently delete the
+                            account for{' '}
+                            <strong>{childToDelete.username}</strong>?
+                        </p>
                         <div className="modal-actions">
-                            <button className="btn cancel-btn" onClick={handleCancelDelete}>Cancel</button>
-                            <button className="btn delete-btn-confirm" onClick={handleConfirmDelete}>Delete Account</button>
+                            <button
+                                className="btn cancel-btn"
+                                onClick={handleCancelDelete}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn delete-btn-confirm"
+                                onClick={handleConfirmDelete}
+                            >
+                                Delete Account
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
-            
-            {/* --- MODAL for Changing Password --- */}
+
+            {/* CHANGE PASSWORD MODAL */}
             {childForPasswordChange && (
                 <div className="modal-overlay">
                     <div className="modal-content">
                         <h3>Change Password</h3>
-                        <p>Changing password for <strong>{childForPasswordChange.username}</strong>.</p>
-                        
-                        <form onSubmit={(e) => { e.preventDefault(); handleConfirmChangePassword(); }} className="modal-form">
+                        <p>
+                            Changing password for{' '}
+                            <strong>
+                                {childForPasswordChange.username}
+                            </strong>.
+                        </p>
+
+                        <form
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                handleConfirmChangePassword();
+                            }}
+                            className="modal-form"
+                        >
                             <div className="form-group">
-                                <label htmlFor="current_password">Current Password</label>
-                                <input type="password" id="current_password" name="current_password" value={passwordData.current_password} onChange={handlePasswordFormChange} required />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="new_password">New Password</label>
-                                <input type="password" id="new_password" name="new_password" value={passwordData.new_password} onChange={handlePasswordFormChange} required />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="confirm_new_password">Confirm New Password</label>
-                                <input type="password" id="confirm_new_password" name="confirm_new_password" value={passwordData.confirm_new_password} onChange={handlePasswordFormChange} required />
+                                <label htmlFor="current_password">
+                                    Current Password
+                                </label>
+                                <input
+                                    type="password"
+                                    id="current_password"
+                                    name="current_password"
+                                    value={passwordData.current_password}
+                                    onChange={handlePasswordFormChange}
+                                    required
+                                />
                             </div>
 
-                            {passwordError && <p className="form-message error">{passwordError}</p>}
-                        
+                            <div className="form-group">
+                                <label htmlFor="new_password">
+                                    New Password
+                                </label>
+                                <input
+                                    type="password"
+                                    id="new_password"
+                                    name="new_password"
+                                    value={passwordData.new_password}
+                                    onChange={handlePasswordFormChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label htmlFor="confirm_new_password">
+                                    Confirm New Password
+                                </label>
+                                <input
+                                    type="password"
+                                    id="confirm_new_password"
+                                    name="confirm_new_password"
+                                    value={
+                                        passwordData.confirm_new_password
+                                    }
+                                    onChange={handlePasswordFormChange}
+                                    required
+                                />
+                            </div>
+
+                            {passwordError && (
+                                <p className="form-message error">
+                                    {passwordError}
+                                </p>
+                            )}
+
                             <div className="modal-actions">
-                                <button type="button" className="btn cancel-btn" onClick={handleCancelChangePassword}>Cancel</button>
-                                <button type="submit" className="btn save-btn">Save Password</button>
+                                <button
+                                    type="button"
+                                    className="btn cancel-btn"
+                                    onClick={handleCancelChangePassword}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="btn save-btn"
+                                >
+                                    Save Password
+                                </button>
                             </div>
                         </form>
                     </div>

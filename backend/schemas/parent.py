@@ -2,6 +2,7 @@ from pydantic import BaseModel, field_validator, ConfigDict
 from datetime import date
 from typing import Optional, List
 from schemas.interest import InterestResponse
+from  models.tables import SubscriptionTier
 
 class ChildRegistrationRequest(BaseModel):
     username: str
@@ -78,3 +79,45 @@ class ParentViewChildAccountsResponse(BaseModel):
     race: Optional[str] = None
     interests: List[InterestResponse] = []
     
+# ---------- Tier change flow ----------
+
+# Preview child during tier change
+class ChildSummary(BaseModel):
+    id: int
+    username: str
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    tier: Optional[str] = None
+
+
+class ParentMeResponse(BaseModel):
+    id: int
+    username: str
+    email: Optional[str] = None
+    tier: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    country: Optional[str] = None
+    gender: Optional[str] = None
+    birthday: Optional[date] = None
+    race: Optional[str] = None
+    role_name: Optional[str] = None
+    children: List[ChildSummary] = []
+
+    class Config:
+        orm_mode = True
+
+
+class TierChangePreviewResponse(BaseModel):
+    current_tier: str
+    target_tier: str
+    gain_features: List[str]
+    lose_features: List[str]
+    requires_child_choice: bool
+    children: List[ChildSummary] = []
+    max_children_allowed: int
+
+
+class ChangeTierRequest(BaseModel):
+    target_tier: str                # "FREE" or "PRO"
+    keep_child_id: Optional[int] = None  # only required if downgrading w/ >1 children

@@ -15,6 +15,7 @@ class UserRole(enum.Enum):
 class SubscriptionTier(enum.Enum):
     PRO = "PRO"
     FREE = "FREE"
+    DEACTIVATED = "DEACTIVATED"
     
 class InterestsList(enum.Enum):
     FICTION = "FICTION"
@@ -146,6 +147,8 @@ class User(Base):
     
     interests = relationship("Interest", secondary="childinterest", back_populates="children")
     reviews = relationship("Review", back_populates="user", cascade="all, delete-orphan")
+    
+    is_active = Column(Boolean, default=True, nullable=False, index=True)
 
 class LandingPage(Base):
     __tablename__ = "landingpage"
