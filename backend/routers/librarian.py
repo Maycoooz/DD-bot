@@ -111,7 +111,6 @@ def view_all_videos(
     return PaginatedVideoResponse(total=total, items=items)
 
 # --- GET Routes Protected ---
-
 @router.get("/all-reviews", response_model=PaginatedLibrarianReviewResponse)
 def librarian_view_all_reviews(
     db: Session = Depends(get_db),

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload, aliased
 from sqlalchemy import or_, select, func
 
-from auth.auth_handler import get_current_admin_user, get_db, verify_password, get_password_hash
+from auth.auth_handler import get_current_admin_user, get_db
 from schemas.auth import StatusMessage
 from schemas.admin import (
     AdminReviewResponse, AdminReviewUserResponse, 
@@ -45,12 +45,10 @@ def view_all_users(
         description="Search username / first_name / last_name / email"
     ),
 ):
-    """
-    Returns a paginated list of PARENT + CHILD accounts.
-    Also returns global totals for parents, kids, and combined.
-    """
-
-    # 1. Build base query of just parents + kids
+    # Returns a paginated list of PARENT + CHILD accounts.
+    # Also returns global totals for parents, kids, and combined.
+    
+    # Build base query of just parents + kids
     base_q = (
         db.query(User)
         .options(joinedload(User.role))
@@ -58,7 +56,7 @@ def view_all_users(
         .filter(Role.name.in_([UserRole.PARENT, UserRole.CHILD]))
     )
 
-    # 2. Apply search if provided
+    # Apply search if provided
     if search:
         like_val = f"%{search}%"
         base_q = base_q.filter(
@@ -70,10 +68,10 @@ def view_all_users(
             )
         )
 
-    # 3. Count how many match the current filter (for pagination UI)
+    # Count how many match the current filter (for pagination UI)
     filtered_total = base_q.count()
 
-    # 4. Pagination slice for this page
+    # Pagination slice for this page
     rows = (
         base_q
         .order_by(User.id.asc())
@@ -82,7 +80,7 @@ def view_all_users(
         .all()
     )
 
-    # 5. Build a map of parent_id -> parent_email so we can show parent email for CHILD rows
+    # Build a map of parent_id -> parent_email so can show parent email for CHILD rows
     parent_ids_needed = {
         u.primary_parent_id
         for u in rows
@@ -97,10 +95,10 @@ def view_all_users(
         )
         parent_email_map = {pid: pemail for (pid, pemail) in parent_email_rows}
 
-    # 6. Build response items for this page
+    # Build response items for page
     items: List[AdminUserListItem] = []
     for u in rows:
-        # role string (PARENT / CHILD). If Role.name is Enum (UserRole), it might already be the right string.
+        # role string (PARENT / CHILD).
         role_name_str = u.role.name if u.role else "UNKNOWN"
 
         # subscription tier (e.g. "FREE", "PREMIUM")
@@ -128,7 +126,7 @@ def view_all_users(
             )
         )
 
-    # 7. Global totals (all parents/kids in DB)
+    # Global totals (all parents/kids in DB)
     total_parents_global = (
         db.query(func.count(User.id))
         .join(Role)
@@ -145,10 +143,10 @@ def view_all_users(
 
     total_accounts_global = (total_parents_global or 0) + (total_kids_global or 0)
 
-    # 8. total pages for current filtered query (at least 1)
+    # total pages for current filtered query (at least 1)
     total_pages = max(1, math.ceil(filtered_total / size)) if filtered_total else 1
 
-    # 9. Return final payload
+    # Return final payload
     return PaginatedUserListResponse(
         items=items,
         total_accounts=total_accounts_global,
@@ -188,7 +186,6 @@ def delete_user(
     
     db.commit()
 
-    # --- Conditional Message Logic ---
     if is_parent:
         message = f"Account for user '{username}' and all associated child accounts have been deleted."
     else:

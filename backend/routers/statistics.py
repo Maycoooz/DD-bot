@@ -8,11 +8,11 @@ router = APIRouter(prefix="/parent", tags=["Parent Statistics"])
 
 @router.get("/{parent_id}/statistics")
 def get_parent_statistics(parent_id: int, db: Session = Depends(get_db)):
-    # 1️⃣ Count children
+    # Count children
     children = db.query(tables.User).filter_by(parent_id=parent_id, role="child").all()
     num_children = len(children)
 
-    # 2️⃣ Count total favorites across all children
+    # Count total favorites across all children
     total_fav_books = 0
     total_fav_videos = 0
 

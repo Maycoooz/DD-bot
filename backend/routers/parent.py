@@ -159,21 +159,16 @@ def _build_preview_payload(
     }
 
 
-# -------------------------------------------------------------------
-# 1. Interests list for dropdown
-# -------------------------------------------------------------------
-
+# Interests list for dropdown
 @router.get("/interests", response_model=List[InterestResponse])
 def get_all_interests(db: Session = Depends(get_db)):
     interests = db.query(Interest).all()
     return interests
 
 
-# -------------------------------------------------------------------
+
 # 2. Create child account
 #    (inherits current parent's tier for the child)
-# -------------------------------------------------------------------
-
 @router.post(
     "/create-child",
     status_code=status.HTTP_201_CREATED,
@@ -184,14 +179,14 @@ async def create_child_account(
     db: Session = Depends(get_db),
     current_parent_user: User = Depends(get_current_active_user),
 ):
-    # 1. Must be a parent
+    # Must be parent
     if not current_parent_user.role or current_parent_user.role.name.value != "PARENT":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only parents can create child accounts.",
         )
 
-    # 2. Enforce FREE plan limit
+    # Enforce FREE plan limit
     parent_tier_str = (
         current_parent_user.tier.value
         if hasattr(current_parent_user.tier, "value")
@@ -220,21 +215,21 @@ async def create_child_account(
                 ),
             )
 
-    # 3. Username must be unique
+    # Username must be unique
     if get_user(db, child_data.username):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Username already registered.",
         )
 
-    # 4. Resolve interests into real Interest rows
+    # Resolve interests into Interest rows
     interests_from_db: List[Interest] = (
         db.query(Interest)
         .filter(Interest.name.in_(child_data.interests))
         .all()
     )
 
-    # 5. Create the new child
+    # Create the new child
     hashed_password = get_password_hash(child_data.password)
 
     new_child = User(
@@ -262,10 +257,8 @@ async def create_child_account(
     return new_child
 
 
-# -------------------------------------------------------------------
-# 3. View child accounts
-# -------------------------------------------------------------------
 
+# View child accounts
 @router.get(
     "/my-children",
     summary="List this parent's children with tier / active info",
@@ -317,10 +310,8 @@ def get_children_for_current_parent(
 
 
 
-# -------------------------------------------------------------------
-# 4. Update a child profile
-# -------------------------------------------------------------------
 
+# Update a child profile
 @router.patch(
     "/update-child/{child_id}",
     response_model=ParentViewChildAccountsResponse,
@@ -376,10 +367,7 @@ def update_child_profile(
     return child_to_update
 
 
-# -------------------------------------------------------------------
-# 5. Delete a child
-# -------------------------------------------------------------------
-
+# Delete a child
 @router.delete(
     "/delete-child/{child_id}",
     response_model=StatusMessage,
@@ -412,10 +400,7 @@ def delete_child_account(
     )
 
 
-# -------------------------------------------------------------------
-# 6. Parent changes their kid's password
-# -------------------------------------------------------------------
-
+# Parent changes their kid's password
 @router.patch(
     "/change-kid-password/{child_id}",
     response_model=ParentViewChildAccountsResponse,
@@ -458,11 +443,8 @@ def edit_child_password(
     return child_to_edit
 
 
-# -------------------------------------------------------------------
-# 7. NEW: Get the parent's fresh profile (authoritative parent view)
-#    This fixes the "frontend shows FREE but DB says PRO" issue.
-# -------------------------------------------------------------------
 
+# Get the parent's profile
 @router.get(
     "/me",
     response_model=ParentMeResponse,
@@ -487,11 +469,8 @@ def get_parent_me(
     return _serialize_parent_with_children(parent, kids)
 
 
-# -------------------------------------------------------------------
-# 8. NEW: Preview the tier change (Upgrade -> PRO or Downgrade -> FREE)
-#    Frontend calls this when user clicks "Upgrade to Pro" or "Switch to Free".
-# -------------------------------------------------------------------
-
+# Preview the tier change (Upgrade to PRO or Downgrade to FREE)
+# Frontend calls this when user clicks "Upgrade to Pro" or "Switch to Free".
 @router.get(
     "/tier-preview",
     response_model=TierChangePreviewResponse,
@@ -558,12 +537,10 @@ def preview_tier_change(
     )
 
 
-# -------------------------------------------------------------------
-# 9. NEW: Actually apply the tier change
-#    Frontend calls this when parent confirms in the modal.
-#    This also handles child limits when downgrading.
-# -------------------------------------------------------------------
 
+# Actually apply the tier change
+# Frontend calls this when parent confirms in the modal.
+# handles child limits when downgrading.
 @router.patch(
     "/change-tier",
     response_model=ParentMeResponse,
@@ -608,9 +585,7 @@ def change_parent_tier(
     # grab *all* kids for this parent
     kids: list[User] = _get_children_for_parent(db, parent.id)
 
-    # ----------------------
     # UPGRADE to PRO
-    # ----------------------
     if requested_tier_str == "PRO":
         # parent becomes PRO (enum)
         parent.tier = SubscriptionTier.PRO
@@ -623,9 +598,7 @@ def change_parent_tier(
         db.commit()
         db.refresh(parent)
 
-    # ----------------------
     # DOWNGRADE to FREE
-    # ----------------------
     else:
         # We allow only one active child on FREE.
         # Count which kids are currently "active"
@@ -688,9 +661,8 @@ def change_parent_tier(
     # re-load after commit so we respond with current data
     fresh_kids = _get_children_for_parent(db, parent.id)
 
-    # IMPORTANT:
-    # _serialize_parent_with_children() needs to include both kid.tier.value and kid.is_active.
-    # Let's update it here inline before returning
+    # _serialize_parent_with_children() include both kid.tier.value and kid.is_active.
+    # update inline before returning
     return {
         "id": parent.id,
         "username": parent.username,
