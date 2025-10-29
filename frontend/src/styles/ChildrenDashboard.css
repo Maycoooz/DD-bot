@@ -1,7 +1,3 @@
-/* /src/styles/ChildrenDashboard.css
-   All selectors start with .child-dashboard to avoid collisions.
-*/
-
 .child-dashboard {
   --bg: #fffdf9;
   --grad-a: #ffe7a9;

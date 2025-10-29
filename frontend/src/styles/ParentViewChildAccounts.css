@@ -1,6 +1,4 @@
-/* ================================
-   PAGE LAYOUT
-=================================== */
+/* PAGE LAYOUT */
 .page-container {
     width: 100%;
     max-width: 1000px;
@@ -454,9 +452,7 @@
     border: 1px solid #86efac;
 }
 
-/* ================================
-   RESPONSIVE TWEAKS
-=================================== */
+/* RESPONSIVE TWEAKS */
 
 @media (max-width: 500px) {
     .child-card-header-row {

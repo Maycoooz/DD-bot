@@ -128,7 +128,7 @@
   display: inline-block;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #4f46e5;         /* indigo-600 */
+  color: #4f46e5;            /* indigo-600 */
   background-color: #eef2ff; /* indigo-50 */
   border: 1px solid #c7d2fe; /* indigo-200 */
   border-radius: 4px;
@@ -152,7 +152,12 @@
   word-break: break-word;
 }
 
-/* Approved / Pending status chips */
+/* Status chips
+   We now reuse these for BOTH:
+   - "Email Verified" column (Verified / Pending)
+   - "Admin Approved" column (Approved / Pending)
+*/
+
 .status-approved {
   display: inline-block;
   background-color: #dcfce7; /* green-100 */

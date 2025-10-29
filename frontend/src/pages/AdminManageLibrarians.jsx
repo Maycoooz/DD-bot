@@ -58,7 +58,6 @@ function AdminManageLibrarians() {
   // Refetch when search or page changes
   useEffect(() => {
     fetchLibrarians();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, searchTerm]);
 
   // ---- Handlers ----
@@ -135,6 +134,37 @@ function AdminManageLibrarians() {
     if (page < totalPages) setPage((p) => p + 1);
   };
 
+  // helper so don't repeat badge logic inline:
+  const renderEmailVerifiedBadge = (isVerified) => {
+    if (isVerified) {
+      return (
+        <span className="status-approved">
+          Verified
+        </span>
+      );
+    }
+    return (
+        <span className="status-pending">
+          Pending
+        </span>
+    );
+  };
+
+  const renderAdminApprovedBadge = (isApproved) => {
+    if (isApproved) {
+      return (
+        <span className="status-approved">
+          Approved
+        </span>
+      );
+    }
+    return (
+      <span className="status-pending">
+        Pending
+      </span>
+    );
+  };
+
   // ---- Render ----
 
   return (
@@ -202,14 +232,14 @@ function AdminManageLibrarians() {
                       </div>
                     </td>
 
-                    <td>{lib.is_verified ? 'Yes' : 'No'}</td>
-
+                    {/* EMAIL VERIFIEDc colum shows Verified / Pending */}
                     <td>
-                      {lib.librarian_verified ? (
-                        <span className="status-approved">Approved</span>
-                      ) : (
-                        <span className="status-pending">Pending</span>
-                      )}
+                      {renderEmailVerifiedBadge(lib.is_verified)}
+                    </td>
+
+                    {/* ADMIN APPROVED column shows Approved / Pending */}
+                    <td>
+                      {renderAdminApprovedBadge(lib.librarian_verified)}
                     </td>
 
                     <td className="actions-cell">
