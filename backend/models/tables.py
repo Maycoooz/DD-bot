@@ -1,4 +1,5 @@
 #tables.py
+from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, TEXT, CheckConstraint, FLOAT, Enum, and_, DATE
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
@@ -97,7 +98,7 @@ class Review(Base):
         index=True
     )
     
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column[datetime](DateTime, server_default=func.now())
     
     user = relationship("User", back_populates="reviews")
 
@@ -171,7 +172,7 @@ class ChildFavoriteBook(Base):
     id = Column(Integer, primary_key=True, autoincrement="auto")
     child_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     book_id = Column(Integer, ForeignKey("book.id", ondelete="CASCADE"), nullable=False)
-
+    created_at = Column[datetime](DateTime, server_default=func.now())
     child = relationship("User", backref="favorite_books")
     book = relationship("Book", backref="favorited_by_children")
 
@@ -182,7 +183,7 @@ class ChildFavoriteVideo(Base):
     id = Column(Integer, primary_key=True, autoincrement="auto")
     child_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
     video_id = Column(Integer, ForeignKey("video.id", ondelete="CASCADE"), nullable=False)
-
+    created_at = Column[datetime](DateTime, server_default=func.now())
     child = relationship("User", backref="favorite_videos")
     video = relationship("Video", backref="favorited_by_children")
 

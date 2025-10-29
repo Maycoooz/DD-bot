@@ -1,14 +1,20 @@
+import React from 'react';
+import ParentChildStatistics from './ParentChildStatistics';
 
-function ParentHome() {
+function ParentHome({ parentId }) {
     return (
-        <div className="home-dashboard">
-            <h2>Welcome to Your Family Dashboard!</h2>
-            <p>This is your central hub for managing child accounts and viewing activity.</p>
-            
-            {/* Placeholder content for future development */}
-            <div className="dashboard-summary">
-                <p>— Summary stats and recent activity will appear here —</p>
-                <p>Quick links to "Create Child Account" or "View Activity" coming soon.</p>
+        <div className="parent-home">
+            <h2>Welcome to Your Parent Dashboard</h2>
+            <p>
+                This is your central hub for managing child accounts and viewing activity.
+                <br /><br />
+                — Summary stats and recent activity will appear here —
+                <br />
+            </p>
+
+            {/* Add spacing and show child statistics */}
+            <div style={{ marginTop: '40px' }}>
+                <ParentChildStatistics parentId={parentId} />
             </div>
         </div>
     );

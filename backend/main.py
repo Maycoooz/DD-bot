@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from db.database import create_tables_and_seed_it
 from contextlib import asynccontextmanager
 
-from routers import auth, users, parent, admin, librarian, review , child, favorite, chat
+from routers import auth, users, parent, admin, librarian, review , child, favorite, chat , statistics
 
 
 @asynccontextmanager
@@ -53,5 +53,6 @@ app.include_router(review.router)
 app.include_router(child.router)
 app.include_router(favorite.router)
 app.include_router(chat.router)
+app.include_router(statistics.router)
 
 

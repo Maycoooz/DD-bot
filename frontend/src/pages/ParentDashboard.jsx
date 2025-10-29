@@ -14,6 +14,7 @@ import AddAppReview from './AddAppReview.jsx';
 import DeleteAppReview from './DeleteAppReview.jsx';
 import ParentChildFavorite from './ParentChildFavorite.jsx';
 import ParentChildChatHistory from './ParentChildChatHistory.jsx';
+import ParentChildStatistics from './ParentChildStatistics';
 
 // --- Dashboard Menu Definition ---
 const menuItems = {
@@ -94,8 +95,8 @@ function ParentDashboard() {
     // ----------------------------------------------------------------------
     const renderComponent = () => {
         switch (activeComponent) {
-            case 'home': 
-                return <ParentHome />;
+            case 'home':
+                return <ParentHome parentId={userProfile.id} />;
             case 'profile':
                 return <ParentProfile onProfileUpdate={setUserProfile} />;
             case 'createChild':
