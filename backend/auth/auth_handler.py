@@ -41,11 +41,34 @@ def get_password_hash(password):
 def get_user(db: Session, username: str):
     return db.query(User).filter(User.username == username).first()
 
+from models.tables import SubscriptionTier
+
 def authenticate_user(db: Session, username: str, password: str):
     user = get_user(db, username)
-    if not user or not verify_password(password, user.hashed_password):
+    if not user:
         return False
+
+    # block deactivated child accounts
+    if (
+        user.role
+        and user.role.name.value == "CHILD"
+        and user.tier == SubscriptionTier.DEACTIVATED
+    ):
+        # Tell them exactly what's going on
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "This child account is deactivated. "
+                "Ask your parent to upgrade to PRO to reactivate access."
+            ),
+        )
+
+    # password check
+    if not verify_password(password, user.hashed_password):
+        return False
+
     return user
+
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
@@ -74,6 +97,20 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     return user
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    # If this is a CHILD and they are deactivated, treat them as unauthorized
+    if (
+        current_user.role
+        and current_user.role.name.value == "CHILD"
+        and current_user.tier == SubscriptionTier.DEACTIVATED
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=(
+                "This child account is deactivated. "
+                "Ask your parent to upgrade to PRO to reactivate access."
+            ),
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return current_user
 
 async def get_current_admin_user(current_user: User = Depends(get_current_active_user)):
