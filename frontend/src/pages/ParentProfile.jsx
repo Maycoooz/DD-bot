@@ -21,7 +21,7 @@ function ParentProfile({ onProfileUpdate }) {
     const [isTierSubmitting, setIsTierSubmitting] = useState(false);
     const [selectedKeepChildId, setSelectedKeepChildId] = useState(null);
 
-    // We consider "parent" to be "no primary_parent_id"
+    // Is parent if there is no primary_parent_id
     const isParent = !profileData?.primary_parent_id;
 
     // fields required for profile save

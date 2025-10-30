@@ -1,3 +1,4 @@
+/* ===== Container & Base Layout ===== */
 .parent-stats-container {
   margin-top: 30px;
   background: #fff;
@@ -6,6 +7,74 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Card wrapper to gray-out content and place an overlay */
+.psc-card {
+  position: relative;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(17, 24, 39, 0.06);
+  min-height: 160px;
+}
+
+/* disables interactions and greys out content for FREE tier */
+.psc-disabled {
+  filter: grayscale(1);
+  opacity: 0.5;
+  pointer-events: none; /* block clicks to underlying content */
+}
+
+/* ===== FREE-tier Overlay ===== */
+.psc-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.45);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;         /* allow clicks on overlay CTA */
+  backdrop-filter: blur(2px);
+}
+
+.psc-overlay-content {
+  max-width: 520px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px 22px;
+  text-align: center;
+  box-shadow: 0 8px 28px rgba(17, 24, 39, 0.25);
+}
+
+.psc-overlay-content h3 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+  color: #111827; 
+}
+
+.psc-overlay-content p {
+  margin: 0 0 16px;
+  color: #374151;
+}
+
+.psc-upgrade-btn {
+  display: inline-block;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid #1d4ed8;
+}
+.psc-upgrade-btn:hover {
+  background: #1e40af;
+  border-color: #1e40af;
+}
+
+/* ===== Existing Page Elements ===== */
 .child-select {
   margin-bottom: 20px;
 }
@@ -43,4 +112,59 @@
 .recent-favorites li {
   padding: 6px 0;
   border-bottom: 1px solid #ddd;
+}
+
+/* Ensure the overlay is clickable while the card body is disabled */
+.psc-card {
+  position: relative;
+}
+
+/* Only disable interactions for the inner body, not the overlay */
+.psc-card .psc-body {
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.psc-card.psc-disabled .psc-body {
+  filter: grayscale(0.9) opacity(0.6);
+  pointer-events: none; /* block clicks on the content behind the overlay */
+}
+
+/* Overlay sits above and remains clickable */
+.psc-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.35); /* slate-900/35 */
+  z-index: 10;
+  pointer-events: auto; /* allow clicks */
+}
+
+.psc-overlay-content {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px 24px;
+  text-align: center;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.18);
+}
+
+.psc-upgrade-btn {
+  margin-top: 12px;
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #1d4ed8;
+  background: #1d4ed8;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.psc-upgrade-btn:hover {
+  background: #1e40af;
+  border-color: #1e40af;
 }

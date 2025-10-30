@@ -44,6 +44,7 @@ function ParentDashboard() {
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeComponent, setActiveComponent] = useState('home'); // Default is home
+    const handleInternalNavigate = (key) => setActiveComponent(key);
      
     // ----------------------------------------------------------------------
     // DATA FETCHING (GET /users/me/)
@@ -73,7 +74,16 @@ function ParentDashboard() {
             // If profile isn't in local storage, fetch it
             fetchProfile();
         }
-    }, []);
+
+        const handler = (e) => {
+            const key = e?.detail;
+            if (typeof key === 'string') {
+            setActiveComponent(key);
+            }
+        };
+        window.addEventListener('PD_NAV', handler);
+        return () => window.removeEventListener('PD_NAV', handler);
+        }, []);
 
     // --- Handler for clearing messages ---
     const clearMessages = () => {
@@ -115,6 +125,8 @@ function ParentDashboard() {
                 return <AddAppReview></AddAppReview>;
             case 'deleteReview':
                 return <DeleteAppReview></DeleteAppReview>
+            case 'childStatistics':
+                return <ParentChildStatistics onNavigate={handleInternalNavigate} />;
             default:
                 return <div><h2>Welcome</h2><p>Select an option from the sidebar to begin.</p></div>;
         }
