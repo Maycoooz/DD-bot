@@ -5,6 +5,7 @@ from models import tables
 from pydantic import BaseModel
 from typing import List
 
+
 router = APIRouter(prefix="/child", tags=["Child"])
 
 # --- Response model ---
@@ -61,3 +62,21 @@ def update_child_interests(child_id: int, data: InterestUpdateRequest, db: Sessi
     db.refresh(child)
 
     return {"message": "✅ Interests updated successfully"}
+
+@router.get("/{child_id}/parent-tier")
+def get_parent_tier_for_child(child_id: int, db: Session = Depends(get_db)):
+    # Fetch the child
+    child = db.query(tables.User).filter(tables.User.id == child_id).first()
+    if not child:
+        raise HTTPException(status_code=404, detail="Child not found.")
+
+    # Fetch the parent linked to this child
+    if not child.primary_parent_id:
+        raise HTTPException(status_code=404, detail="Child has no linked parent.")
+
+    parent = db.query(tables.User).filter(tables.User.id == child.primary_parent_id).first()
+    if not parent:
+        raise HTTPException(status_code=404, detail="Parent not found.")
+
+    # Return the parent's subscription tier (default to FREE)
+    return {"tier": parent.tier.value if parent.tier else "FREE"}

@@ -64,6 +64,37 @@ export default function ChildDashboard() {
   const profile = JSON.parse(localStorage.getItem("userProfile") || "{}");
   const userId = profile.id;
   const username = profile.first_name || "Guest";
+const [parentTier, setParentTier] = useState("FREE");
+useEffect(() => {
+  async function fetchTier() {
+    try {
+      const res = await api.get(`/child/${userId}/parent-tier`);
+      setParentTier(res.data.tier?.toUpperCase() || "FREE");
+    } catch (err) {
+      console.error("Failed to fetch parent tier:", err);
+      setParentTier("FREE");
+    }
+  }
+  fetchTier();
+}, [userId]);
+
+const isFreeParent = parentTier === "FREE";
+// ⬇️ ADD THIS reusable popup component
+function UpgradePopup({ title, onClose }) {
+  return (
+    <div className="upgrade-popup">
+      <button className="upgrade-close" onClick={onClose}>✖</button>
+      <h3>Upgrade to PRO to use {title}</h3>
+      <p>Your current plan is <strong>FREE</strong>. This feature is for PRO users only.</p>
+      <button
+        className="upgrade-btn"
+        onClick={() => window.dispatchEvent(new CustomEvent("PD_NAV", { detail: "profile" }))}
+      >
+        Go to Profile to Upgrade
+      </button>
+    </div>
+  );
+}
 
 
 async function handleNewChat() {
@@ -332,22 +363,32 @@ useEffect(() => {
           )}
         </div>
       </div>
-       {/* Favorites Modal */}
-{showFavoritesModal && (
-  <div
-    className="child-dashboard__modal-overlay"
-    onClick={() => setShowFavoritesModal(false)}
-  >
-    <ChildSearchFavorite
-  userId={userId}
-  onClose={() => setShowFavoritesModal(false)}
-  refreshFavorites={fetchUserFavorites}
-/>
 
+{/* Favorites Modal */}
+{showFavoritesModal && (
+  <div className={`child-dashboard__modal-overlay ${isFreeParent ? "blurred" : ""}`}>
+    {isFreeParent ? (
+      <UpgradePopup title="Favorites" onClose={() => setShowFavoritesModal(false)} />
+    ) : (
+
+        <ChildSearchFavorite
+          userId={userId}
+          onClose={() => setShowFavoritesModal(false)}
+          refreshFavorites={fetchUserFavorites}
+        />
+
+    )}
   </div>
 )}
+
+
       {/* Interests Modal */}
-      {showInterestsModal && (
+{showInterestsModal && (
+  <div className={`child-dashboard__modal-overlay ${isFreeParent ? "blurred" : ""}`}>
+    {isFreeParent ? (
+      <UpgradePopup title="Interests" onClose={() => setShowInterestsModal(false)} />
+    ) : (
+      
         <ChildEditInterest
           userId={userId}
           initialInterests={childInterests}
@@ -357,63 +398,70 @@ useEffect(() => {
           }}
           onClose={() => setShowInterestsModal(false)}
         />
-      )}
 
-      {/* Books Modal */}
-      {showBooksModal && (
-        <div
-          className="child-dashboard__modal-overlay"
-          onClick={() => setShowBooksModal(false)}
-        >
-          <div
-            className="child-dashboard__modal child-dashboard__modal--wide"
-            onClick={(e) => e.stopPropagation()}
+    )}
+  </div>
+)}
+
+
+
+{/* Books Modal */}
+{showBooksModal && (
+  <div className={`child-dashboard__modal-overlay ${isFreeParent ? "blurred" : ""}`}>
+    {isFreeParent ? (
+      <UpgradePopup title="Search Books" onClose={() => setShowBooksModal(false)} />
+    ) : (
+      <div
+        className="child-dashboard__modal child-dashboard__modal--wide"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <ChildSearchBook
+          userId={userId}
+          userFavorites={userFavorites}
+          refreshFavorites={fetchUserFavorites}
+        />
+        <div className="child-dashboard__modal-actions">
+          <button
+            className="child-dashboard__btn child-dashboard__btn--outline"
+            onClick={() => setShowBooksModal(false)}
           >
-          <ChildSearchBook
-  userId={userId}
-  userFavorites={userFavorites}
-  refreshFavorites={fetchUserFavorites}
-/>
-
-            <div className="child-dashboard__modal-actions">
-              <button
-                className="child-dashboard__btn child-dashboard__btn--outline"
-                onClick={() => setShowBooksModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
+            Close
+          </button>
         </div>
-      )}
+      </div>
+    )}
+  </div>
+)}
+
 
       {/* Videos Modal */}
-      {showVideosModal && (
-        <div
-          className="child-dashboard__modal-overlay"
-          onClick={() => setShowVideosModal(false)}
-        >
-          <div
-            className="child-dashboard__modal child-dashboard__modal--wide"
-            onClick={(e) => e.stopPropagation()}
+{showVideosModal && (
+  <div className={`child-dashboard__modal-overlay ${isFreeParent ? "blurred" : ""}`}>
+    {isFreeParent ? (
+      <UpgradePopup title="Search Videos" onClose={() => setShowVideosModal(false)} />
+    ) : (
+      <div
+        className="child-dashboard__modal child-dashboard__modal--wide"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <ChildSearchVideo
+          userId={userId}
+          userFavorites={userFavorites}
+          refreshFavorites={fetchUserFavorites}
+        />
+        <div className="child-dashboard__modal-actions">
+          <button
+            className="child-dashboard__btn child-dashboard__btn--outline"
+            onClick={() => setShowVideosModal(false)}
           >
-            <ChildSearchVideo
-  userId={userId}
-  userFavorites={userFavorites}
-  refreshFavorites={fetchUserFavorites}
-/>
-
-            <div className="child-dashboard__modal-actions">
-              <button
-                className="child-dashboard__btn child-dashboard__btn--outline"
-                onClick={() => setShowVideosModal(false)}
-              >
-                Close
-              </button>
-            </div>
-          </div>
+            Close
+          </button>
         </div>
-      )}
+      </div>
+    )}
+  </div>
+)}
+
 
       {/* Add Review Modal */}
       {showAddReviewModal && (
