@@ -86,12 +86,6 @@ function UpgradePopup({ title, onClose }) {
       <button className="upgrade-close" onClick={onClose}>✖</button>
       <h3>Upgrade to PRO to use {title}</h3>
       <p>Your current plan is <strong>FREE</strong>. This feature is for PRO users only.</p>
-      <button
-        className="upgrade-btn"
-        onClick={() => window.dispatchEvent(new CustomEvent("PD_NAV", { detail: "profile" }))}
-      >
-        Go to Profile to Upgrade
-      </button>
     </div>
   );
 }
