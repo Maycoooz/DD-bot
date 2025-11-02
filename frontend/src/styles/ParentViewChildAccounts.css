@@ -40,7 +40,7 @@
     margin-bottom: 24px;
     background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+    overflow: visible;
 }
 
 /* Extra styling if the account is deactivated */
@@ -171,6 +171,68 @@
 }
 
 .form-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+/* --- SELECTS (Country / Gender / Race) --- */
+.form-group select {
+    padding: 10px 40px 10px 12px;      /* room for chevron */
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #1f2937;
+    background-color: #ffffff;
+    min-height: 40px;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    /* subtle chevron without external asset */
+    background-image:
+      linear-gradient(45deg, transparent 50%, #6b7280 50%),
+      linear-gradient(135deg, #6b7280 50%, transparent 50%),
+      linear-gradient(to right, #ffffff, #ffffff);
+    background-size: 6px 6px, 6px 6px, 100% 100%;
+    background-position:
+      calc(100% - 18px) 50%,
+      calc(100% - 12px) 50%,
+      0 0;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+.form-group select:disabled {
+    background-color: #f3f4f6;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+/* Hide old IE arrow if ever encountered */
+.form-group select::-ms-expand {
+    display: none;
+}
+
+/* “Other” text input shown under selects */
+.form-group .other-input {
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #1f2937;
+    background-color: #ffffff;
+    min-height: 40px;
+    box-sizing: border-box;
+}
+.form-group .other-input:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
@@ -317,13 +379,14 @@
     top: calc(100% + 4px);
     left: 0;
     right: 0;
-    max-height: 220px;
+    max-height: 340px;
     overflow-y: auto;
     background-color: #ffffff;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
     padding: 8px 0;
+    z-index: 500;
 }
 
 .dropdown-item {
