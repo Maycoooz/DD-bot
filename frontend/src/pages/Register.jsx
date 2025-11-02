@@ -30,7 +30,7 @@ function Register() {
     last_name: '',
     country: '',
     custom_country: '',
-    gender: '',
+    gender: '',              // now a dropdown
     birthday: '',
     race: '',
     custom_race: '',
@@ -70,7 +70,7 @@ function Register() {
     setError('');
     setSuccess('');
 
-    // Front-end basic required check
+    // Basic requireds
     const required = [
       'username',
       'email',
@@ -96,7 +96,7 @@ function Register() {
     delete dataToSend.custom_country;
     delete dataToSend.custom_race;
 
-    // Resolve “Other” to custom typed values
+    // Resolve “Other”
     if (formData.country === OTHER_VALUE) {
       dataToSend.country = formData.custom_country?.trim() || null;
     }
@@ -104,7 +104,7 @@ function Register() {
       dataToSend.race = formData.custom_race?.trim() || null;
     }
 
-    // Normalize optional fields
+    // Optional fields normalization
     const optionalFields = ['country', 'gender', 'race', 'birthday'];
     for (const key of optionalFields) {
       if (dataToSend[key] === '' || dataToSend[key] == null) {
@@ -116,22 +116,14 @@ function Register() {
       const response = await api.post('/auth/register', dataToSend);
       setSuccess(response.data.message || 'Registration successful! Please verify your email.');
     } catch (err) {
-      // Turn server validation arrays / 422 responses into the same friendly message
       const is422 = err.response?.status === 422;
       const detail = err.response?.data?.detail;
 
-      if (is422 || Array.isArray(detail)) {
+      if (is422 || Array.isArray(detail) || typeof detail === 'string') {
         setError('Please input all fields.');
         return;
       }
 
-      if (typeof detail === 'string') {
-        // If the backend sends a simple string for a different error, still show the friendly message
-        setError('Please input all fields.');
-        return;
-      }
-
-      // Fallback (e.g., network)
       setError('Please input all fields.');
     }
   };
@@ -206,33 +198,21 @@ function Register() {
           )}
         </div>
 
-        {/* Gender radios */}
+        {/* Gender — DROPDOWN now */}
         <div className="form-group">
-          <label>Gender</label>
-          <div className="gender-radio-group">
-            <label className={`radio-button ${formData.gender === 'Male' ? 'selected' : ''}`}>
-              <input type="radio" name="gender" value="Male" checked={formData.gender === 'Male'} onChange={handleChange} />
-              Male
-            </label>
-            <label className={`radio-button ${formData.gender === 'Female' ? 'selected' : ''}`}>
-              <input type="radio" name="gender" value="Female" checked={formData.gender === 'Female'} onChange={handleChange} />
-              Female
-            </label>
-            <label className={`radio-button ${formData.gender === 'Other' ? 'selected' : ''}`}>
-              <input type="radio" name="gender" value="Other" checked={formData.gender === 'Other'} onChange={handleChange} />
-              Other
-            </label>
-            <label className={`radio-button ${formData.gender === 'Prefer not to say' ? 'selected' : ''}`}>
-              <input
-                type="radio"
-                name="gender"
-                value="Prefer not to say"
-                checked={formData.gender === 'Prefer not to say'}
-                onChange={handleChange}
-              />
-              Prefer not to say
-            </label>
-          </div>
+          <label htmlFor="gender">Gender</label>
+          <select
+            id="gender"
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+          >
+            <option value="">Select gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+            <option value="Prefer not to say">Prefer not to say</option>
+          </select>
         </div>
 
         <div className="form-group">

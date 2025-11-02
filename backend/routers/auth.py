@@ -88,7 +88,7 @@ async def register_librarian(
     token = create_verification_token(data={"sub": db_user.email})
     background_tasks.add_task(send_verification_email, db_user.email, token)
     
-    return {"message": "Librarian registration successful. Please check your email to verify your account."}
+    return {"message": "Librarian registration successful. Please check your email to verify your account and wait for admin approval."}
 
 
 # verify email 

@@ -17,6 +17,8 @@ const RACES = [
   'Prefer not to say','Other'
 ];
 
+const GENDERS = ['Male', 'Female', 'Other', 'Prefer not to say'];
+
 const OTHER_VALUE = '__other__';
 
 function RegisterLibrarian() {
@@ -29,7 +31,6 @@ function RegisterLibrarian() {
     confirm_password: '',
     first_name: '',
     last_name: '',
-    // selects with optional “Other”
     country: '',
     custom_country: '',
     gender: '',
@@ -44,8 +45,9 @@ function RegisterLibrarian() {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // handle selects with “Other”
     if (name === 'country') {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         country: value,
         custom_country: value === OTHER_VALUE ? prev.custom_country : '',
@@ -54,7 +56,7 @@ function RegisterLibrarian() {
       return;
     }
     if (name === 'race') {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
         race: value,
         custom_race: value === OTHER_VALUE ? prev.custom_race : '',
@@ -63,7 +65,7 @@ function RegisterLibrarian() {
       return;
     }
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
     setError('');
   };
 
@@ -96,9 +98,11 @@ function RegisterLibrarian() {
 
     try {
       const res = await api.post('/auth/register-librarian', payload);
-      setSuccess(res.data?.message || 'Registration successful! Please verify your email and wait for an admin to approve your account.');
+      setSuccess(
+        res.data?.message ||
+          'Registration successful! Please verify your email and wait for admin approval.'
+      );
     } catch (err) {
-      // Friendlier fallback message for validation noise
       let detail = 'Please input all fields correctly.';
       const d = err?.response?.data?.detail;
       if (typeof d === 'string') detail = d;
@@ -179,31 +183,15 @@ function RegisterLibrarian() {
         </div>
 
         <div className="form-group">
-          <label>Gender</label>
-          <div className="gender-radio-group">
-            <label className={`radio-button ${formData.gender === 'Male' ? 'selected' : ''}`}>
-              <input type="radio" name="gender" value="Male" checked={formData.gender === 'Male'} onChange={handleChange} />
-              Male
-            </label>
-            <label className={`radio-button ${formData.gender === 'Female' ? 'selected' : ''}`}>
-              <input type="radio" name="gender" value="Female" checked={formData.gender === 'Female'} onChange={handleChange} />
-              Female
-            </label>
-            <label className={`radio-button ${formData.gender === 'Other' ? 'selected' : ''}`}>
-              <input type="radio" name="gender" value="Other" checked={formData.gender === 'Other'} onChange={handleChange} />
-              Other
-            </label>
-            <label className={`radio-button ${formData.gender === 'Prefer not to say' ? 'selected' : ''}`}>
-              <input
-                type="radio"
-                name="gender"
-                value="Prefer not to say"
-                checked={formData.gender === 'Prefer not to say'}
-                onChange={handleChange}
-              />
-              Prefer not to say
-            </label>
-          </div>
+          <label htmlFor="gender">Gender</label>
+          <select id="gender" name="gender" value={formData.gender} onChange={handleChange}>
+            <option value="">Select gender</option>
+            {GENDERS.map((g) => (
+              <option key={g} value={g}>
+                {g}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Row 5 */}
