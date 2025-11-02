@@ -169,7 +169,7 @@ function SearchBooks() {
         />
       )}
 
-      {/* tiny star styles if you need them */}
+      {/* tiny star styles*/}
       <style>{`
         .star-chip { display: inline-flex; align-items: center; gap: 6px; }
         .star-icon { color: #ffc107; font-size: 16px; line-height: 1; }

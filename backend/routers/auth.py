@@ -131,7 +131,7 @@ async def login_for_access_token( form_data: OAuth2PasswordRequestForm = Depends
     # Get role information
     user_role_name = user.role.name.value
     
-    # Additional check for librarians to see if an admin has approved them
+    # extra check for librarians to see if an admin has approved them
     if user_role_name == "LIBRARIAN" and not user.librarian_verified:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
