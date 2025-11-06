@@ -22,7 +22,7 @@ const GENDERS = ['Male','Female','Other','Prefer not to say'];
 const OTHER_VALUE = '__other__';
 
 function ParentProfile({ onProfileUpdate }) {
-  // pull from localStorage first just for instant paint
+  // pull from localStorage first 
   const initialProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
   const [profileData, setProfileData] = useState(initialProfile);
 

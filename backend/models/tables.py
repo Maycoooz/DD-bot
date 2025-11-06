@@ -1,4 +1,3 @@
-#tables.py
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Boolean, ForeignKey, TEXT, CheckConstraint, FLOAT, Enum, and_, DATE
 from sqlalchemy.sql import func
@@ -6,7 +5,7 @@ from sqlalchemy.orm import relationship
 from db.database import Base
 import enum
 
-# --- Enums (No changes needed here) ---
+# Enums
 class UserRole(enum.Enum):
     ADMIN = "ADMIN"
     PARENT = "PARENT"
@@ -32,12 +31,18 @@ class InterestsList(enum.Enum):
     SPORTS = "SPORTS"
     COOKING = "COOKING"
     
+    CARTOON = "CARTOON"
+    MATH = "MATH"
+    MUSIC = "MUSIC"
+    SPACE = "SPACE"
+    
+    
 class ReviewType(enum.Enum):
     BOOK = "BOOK"
     VIDEO = "VIDEO"
     APP = "APP"
 
-# --- Models ---
+# Models 
 
 class Book(Base):
     __tablename__ = "book"
@@ -57,7 +62,7 @@ class Book(Base):
         "Review",
         primaryjoin="and_(Book.id == foreign(Review.reviewable_id), Review.review_type == 'BOOK')",
         cascade="all, delete-orphan",
-        lazy="dynamic" # Use lazy='dynamic' if you expect many reviews
+        lazy="dynamic" # lazy='dynamic' for many reviews
     )
 
 class Video(Base):
@@ -91,7 +96,7 @@ class Review(Base):
     
     is_public_display_approved = Column(Boolean, default=False, nullable=False, index=True)
     
-    # Polymorphic relationship columns
+    # Polymorphic relationship 
     reviewable_id = Column(Integer, nullable=False)
     review_type = Column(
         Enum(ReviewType, native_enum=False, length=50),
@@ -159,7 +164,7 @@ class LandingPage(Base):
     # INTRODUCTION', 'FEATURE', 'HOW_IT_WORKS', 'PRICING', 'VIDEO'
     display_type = Column(String(length=50), nullable=False)
     
-    # Optional title for the content (eg. "Personalized Recommendations")
+    # Optional title for the content
     title = Column(String(length=100), nullable=True)
     
     # text content
@@ -213,7 +218,7 @@ class ChatMessage(Base):
     message_text = Column(TEXT, nullable=False)
     timestamp = Column(DateTime, server_default=func.now())
     model_used = Column(String(length=50), nullable=True)
-    meta_data = Column(TEXT, nullable=True)  # Could store JSON string (like token count, etc.)
+    meta_data = Column(TEXT, nullable=True)  # Could store JSON string
 
     # Relationships
     conversation = relationship("ChatConversation", back_populates="messages")
