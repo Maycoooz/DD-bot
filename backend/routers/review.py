@@ -4,7 +4,7 @@ from typing import List
 
 from db.database import get_db
 from models.tables import User, Review, ReviewType, Book, Video
-from schemas.review import ReviewCreate, ReviewResponse, PublicReviewResponse
+from schemas.review import ReviewCreate, ReviewResponse, PublicReviewResponse, ReviewerResponse
 from schemas.auth import StatusMessage
 from auth.auth_handler import get_current_active_user
 
@@ -286,3 +286,67 @@ def create_video_review(
         message += " Thank you for your feedback!"
 
     return StatusMessage(status="success", message=message)
+
+
+# For when parent/kid wants to view review of book in the library
+@router.get("/book-reviews/{book_id}", response_model=list[PublicReviewResponse])
+def get_book_reviews(book_id: int, db: Session = Depends(get_db)):
+    # Query all approved reviews for this book
+    reviews = (
+        db.query(Review)
+        .join(User, User.id == Review.user_id)
+        .filter(
+            Review.reviewable_id == book_id,
+            Review.review_type == ReviewType.BOOK,
+            Review.is_public_display_approved == True,
+        )
+        .all()
+    )
+
+    # Always return a list (possibly empty)
+    result: list[PublicReviewResponse] = []
+    for r in reviews:
+        result.append(
+            PublicReviewResponse(
+                id=r.id,
+                review=r.review,
+                stars=r.stars,
+                user=ReviewerResponse(
+                    username=r.user.username if r.user else "Anonymous"
+                ),
+                review_type=r.review_type,
+                media_title=None,
+                media_id=r.reviewable_id,
+            )
+        )
+
+    return result
+
+# For when parent/kid wants to view review of video in the library
+@router.get("/video-reviews/{video_id}", response_model=list[PublicReviewResponse])
+def get_video_reviews(video_id: int, db: Session = Depends(get_db)):
+    # Query all approved reviews for this video
+    reviews = (
+        db.query(Review)
+        .join(User, Review.user_id == User.id)
+        .filter(
+            Review.review_type == ReviewType.VIDEO,
+            Review.reviewable_id == video_id,
+            Review.is_public_display_approved.is_(True),
+        )
+        .order_by(Review.created_at.desc())
+        .all()
+    )
+
+    return [
+        PublicReviewResponse(
+            id=r.id,
+            review=r.review,
+            stars=r.stars,
+            user=ReviewerResponse(username=r.user.username),
+            review_type=r.review_type,
+            media_title=None,
+            media_id=video_id,
+        )
+        for r in reviews
+    ]

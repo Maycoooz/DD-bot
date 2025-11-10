@@ -1,0 +1,93 @@
+/* ViewBookReviewsModal.css */
+
+/* Body area where reviews appear */
+.reviews-body {
+  padding: 16px 20px 8px;
+  overflow-y: auto;
+  max-height: 60vh;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+/* Error text */
+.reviews-error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+}
+
+/* List of reviews */
+.reviews-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Individual review “card” */
+.review-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+/* Top line: author + rating */
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.review-author {
+  font-weight: 600;
+  color: #111827;
+  font-size: 0.95rem;
+}
+
+/* Stars */
+.review-rating {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #f59e0b; /* star color */
+}
+
+.review-rating-out-of {
+  font-weight: 400;
+  color: #4b5563;
+  font-size: 0.8rem;
+  margin-left: 2px;
+}
+
+/* Date line */
+.review-date {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+/* Comment text */
+.review-comment {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #374151;
+  line-height: 1.5;
+}
+
+/* Footer for the reviews modal only */
+.reviews-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Optional: tweak the Close button only in this footer */
+.reviews-footer .btn-secondary {
+  min-width: 90px;
+}

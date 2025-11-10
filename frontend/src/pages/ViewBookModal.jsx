@@ -1,17 +1,30 @@
 import React, { useState } from 'react';
 import '../styles/ViewBookModal.css';
 import ReviewBookModal from './AddBookReview';
+import ViewBookReviewsModal from './ViewBookReviewsModal';
 
 function ViewBookModal({ book, onClose }) {
   const [showReview, setShowReview] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
 
   return (
     <>
       <div className="modal-overlay">
-        <div className="view-book-modal" role="dialog" aria-modal="true" aria-label={book.title}>
+        <div
+          className="view-book-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label={book.title}
+        >
           <div className="modal-header">
             <h3>{book.title}</h3>
-            <button onClick={onClose} className="btn-close" aria-label="Close">&times;</button>
+            <button
+              onClick={onClose}
+              className="btn-close"
+              aria-label="Close"
+            >
+              &times;
+            </button>
           </div>
 
           <div className="modal-body">
@@ -33,12 +46,27 @@ function ViewBookModal({ book, onClose }) {
             </div>
           </div>
 
-          <div className="modal-footer" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="modal-footer modal-footer-actions">
             {book.link && (
-              <a href={book.link} target="_blank" rel="noopener noreferrer" className="btn-view-link">
+              <a
+                href={book.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-view-link"
+              >
                 View on Store
               </a>
             )}
+
+            <button
+              className="btn-secondary"
+              onClick={() => setShowReviews(true)}
+              aria-haspopup="dialog"
+              aria-expanded={showReviews}
+            >
+              View Reviews
+            </button>
+
             <button
               className="btn-secondary"
               onClick={() => setShowReview(true)}
@@ -55,6 +83,13 @@ function ViewBookModal({ book, onClose }) {
         <ReviewBookModal
           book={book}
           onClose={() => setShowReview(false)}
+        />
+      )}
+
+      {showReviews && (
+        <ViewBookReviewsModal
+          book={book}
+          onClose={() => setShowReviews(false)}
         />
       )}
     </>
