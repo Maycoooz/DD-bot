@@ -169,17 +169,10 @@
 .review-text-cell {
     max-width: 300px;
     min-width: 200px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #0f172a;
-}
-
-.review-text-cell:hover {
-    white-space: normal;
-    overflow: visible;
-    overflow-wrap: break-word;
-    word-break: break-word;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: break-word !important;
+    color: #0f172a !important;
 }
 
 /* --- Stars column --- */
