@@ -12,8 +12,8 @@ const COUNTRIES = [
 ];
 
 const RACES = [
-  'Asian','Black / African','White / European','Hispanic / Latino',
-  'Middle Eastern / North African','Pacific Islander','Mixed / Multiracial',
+  'Asian','African','European','Hispanic', 'American',
+  'Middle Eastern','Pacific Islander','Mixed',
   'Prefer not to say','Other'
 ];
 
@@ -30,7 +30,7 @@ function Register() {
     last_name: '',
     country: '',
     custom_country: '',
-    gender: '',              // now a dropdown
+    gender: '',
     birthday: '',
     race: '',
     custom_race: '',
@@ -70,7 +70,7 @@ function Register() {
     setError('');
     setSuccess('');
 
-    // Basic requireds
+    // Required fields
     const required = [
       'username',
       'email',
@@ -85,8 +85,15 @@ function Register() {
       return;
     }
 
+    // Password match
     if (formData.password !== formData.confirm_password) {
       setError('Passwords do not match.');
+      return;
+    }
+
+    // Minimum password length
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters long.');
       return;
     }
 
@@ -114,17 +121,33 @@ function Register() {
 
     try {
       const response = await api.post('/auth/register', dataToSend);
-      setSuccess(response.data.message || 'Registration successful! Please verify your email.');
+      setSuccess(
+        response.data.message ||
+          'Registration successful! Please verify your email.'
+      );
+      // Optional: redirect after a short delay
+      // setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
-      const is422 = err.response?.status === 422;
+      console.error('Registration error:', err.response?.data || err);
+
       const detail = err.response?.data?.detail;
 
-      if (is422 || Array.isArray(detail) || typeof detail === 'string') {
-        setError('Please input all fields.');
+      if (typeof detail === 'string') {
+        // e.g. "Username already taken"
+        setError(detail);
         return;
       }
 
-      setError('Please input all fields.');
+      if (Array.isArray(detail)) {
+        // FastAPI-style validation errors
+        const msg = detail
+          .map((e) => `${e.loc?.[e.loc.length - 1] || 'field'}: ${e.msg}`)
+          .join(', ');
+        setError(`Validation error: ${msg}`);
+        return;
+      }
+
+      setError('Registration failed. Please try again.');
     }
   };
 
@@ -139,17 +162,38 @@ function Register() {
         {/* Credentials */}
         <div className="form-group">
           <label htmlFor="username">Username</label>
-          <input id="username" name="username" value={formData.username} onChange={handleChange} required />
+          <input
+            id="username"
+            name="username"
+            value={formData.username}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className="form-group">
           <label htmlFor="email">Email</label>
-          <input id="email" type="email" name="email" value={formData.email} onChange={handleChange} required />
+          <input
+            id="email"
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className="form-group">
           <label htmlFor="password">Password</label>
-          <input id="password" type="password" name="password" value={formData.password} onChange={handleChange} required />
+          <input
+            id="password"
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+            minLength={8}
+          />
         </div>
 
         <div className="form-group">
@@ -161,24 +205,42 @@ function Register() {
             value={formData.confirm_password}
             onChange={handleChange}
             required
+            minLength={8}
           />
         </div>
 
         {/* Personal */}
         <div className="form-group">
           <label htmlFor="first_name">First Name</label>
-          <input id="first_name" name="first_name" value={formData.first_name} onChange={handleChange} required />
+          <input
+            id="first_name"
+            name="first_name"
+            value={formData.first_name}
+            onChange={handleChange}
+            required
+          />
         </div>
 
         <div className="form-group">
           <label htmlFor="last_name">Last Name</label>
-          <input id="last_name" name="last_name" value={formData.last_name} onChange={handleChange} required />
+          <input
+            id="last_name"
+            name="last_name"
+            value={formData.last_name}
+            onChange={handleChange}
+            required
+          />
         </div>
 
-        {/* Country (with Other) */}
+        {/* Country */}
         <div className="form-group">
           <label htmlFor="country">Country</label>
-          <select id="country" name="country" value={formData.country} onChange={handleChange}>
+          <select
+            id="country"
+            name="country"
+            value={formData.country}
+            onChange={handleChange}
+          >
             <option value="">Select country</option>
             {COUNTRIES.map((c) => (
               <option key={c} value={c === 'Other' ? OTHER_VALUE : c}>
@@ -198,7 +260,7 @@ function Register() {
           )}
         </div>
 
-        {/* Gender — DROPDOWN now */}
+        {/* Gender */}
         <div className="form-group">
           <label htmlFor="gender">Gender</label>
           <select
@@ -217,13 +279,24 @@ function Register() {
 
         <div className="form-group">
           <label htmlFor="birthday">Birthday (YYYY-MM-DD)</label>
-          <input id="birthday" type="date" name="birthday" value={formData.birthday} onChange={handleChange} />
+          <input
+            id="birthday"
+            type="date"
+            name="birthday"
+            value={formData.birthday}
+            onChange={handleChange}
+          />
         </div>
 
-        {/* Race (with Other) */}
+        {/* Race / Ethnicity */}
         <div className="form-group">
           <label htmlFor="race">Race / Ethnicity</label>
-          <select id="race" name="race" value={formData.race} onChange={handleChange}>
+          <select
+            id="race"
+            name="race"
+            value={formData.race}
+            onChange={handleChange}
+          >
             <option value="">Select race / ethnicity</option>
             {RACES.map((r) => (
               <option key={r} value={r === 'Other' ? OTHER_VALUE : r}>

@@ -12,8 +12,8 @@ const COUNTRIES = [
 ];
 
 const RACES = [
-  'Asian','Black / African','White / European','Hispanic / Latino',
-  'Middle Eastern / North African','Pacific Islander','Mixed / Multiracial',
+  'Asian','African','European','Hispanic', 'American',
+  'Middle Eastern','Pacific Islander','Mixed',
   'Prefer not to say','Other'
 ];
 
@@ -133,7 +133,15 @@ function RegisterLibrarian() {
         {/* Row 2 */}
         <div className="form-group">
           <label htmlFor="password">Password</label>
-          <input id="password" type="password" name="password" value={formData.password} onChange={handleChange} required />
+          <input 
+            id="password" 
+            type="password" 
+            name="password" 
+            value={formData.password} 
+            onChange={handleChange} 
+            required
+            minLength={8}
+          />
         </div>
 
         <div className="form-group">
@@ -145,6 +153,7 @@ function RegisterLibrarian() {
             value={formData.confirm_password}
             onChange={handleChange}
             required
+            minLength={8}
           />
         </div>
 

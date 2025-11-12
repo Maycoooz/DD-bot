@@ -11,10 +11,9 @@ const COUNTRIES = [
   'New Zealand','Other'
 ];
 
-// General set; refine if you keep a localised list elsewhere
 const RACES = [
-  'Asian','White / European','Black / African','Hispanic / Latino',
-  'Middle Eastern / North African','Pacific Islander','Mixed / Multiracial',
+  'Asian','African','European','Hispanic', 'American',
+  'Middle Eastern','Pacific Islander','Mixed',
   'Prefer not to say','Other'
 ];
 
@@ -579,6 +578,7 @@ function ViewChildAccounts() {
                   value={passwordData.new_password}
                   onChange={handlePasswordFormChange}
                   required
+                  minLength={8}
                 />
               </div>
 
@@ -591,6 +591,7 @@ function ViewChildAccounts() {
                   value={passwordData.confirm_new_password}
                   onChange={handlePasswordFormChange}
                   required
+                  minLength={8}
                 />
               </div>
 

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import api from '../api/axiosConfig';
 import '../styles/ChangePasswordModal.css';
 
-// Accept the new 'username' prop
 function ChangePasswordModal({ userId, username, onClose }) { 
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -41,7 +40,7 @@ function ChangePasswordModal({ userId, username, onClose }) {
         <div className="modal-overlay">
             <div className="modal-content">
                 
-                {/* --- NEW HEADER SECTION --- */}
+                {/* --- HEADER SECTION --- */}
                 <div className="modal-header">
                     <h2>Change Password</h2>
                     <p>Changing password for <strong>{username}</strong>.</p>
@@ -69,6 +68,7 @@ function ChangePasswordModal({ userId, username, onClose }) {
                             value={newPassword}
                             onChange={(e) => setNewPassword(e.target.value)}
                             required
+                            minLength={8}
                         />
                     </div>
                     <div className="form-field">
@@ -79,10 +79,11 @@ function ChangePasswordModal({ userId, username, onClose }) {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
+                            minLength={8}
                         />
                     </div>
 
-                    {/* --- UPDATED BUTTONS SECTION --- */}
+                    {/* --- BUTTONS SECTION --- */}
                     <div className="modal-actions">
                         <button type="button" className="btn-cancel" onClick={onClose}>Cancel</button>
                         <button type="submit" className="btn-save">Save Password</button>
