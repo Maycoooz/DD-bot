@@ -9,6 +9,16 @@ import os, re, time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
+# ANN / BERT intent model
+try:
+    from ann_model.chatbot_ann import make_predictor, recommend_books
+    # If you have a trained classifier head, put its path here
+    PREDICTOR = make_predictor(head_weights_path=None)
+    print("[ANN] BERT intent model loaded.")
+except Exception as e:
+    print(f"[ANN] Could not load ANN model, falling back to rule-based intents: {e}")
+    PREDICTOR = None
+
 # ----------------- Data helpers -----------------
 def parse_age_band(age_raw: str):
     if not isinstance(age_raw, str):
@@ -219,19 +229,31 @@ def root():
 
 @app.post("/chatbot")
 def chatbot(req: ChatIn):
+    # 1) session + light entity extraction (age, k, #id etc)
     s = MEM.get(req.session_id)
     ent = extract_entities(req.message)
 
-    # merge prefs
+    # --- merge age into session (same as before) ---
     if ent.get("age") is not None:
         s["age"] = ent["age"]
     elif ent.get("age_min") is not None and ent.get("age_max") is not None:
         # store midpoint for future turns
         s["age"] = int((ent["age_min"] + ent["age_max"]) / 2)
 
+    # how many results
     k = ent.get("k", req.k or 6)
 
-    # intent handling
+    # 2) If ANN model is available, use it
+    if PREDICTOR is not None:
+        # ANN-based policy (uses Catalog + session)
+        result = recommend_books(PREDICTOR, req.message, s, CAT, k=k)
+
+        return {
+            "reply": result["reply"],
+            "items": result["items"],
+        }
+
+    # 3) Fallback: original rule-based intent logic
     intent = ent["intent"]
 
     # similar_to by short id (#1) mapped from last result list
@@ -251,9 +273,11 @@ def chatbot(req: ChatIn):
         return {"reply": _format_list(items), "items": items}
 
     if intent in ("help", "greet"):
-        return {"reply": ("Hi! Tell me what you’re after (e.g., “bedtime stories about friendship”). "
-                          "You can add an age: “for a 6 year old”, and how many: “show 5”. "
-                          "After I show a list, say “similar to #2”."),
+        return {"reply": (
+                    "Hi! Tell me what you’re after (e.g., “bedtime stories about friendship”). "
+                    "You can add an age: “for a 6 year old”, and how many: “show 5”. "
+                    "After I show a list, say “similar to #2”."
+                ),
                 "items": []}
 
     # get_recs
@@ -271,8 +295,7 @@ def chatbot(req: ChatIn):
     if not items:
         items = CAT.top_k(k)
 
-    items = CAT.rerank_by_quality(items, top_n=k)    
-
+    items = CAT.rerank_by_quality(items, top_n=k)
     s["last_items"] = items
     return {"reply": _format_list(items), "items": items}
 
