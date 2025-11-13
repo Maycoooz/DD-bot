@@ -1,5 +1,5 @@
 /* Overlay to dim background */
-.view-modal-overlay {
+.admin-manage-users-overlay {
   position: fixed;
   inset: 0;
   background-color: rgba(15, 23, 42, 0.55); /* slate-900 w/ opacity */
@@ -12,7 +12,7 @@
 }
 
 /* Card body */
-.view-modal-card {
+.admin-manage-users-modal {
   background: #fff;
   max-width: 700px;
   width: 100%;
@@ -41,7 +41,7 @@
   color: #1e293b; /* slate-800 */
 }
 
-.close-btn {
+.close-button {
   all: unset;
   cursor: pointer;
   background: #e2e8f0; /* slate-200 */
@@ -53,13 +53,13 @@
   line-height: 1.2;
   transition: background 0.18s ease, box-shadow 0.18s ease;
 }
-.close-btn:hover {
+.close-button:hover {
   background: #cbd5e1; /* slate-300 */
   box-shadow: 0 2px 6px rgba(15,23,42,.15);
 }
 
 /* Info grid */
-.user-info-grid {
+.info-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
@@ -148,7 +148,7 @@
   margin: 0 0 12px;
 }
 
-.btn-delete-full {
+.danger-button {
   background-color: #dc2626;     /* red-600 */
   color: #fff;
   font-size: 0.9rem;
@@ -159,7 +159,7 @@
   cursor: pointer;
   transition: background .18s ease, box-shadow .18s ease;
 }
-.btn-delete-full:hover {
+.danger-button:hover {
   background-color: #b91c1c;     /* red-700 */
   box-shadow: 0 4px 12px rgba(220,38,38,.4);
 }
