@@ -68,7 +68,7 @@
     -moz-appearance: none;
 }
 
-/* add a subtle caret for selects (keeps native on mobile) */
+/* caret for selects  */
 .profile-field select {
     background-image:
       linear-gradient(45deg, transparent 50%, #777 50%),
@@ -109,7 +109,8 @@
 }
 
 .btn-primary,
-.btn-secondary {
+.btn-secondary,
+.btn-danger {
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
@@ -135,6 +136,21 @@
 }
 .btn-secondary:hover {
     background-color: #5a6268;
+}
+
+/* destructive button for Delete Account */
+.btn-danger {
+    background-color: #ef4444;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(239,68,68,.25);
+}
+.btn-danger:hover {
+    background-color: #dc2626;
+    transform: translateY(-1px);
+}
+.btn-danger:disabled {
+    opacity: .6;
+    cursor: not-allowed;
 }
 
 /* --- MESSAGING --- */
@@ -191,7 +207,7 @@
 .btn-downgrade:hover { background-color: #b02a37; }
 
 /* ----------------------------
-   Tier Change Modal Styles
+   Tier / Delete Confirmation Modal
    ---------------------------- */
 .tier-modal-overlay {
     position: fixed;
@@ -337,3 +353,8 @@
 .tier-confirm-btn:hover { background-color: #1d4ed8; }
 .tier-confirm-btn:disabled,
 .tier-cancel-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* make any .btn-danger used inside the modal match spacing */
+.tier-modal-footer .btn-danger {
+    min-width: 160px;
+}

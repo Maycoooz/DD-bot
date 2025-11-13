@@ -7,8 +7,11 @@ from fastapi import (
     HTTPException,
     status,
     Query as FastAPIQuery,
+    Response
 )
 from pydantic import BaseModel
+from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from auth.auth_handler import (
@@ -16,6 +19,7 @@ from auth.auth_handler import (
     get_password_hash,
     get_user,
     verify_password,
+    get_current_user
 )
 from db.database import get_db
 from schemas.users import ChangePassword
@@ -28,24 +32,18 @@ from schemas.parent import (
     ChildProfileUpdate,
     ChildSummary, ParentMeResponse, TierChangePreviewResponse, ChangeTierRequest
 )
-from models.tables import Interest, User, Role, UserRole, SubscriptionTier
+from models.tables import Interest, User, Role, UserRole, SubscriptionTier, ChatConversation, ChatMessage, Review, ChildFavoriteBook, ChildFavoriteVideo, ChildInterest
 
 router = APIRouter(
     prefix="/parent",
     tags=["Parent Actions"],
 )
 
-# -------------------------------------------------------------------
 # Constants / plan rules
-# -------------------------------------------------------------------
-
 FREE_CHILD_LIMIT = 1  # how many child accounts are allowed on FREE
 
 
-# -------------------------------------------------------------------
 # Internal helper functions (kept inside this router, not global)
-# -------------------------------------------------------------------
-
 def _assert_is_parent(user: User):
     """Only allow real parents to hit tier endpoints."""
     if not user.role or user.role.name.value != "PARENT":
@@ -56,7 +54,7 @@ def _assert_is_parent(user: User):
 
 
 def _get_children_for_parent(db: Session, parent_id: int) -> List[User]:
-    """Return all children (regardless of 'active' flag—no hard requirement here)."""
+    """Return all children (regardless of 'active' flag)."""
     return (
         db.query(User)
         .join(Role)
@@ -687,3 +685,66 @@ def change_parent_tier(
             for k in fresh_kids
         ],
     }
+
+@router.delete("/delete-my-account", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_account(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Deletes the authenticated parent's account, all child accounts,
+    and all associated data (favorites, interests, chats, reviews).
+    Returns 204 on success.
+    """
+
+    # Treat as parent only if not a child (no primary_parent_id). 
+    # If you also need a role check, add it here.
+    if current_user.primary_parent_id is not None:
+        raise HTTPException(status_code=403, detail="Only parent accounts can perform this action.")
+
+    parent = db.get(User, current_user.id)
+    if not parent:
+        raise HTTPException(status_code=404, detail="Account not found.")
+
+    # Collect child IDs
+    child_ids = [
+        row[0]
+        for row in db.execute(
+            select(User.id).where(User.primary_parent_id == parent.id)
+        ).all()
+    ]
+
+    # We will delete reviews for both parent + children
+    all_user_ids = child_ids + [parent.id]
+
+    try:
+        # ---- 1) Delete child-scoped dependents first ----
+        if child_ids:
+            db.execute(delete(ChildFavoriteBook).where(ChildFavoriteBook.child_id.in_(child_ids)))
+            db.execute(delete(ChildFavoriteVideo).where(ChildFavoriteVideo.child_id.in_(child_ids)))
+            db.execute(delete(ChildInterest).where(ChildInterest.child_id.in_(child_ids)))
+            # ChatMessage cascades from ChatConversation (FK with ON DELETE CASCADE in your model),
+            # so deleting conversations is enough:
+            db.execute(delete(ChatConversation).where(ChatConversation.child_id.in_(child_ids)))
+
+        # ---- 2) Delete reviews for parent and children ----
+        if all_user_ids:
+            db.execute(delete(Review).where(Review.user_id.in_(all_user_ids)))
+
+        # ---- 3) Delete child users, then parent user ----
+        if child_ids:
+            db.execute(delete(User).where(User.id.in_(child_ids)))
+
+        db.execute(delete(User).where(User.id == parent.id))
+
+        # Finalize
+        db.commit()
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+    except IntegrityError as e:
+        db.rollback()
+        # If any new FK shows up later, you’ll see this. Add a targeted delete above and retry.
+        raise HTTPException(
+            status_code=409,
+            detail="Delete failed due to related records. Please try again after cleaning up dependent data."
+        ) from e

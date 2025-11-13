@@ -1,11 +1,9 @@
-// src/components/ParentProfile.jsx
 import React, { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import '../styles/ParentProfile.css';
 import ChangePasswordModal from './ChangePasswordModal';
 import TierChangeModal from './TierChangeModal';
 
-// --- Options (short lists; extend as you wish) ---
 const COUNTRIES = [
   'Singapore','United States','United Kingdom','Australia','Canada',
   'China','India','Indonesia','Malaysia','Philippines','Vietnam','Thailand',
@@ -22,7 +20,7 @@ const GENDERS = ['Male','Female','Other','Prefer not to say'];
 const OTHER_VALUE = '__other__';
 
 function ParentProfile({ onProfileUpdate }) {
-  // pull from localStorage first 
+  // pull from localStorage first
   const initialProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
   const [profileData, setProfileData] = useState(initialProfile);
 
@@ -35,6 +33,10 @@ function ParentProfile({ onProfileUpdate }) {
   const [tierPreview, setTierPreview] = useState(null);
   const [isTierSubmitting, setIsTierSubmitting] = useState(false);
   const [selectedKeepChildId, setSelectedKeepChildId] = useState(null);
+
+  // delete account modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // local UI state for custom "Other" entries
   const [customCountry, setCustomCountry] = useState('');
@@ -167,9 +169,7 @@ function ParentProfile({ onProfileUpdate }) {
     }
   };
 
-  // ------------------------
-  // Tier change flow
-  // ------------------------
+  // Tier change
   const handleOpenTierModal = async () => {
     if (!isParent) return;
     const currentTier = profileData.tier || 'FREE';
@@ -253,11 +253,28 @@ function ParentProfile({ onProfileUpdate }) {
     }
   };
 
-  // ------------------------
-  // Render helpers
-  // ------------------------
+  // Delete account
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    setMessage('');
+    try {
+      await api.delete('/parent/delete-my-account');
+      // Clear client-side state and redirect
+      localStorage.clear();
+      sessionStorage.clear();
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+      window.location.href = '/';
+    } catch (err) {
+      console.error('Delete account failed:', err);
+      const detail = err.response?.data?.detail || 'Failed to delete account.';
+      setMessage(`Error: ${detail}`);
+      setIsDeleting(false);
+    }
+  };
 
-  // Generic text/date display or input for non-select fields
+  // Render helpers
+  // text/date display or input for non-select fields
   const renderField = (label, key) => {
     const isRequired = requiredForParent.includes(key);
     const value = profileData[key] || '';
@@ -309,8 +326,8 @@ function ParentProfile({ onProfileUpdate }) {
                 </option>
               ))}
             </select>
-            { (profileData.country === OTHER_VALUE ||
-               (!COUNTRIES.includes(current) && current) ) && (
+            {(profileData.country === OTHER_VALUE ||
+              (!COUNTRIES.includes(current) && current)) && (
               <input
                 type="text"
                 placeholder="Type your country"
@@ -374,8 +391,8 @@ function ParentProfile({ onProfileUpdate }) {
                 </option>
               ))}
             </select>
-            { (profileData.race === OTHER_VALUE ||
-               (!RACES.includes(current) && current) ) && (
+            {(profileData.race === OTHER_VALUE ||
+              (!RACES.includes(current) && current)) && (
               <input
                 type="text"
                 placeholder="Type your race / ethnicity"
@@ -417,9 +434,6 @@ function ParentProfile({ onProfileUpdate }) {
     );
   };
 
-  // ------------------------
-  // JSX
-  // ------------------------
   return (
     <div className="profile-view">
       <h3>My Profile Details</h3>
@@ -447,6 +461,17 @@ function ParentProfile({ onProfileUpdate }) {
             >
               Change Password
             </button>
+            {/* Delete Account button (parents only) */}
+            {isParent && (
+              <button
+                type="button"
+                className="btn-danger"
+                onClick={() => setShowDeleteModal(true)}
+                style={{ marginLeft: 8 }}
+              >
+                Delete Account
+              </button>
+            )}
           </>
         )}
       </div>
@@ -492,6 +517,47 @@ function ParentProfile({ onProfileUpdate }) {
         setSelectedKeepChildId={setSelectedKeepChildId}
         onConfirm={handleConfirmTierChange}
       />
+
+      {/* Delete confirmation modal */}
+      {showDeleteModal && (
+        <div className="tier-modal-overlay">
+          <div className="tier-modal-card">
+            <div className="tier-modal-header">
+              <h2>Delete Account</h2>
+              <button
+                className="tier-modal-close-btn"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+              >
+                ×
+              </button>
+            </div>
+            <div className="tier-modal-body">
+              <p>
+                This action is <strong>permanent</strong>. Deleting your account will also delete
+                all child accounts linked to you and any associated data. Are you sure you want to
+                continue?
+              </p>
+            </div>
+            <div className="tier-modal-footer">
+              <button
+                className="tier-cancel-btn"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-danger"
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+              >
+                {isDeleting ? 'Deleting...' : 'Yes, Delete My Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
