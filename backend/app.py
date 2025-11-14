@@ -8,15 +8,15 @@ import numpy as np
 import os, re, time
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
+from nlu_ann.ann_intent_model import IntentANN
 
-# ANN / BERT intent model
 try:
     from ann_model.chatbot_ann import make_predictor, recommend_books
-    # If you have a trained classifier head, put its path here
+    print("[ANN-NLU] Loading ANN+BERT intent model…")
     PREDICTOR = make_predictor(head_weights_path=None)
-    print("[ANN] BERT intent model loaded.")
+    print("[ANN-NLU] ANN intent classifier loaded (random weights).")
 except Exception as e:
-    print(f"[ANN] Could not load ANN model, falling back to rule-based intents: {e}")
+    print(f"[ANN-NLU] Could not load ANN model → {e}")
     PREDICTOR = None
 
 # ----------------- Data helpers -----------------
@@ -210,6 +210,7 @@ class Memory:
 
 MEM = Memory()
 CAT = Catalog(csv_path="books_data.csv")
+INTENT_ANN = IntentANN()
 
 # ----------------- FastAPI -----------------
 app = FastAPI(title="DD BOT — Kids Book NLP Chatbot", version="0.1.0")
@@ -240,21 +241,19 @@ def chatbot(req: ChatIn):
         # store midpoint for future turns
         s["age"] = int((ent["age_min"] + ent["age_max"]) / 2)
 
-    # how many results
+    # how many results to show
     k = ent.get("k", req.k or 6)
 
-    # 2) If ANN model is available, use it
-    if PREDICTOR is not None:
-        # ANN-based policy (uses Catalog + session)
-        result = recommend_books(PREDICTOR, req.message, s, CAT, k=k)
-
-        return {
-            "reply": result["reply"],
-            "items": result["items"],
-        }
-
-    # 3) Fallback: original rule-based intent logic
+    # 2) Start with rule-based intent from regex
     intent = ent["intent"]
+
+    # 3) If ANN is available, override the intent
+    if INTENT_ANN.available:
+        ann_pred = INTENT_ANN.predict_intent(req.message)
+        if ann_pred:
+            intent = ann_pred
+
+    # ---------- INTENT HANDLING ---------- #
 
     # similar_to by short id (#1) mapped from last result list
     if intent == "similar_to":
@@ -264,30 +263,46 @@ def chatbot(req: ChatIn):
             idx = int(bid) - 1
             if 0 <= idx < len(s["last_items"]):
                 bid = s["last_items"][idx]["id"]
+
         if not bid:
-            return {"reply": "Tell me which one: say “similar to #2” after I show results.", "items": []}
+            return {
+                "reply": "Tell me which one: say “similar to #2” after I show results.",
+                "items": [],
+            }
+
         items = CAT.similar(bid, k=k)
         if not items:
-            return {"reply": "I couldn’t find similar titles to that one. Try another pick?", "items": []}
+            return {
+                "reply": "I couldn’t find similar titles to that one. Try another pick?",
+                "items": [],
+            }
+
         s["last_items"] = items
         return {"reply": _format_list(items), "items": items}
 
+    # greet/help → just text, no items
     if intent in ("help", "greet"):
-        return {"reply": (
-                    "Hi! Tell me what you’re after (e.g., “bedtime stories about friendship”). "
-                    "You can add an age: “for a 6 year old”, and how many: “show 5”. "
-                    "After I show a list, say “similar to #2”."
-                ),
-                "items": []}
+        return {
+            "reply": (
+                "Hi! Tell me what you’re after (e.g., “bedtime stories about friendship”). "
+                "You can add an age: “for a 6 year old”, and how many: “show 5”. "
+                "After I show a list, say “similar to #2”."
+            ),
+            "items": [],
+        }
 
-    # get_recs
+    # default: get_recs (or anything unknown)
     # need an age? if not in memory, ask once
     if s["age"] is None:
         # try to infer from this turn
         if "age" not in ent and "age_min" not in ent:
-            return {"reply": "What age is the child? (e.g., 4, 6–8, or 7+)", "items": []}
+            return {
+                "reply": "What age is the child? (e.g., 4, 6–8, or 7+)",
+                "items": [],
+            }
 
     age_for_search = s["age"]
+
     # perform search with age filter; if empty, retry without age
     items = CAT.search(ent["query"], k=k, age=age_for_search)
     if not items:
@@ -297,7 +312,9 @@ def chatbot(req: ChatIn):
 
     items = CAT.rerank_by_quality(items, top_n=k)
     s["last_items"] = items
+
     return {"reply": _format_list(items), "items": items}
+
 
 def _format_list(items):
     lines = []

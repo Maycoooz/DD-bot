@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from db.database import get_db
 from models.tables import ChatConversation, ChatMessage, User
 from datetime import datetime
+from app import chatbot as nlp_chatbot, ChatIn
 
 router = APIRouter()
 
@@ -107,11 +108,17 @@ def send_message(payload: dict, db: Session = Depends(get_db)):
     db.add(user_msg)
     db.commit()
 
-    # Generate bot reply (placeholder - integrate with ANN model)
-    reply_text = (
-        "I'm here to help! This is a placeholder response. "
-        "The ANN model integration is in app.py."
+    # Generate bot reply using ANN/NLU chatbot in app.py
+    nlp_request = ChatIn(
+        message=message_text,
+        session_id=str(userId),  # or f"child-{userId}"
+        k=6
     )
+    nlp_result = nlp_chatbot(nlp_request)
+
+    reply_text = nlp_result["reply"]
+    recommended_items = nlp_result["items"]  # list of books
+
 
     # Save bot reply
     bot_msg = ChatMessage(
@@ -135,6 +142,7 @@ def send_message(payload: dict, db: Session = Depends(get_db)):
         "chat_title": convo.title,
         "started_at": convo.started_at,
         "last_updated": convo.last_updated,
+        "recommendations": recommended_items,
     }
 # Delete a chat conversation
 @router.delete("/chat/{chat_id}")
