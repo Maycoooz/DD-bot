@@ -157,12 +157,11 @@ def view_all_users(
         total_pages=total_pages,
     )
 
-# delete parent or kid 
 @router.delete("/delete-user/{user_id}", response_model=StatusMessage)
 def delete_user(
     user_id: int,
     db: Session = Depends(get_db),
-    current_admin: User = Depends(get_current_admin_user)
+    current_admin: User = Depends(get_current_admin_user),
 ):
     user_to_delete = (
         db.query(User)
@@ -172,30 +171,65 @@ def delete_user(
     )
 
     if not user_to_delete:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
 
-    is_parent = user_to_delete.role.name.value == "PARENT"
-    username = user_to_delete.username # Store username before deletion
+    # role name string like "PARENT", "CHILD", "LIBRARIAN", etc.
+    role_name = user_to_delete.role.name.value if user_to_delete.role else None
+    username = user_to_delete.username  # store before deletion
 
-    if is_parent:
-        children_to_delete = db.query(User).filter(User.primary_parent_id == user_to_delete.id).all()
-        for child in children_to_delete:
-            db.delete(child)
-    
-    db.delete(user_to_delete)
-    
-    db.commit()
+    try:
+        # ----- Case 1: deleting a PARENT → delete their children first -----
+        if role_name == "PARENT":
+            (
+                db.query(User)
+                .filter(User.primary_parent_id == user_to_delete.id)
+                .delete(synchronize_session=False)
+            )
 
-    if is_parent:
-        message = f"Account for user '{username}' and all associated child accounts have been deleted."
-    else:
-        message = f"Account for user '{username}' has been deleted."
-    
+            # now delete the parent row itself
+            (
+                db.query(User)
+                .filter(User.id == user_to_delete.id)
+                .delete(synchronize_session=False)
+            )
+
+            db.commit()
+
+            message = (
+                f"Account for user '{username}' and all associated child "
+                f"accounts have been deleted."
+            )
+
+        # ----- Case 2: deleting a CHILD or any other non-parent user -----
+        else:
+            (
+                db.query(User)
+                .filter(User.id == user_to_delete.id)
+                .delete(synchronize_session=False)
+            )
+
+            db.commit()
+
+            message = f"Account for user '{username}' has been deleted."
+
+    except IntegrityError as e:
+        db.rollback()
+        # If you ever see this again, it means there's some FK that isn't CASCADE
+        # and we may need to add a targeted delete like in /parent/delete-my-account
+        print(f"[ADMIN DELETE] IntegrityError while deleting user {user_id}: {repr(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Delete failed due to related records.",
+        ) from e
+
     return StatusMessage(
         status="success",
-        message=message
+        message=message,
     )
-
+    
 @router.get("/landing-page-content", response_model=List[LandingPageResponse])
 def get_admin_landing_page_content(
     db: Session = Depends(get_db), 
