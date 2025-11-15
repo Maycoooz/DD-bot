@@ -34,7 +34,7 @@ mdurl==0.1.2
 mysql-connector-python==9.4.0
 numpy==2.3.4
 orjson==3.11.2
-pandas==2.2.2
+pandas==2.2.3
 passlib==1.7.4
 pyasn1==0.6.1
 pycparser==2.22
@@ -78,5 +78,6 @@ vaderSentiment==3.3.2
 watchfiles==1.1.0
 webencodings==0.5.1
 websockets==15.0.1
+
 
 
