@@ -133,13 +133,13 @@ class Catalog:
         if pd.notna(r["Price"]):           badge.append(f"${r['Price']:.2f}")
         if r["Best_Seller"]:               badge.append("Best Seller")
         badge_s = " | ".join(badge)
-        why_text = why or (r["series"] or (r["synopsis"][:60] if isinstance(r["synopsis"], str) else "Good match"))
+        why_text = why or (r["series"] or (r["synopsis"] if isinstance(r["synopsis"], str) else "Good match"))
         return {
             "id": r["id"],
             "title": r["title"],
             "authors": r["authors"],
             "series": r["series"],
-            "synopsis": r["synopsis"][:350],
+            "synopsis": r["synopsis"][:600],
             "age_min": int(r["age_min"]),
             "age_max": int(r["age_max"]),
             "rating": (float(r["Rating_out_of_5"]) if pd.notna(r["Rating_out_of_5"]) else None),
