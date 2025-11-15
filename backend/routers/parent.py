@@ -375,8 +375,12 @@ def delete_child_account(
     db: Session = Depends(get_db),
     current_parent: User = Depends(get_current_active_user),
 ):
-    # 1) Fetch child
-    child_to_delete = db.query(User).filter(User.id == child_id).first()
+    # 1) Fetch child to verify existence + ownership
+    child_to_delete = (
+        db.query(User)
+        .filter(User.id == child_id)
+        .first()
+    )
 
     if not child_to_delete:
         raise HTTPException(
@@ -384,7 +388,6 @@ def delete_child_account(
             detail="Child not found",
         )
 
-    # 2) Validate ownership
     if child_to_delete.primary_parent_id != current_parent.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -392,39 +395,19 @@ def delete_child_account(
         )
 
     try:
-        # --- 3) Delete child-scoped dependents first ---
+        # 2) Bulk-delete the child user row.
+        #    This issues: DELETE FROM user WHERE id = :child_id
+        #    and lets ON DELETE CASCADE clean up:
+        #    - chat_conversation / chat_message
+        #    - child_favorite_book / child_favorite_video
+        #    - childinterest
+        #    - review
+        (
+            db.query(User)
+            .filter(User.id == child_id)
+            .delete(synchronize_session=False)
+        )
 
-        # Chat messages (if they reference the child directly)
-        db.query(ChatMessage).filter(
-            ChatMessage.child_id == child_id
-        ).delete(synchronize_session=False)
-
-        # Chat conversations for this child
-        db.query(ChatConversation).filter(
-            ChatConversation.child_id == child_id
-        ).delete(synchronize_session=False)
-
-        # Favourites
-        db.query(ChildFavoriteBook).filter(
-            ChildFavoriteBook.child_id == child_id
-        ).delete(synchronize_session=False)
-
-        db.query(ChildFavoriteVideo).filter(
-            ChildFavoriteVideo.child_id == child_id
-        ).delete(synchronize_session=False)
-
-        # Interests
-        db.query(ChildInterest).filter(
-            ChildInterest.child_id == child_id
-        ).delete(synchronize_session=False)
-
-        # Reviews written by this child (if applicable)
-        db.query(Review).filter(
-            Review.user_id == child_id
-        ).delete(synchronize_session=False)
-
-        # --- 4) Now it is safe to delete the child user row ---
-        db.delete(child_to_delete)
         db.commit()
 
     except IntegrityError as e:
