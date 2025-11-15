@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 
 from routers import auth, users, parent, admin, librarian, review , child, favorite, chat , statistics
 
+import app as nlp_app_module
 
 @asynccontextmanager
 async def lifespan_context(app: FastAPI):
@@ -23,6 +24,9 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan_context,
 )
+
+main_app = FastAPI()
+main_app.mount("/nlp", nlp_app_module.app)
 
 origins = [
     "http://localhost:8000",
