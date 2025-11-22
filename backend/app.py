@@ -161,7 +161,7 @@ class VideoCatalog:
             "title": r["title"],
             "authors": r.get("channel", ""),  # reuse 'authors' field for channel
             "series": "",                     # you can fill playlist/category later
-            "synopsis": r["description"][:350] if isinstance(r["description"], str) else "",
+            "synopsis": r["description"][:900] if isinstance(r["description"], str) else "",
             "age_min": int(r["age_min"]),
             "age_max": int(r["age_max"]),
             "rating": None,
@@ -275,7 +275,7 @@ class Catalog:
             "title": r["title"],
             "authors": r["authors"],
             "series": r["series"],
-            "synopsis": r["synopsis"][:350],
+            "synopsis": r["synopsis"][:900],
             "age_min": int(r["age_min"]),
             "age_max": int(r["age_max"]),
             "rating": (float(r["Rating_out_of_5"]) if pd.notna(r["Rating_out_of_5"]) else None),
